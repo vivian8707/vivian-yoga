@@ -739,7 +739,9 @@ function D_ClassList({ T, onEdit }) {
                 }}>
                   <span style={{ minWidth: 56, fontWeight: 500 }}>{a.studentName}</span>
                   <span style={{ color: T.inkSoft, fontSize: 11 }}>
-                    {a.classType} ×{a.count || 1}
+                    {a.usedPackage
+                      ? `${a.classType || "扣堂數"} ×${a.count || 1}`
+                      : `${a.classType || ""}${(a.count || 1) > 1 ? ` ×${a.count}` : ""}`}
                   </span>
                   <span style={{
                     marginLeft: "auto", fontWeight: 400, color: T.primary,
