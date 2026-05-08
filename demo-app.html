@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vivian Yoga — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #f6f3ee; font-family: 'Noto Sans TC', system-ui, sans-serif; overscroll-behavior: none; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { width: 100vw; height: 100vh; overflow: hidden; }
+  #root { width: 100%; height: 100%; }
+  .vyc-scroll::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+// ── Demo data (replaces data.js + isolates localStorage) ──────────────────
+
+// Isolate localStorage so demo doesn't touch real data
+const _ls = { get: localStorage.getItem.bind(localStorage), set: localStorage.setItem.bind(localStorage) };
+localStorage.getItem = k => _ls.get(k === 'vyc.v1' ? 'vyc.demo.v1' : k);
+localStorage.setItem = (k, v) => _ls.set(k === 'vyc.v1' ? 'vyc.demo.v1' : k, v);
+localStorage.removeItem = k => localStorage.removeItem(k === 'vyc.v1' ? 'vyc.demo.v1' : k);
+
+// Pre-seed demo data into isolated key
+const DEMO_DATA = {
+  students: [
+    { id: "s1", name: "美玲", location: "園頂", remaining: 8 },
+    { id: "s2", name: "雅婷", location: "園頂", remaining: 3 },
+    { id: "s3", name: "怡君", location: "到府",  remaining: 5 },
+  ],
+  records: [
+    // ── Payments (儲值記錄) ──
+    { id: "p5", type: "payment", date: "2026-04-02", studentId: "s1", plan: "20堂方案", amount: 10000, classes: 20 },
+    { id: "p4", type: "payment", date: "2026-03-10", studentId: "s2", plan: "10堂方案", amount: 5300,  classes: 10 },
+    { id: "p3", type: "payment", date: "2026-02-01", studentId: "s3", plan: "10堂方案", amount: 5300,  classes: 10 },
+    { id: "p2", type: "payment", date: "2025-12-05", studentId: "s2", plan: "10堂方案", amount: 5300,  classes: 10 },
+    { id: "p1", type: "payment", date: "2025-11-20", studentId: "s1", plan: "20堂方案", amount: 10000, classes: 20 },
+
+    // ── May 2026 classes ──
+    { id: "rm4", type: "class", date: "2026-05-08", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rm3", type: "class", date: "2026-05-06", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "rm2", type: "class", date: "2026-05-03", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rm1", type: "class", date: "2026-05-01", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+
+    // ── April 2026 classes ──
+    { id: "ra6", type: "class", date: "2026-04-29", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "ra5", type: "class", date: "2026-04-24", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "ra4", type: "class", date: "2026-04-22", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "ra3", type: "class", date: "2026-04-17", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "ra2", type: "class", date: "2026-04-15", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "ra1", type: "class", date: "2026-04-10", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+
+    // ── March 2026 classes ──
+    { id: "rr6", type: "class", date: "2026-03-28", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rr5", type: "class", date: "2026-03-25", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "rr4", type: "class", date: "2026-03-20", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rr3", type: "class", date: "2026-03-18", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "rr2", type: "class", date: "2026-03-11", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rr1", type: "class", date: "2026-03-06", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+
+    // ── February 2026 classes ──
+    { id: "rf4", type: "class", date: "2026-02-25", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rf3", type: "class", date: "2026-02-20", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "rf2", type: "class", date: "2026-02-13", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rf1", type: "class", date: "2026-02-06", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+
+    // ── January 2026 classes ──
+    { id: "rj4", type: "class", date: "2026-01-23", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rj3", type: "class", date: "2026-01-16", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "rj2", type: "class", date: "2026-01-09", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rj1", type: "class", date: "2026-01-06", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+
+    // ── December 2025 classes ──
+    { id: "rd4", type: "class", date: "2025-12-26", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rd3", type: "class", date: "2025-12-19", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+    { id: "rd2", type: "class", date: "2025-12-12", location: "到府", totalAmount: 600,
+      attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
+    { id: "rd1", type: "class", date: "2025-12-05", location: "園頂", totalAmount: 1030,
+      attendees: [
+        { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
+        { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
+      ]},
+  ],
+  customPlans: []
+};
+_ls.set('vyc.demo.v1', JSON.stringify(DEMO_DATA));
+
+// Globals (replaces data.js)
+window.SEED_STUDENTS = DEMO_DATA.students.slice();
+window.SEED_RECORDS  = DEMO_DATA.records.slice();
+window.TABS = ["上課記錄", "儲值記錄", "學生管理", "收入記錄"];
+
+// SAMPLE_* getters (used by variant-d.jsx)
+Object.defineProperty(window, "SAMPLE_STUDENTS", {
+  get() { return window.Store ? window.Store.getState().students : window.SEED_STUDENTS; }
+});
+Object.defineProperty(window, "SAMPLE_RECORDS", {
+  get() {
+    const list = window.Store ? window.Store.getState().records : window.SEED_RECORDS;
+    const order = new Map();
+    list.forEach((r, i) => order.set(r, i));
+    return list.slice().sort((a, b) => {
+      const da = a.date || "", db = b.date || "";
+      if (da !== db) return db.localeCompare(da);
+      return (order.get(b) || 0) - (order.get(a) || 0);
+    });
+  }
+});
+Object.defineProperty(window, "SAMPLE_MONTHS", {
+  get() { return window.Store ? window.Store.derived.months() : []; }
+});
+
+// Silence sync (no sync.js loaded)
+window.SyncStatus = {
+  get: () => ({ state: "synced", message: "Demo 模式", lastSync: new Date() }),
+  subscribe(fn) { fn(window.SyncStatus.get()); return () => {}; },
+  forcePush: () => {}, forcePull: () => {},
+};
+</script>
+
+<script src="store.js"></script>
+<script type="text/babel" src="use-store.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="sync-badge.jsx"></script>
+<script type="text/babel" src="variant-d.jsx"></script>
+<script type="text/babel" src="variant-d-modals.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+function App() {
+  return (
+    <div style={{
+      position: "fixed", inset: 0,
+      background: "#f6f3ee",
+      display: "flex", flexDirection: "column"
+    }}>
+      <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+        <window.VariantD chartStyle="bar" monthCardVariant="split-monogram" />
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
