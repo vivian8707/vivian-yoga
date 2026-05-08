@@ -2,21 +2,26 @@
   <!-- Background -->
   <rect width="512" height="512" rx="112" fill="#f6f3ee"/>
 
-  <!-- Head (filled) -->
-  <circle cx="256" cy="116" r="36" fill="#8b9587"/>
-
+  <!-- Seated meditation figure (Sukhasana) -->
   <g fill="none" stroke="#8b9587" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Head (filled) -->
+    <circle cx="256" cy="116" r="40" fill="#8b9587" stroke="none"/>
+
     <!-- Torso -->
-    <line x1="256" y1="152" x2="256" y2="308" stroke-width="22"/>
+    <line x1="256" y1="156" x2="256" y2="264" stroke-width="24"/>
 
-    <!-- Arms raised in V (namaste overhead) -->
-    <path d="M256 192 L154 88" stroke-width="19"/>
-    <path d="M256 192 L358 88" stroke-width="19"/>
+    <!-- Left arm curving down to left knee -->
+    <path d="M242 196 Q 196 232, 166 284" stroke-width="20"/>
 
-    <!-- Standing leg (left, straight) -->
-    <line x1="256" y1="308" x2="252" y2="448" stroke-width="22"/>
+    <!-- Right arm curving down to right knee -->
+    <path d="M270 196 Q 316 232, 346 284" stroke-width="20"/>
 
-    <!-- Raised right leg (bent knee pointing outward, foot to inner thigh) -->
-    <path d="M256 308 C 324 316, 348 368, 256 396" stroke-width="19"/>
+    <!-- Left leg: hip → left knee → shin curves back to center foot -->
+    <path d="M238 264 Q 164 276, 144 346" stroke-width="22"/>
+    <path d="M144 346 Q 186 406, 256 402" stroke-width="22"/>
+
+    <!-- Right leg: hip → right knee → shin curves back to center foot -->
+    <path d="M274 264 Q 348 276, 368 346" stroke-width="22"/>
+    <path d="M368 346 Q 326 406, 256 402" stroke-width="22"/>
   </g>
 </svg>
