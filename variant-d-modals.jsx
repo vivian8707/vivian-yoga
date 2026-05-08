@@ -11,17 +11,17 @@ const T = {
 };
 
 const D_LOC_M = {
-  "園頂": { bg: "#e1e5dc", fg: "#5b6650" },
+  "社區小班": { bg: "#e1e5dc", fg: "#5b6650" },
   "到府": { bg: "#ecdfdf", fg: "#7c5e5e" },
-  "天空": { bg: "#dee2e8", fg: "#5d6776" },
-  "台中": { bg: "#ece2d7", fg: "#7a624e" },
+  "天空教室": { bg: "#dee2e8", fg: "#5d6776" },
+  "包班": { bg: "#ece2d7", fg: "#7a624e" },
   "其他": { bg: "#e6e2db", fg: "#6e6a62" },
 };
 
 // ====== 背景: 縮略主畫面 (用來襯托 bottom sheet) ======
 function BackdropList() {
   const items = [
-    { date: "2026/05/05", loc: "園頂", who: "樹慧、Claire (4人)", amt: "$1,420" },
+    { date: "2026/05/05", loc: "社區小班", who: "樹慧、Claire (4人)", amt: "$1,420" },
     { date: "2026/05/04", loc: "到府", who: "Krystal (2人)", amt: "$2,000" },
     { date: "2026/05/04", loc: "包班", who: "3 人", amt: "$2,000" },
     { date: "2026/05/04", loc: "到府", who: "Krystal (1人)", amt: "$1,500" },
@@ -59,8 +59,8 @@ function BackdropList() {
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 4 }}>
                 <span style={{
                   fontSize: 10, padding: "2px 8px", borderRadius: 999,
-                  background: (D_LOC_M[r.loc] || D_LOC_M["園頂"]).bg,
-                  color: (D_LOC_M[r.loc] || D_LOC_M["園頂"]).fg, fontWeight: 600
+                  background: (D_LOC_M[r.loc] || D_LOC_M["社區小班"]).bg,
+                  color: (D_LOC_M[r.loc] || D_LOC_M["社區小班"]).fg, fontWeight: 600
                 }}>{r.loc}</span>
                 <span style={{ fontSize: 12 }}>{r.who}</span>
               </div>
@@ -261,7 +261,7 @@ function DateInput({ value }) {
 }
 
 function LocChip({ label, active, onClick }) {
-  const tone = D_LOC_M[label] || D_LOC_M["園頂"];
+  const tone = D_LOC_M[label] || D_LOC_M["社區小班"];
   return (
     <button onClick={onClick} style={{
       padding: "8px 16px", borderRadius: 999,
@@ -384,7 +384,7 @@ function StudentCard({ student, state, onChange }) {
 }
 
 // ====== 1. 編輯上課紀錄 ======
-function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord }) {
+function D_Modal_Class({ initialLoc = "社區小班", embedded, onClose, editRecord }) {
   const isEdit = !!editRecord;
   const [loc, setLoc] = useStateMod(editRecord ? editRecord.location : initialLoc);
   const today = new Date();
@@ -445,7 +445,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
 
   // 天空 / 台中 / 其他
   const [headcount, setHeadcount] = useStateMod(
-    editRecord && (editRecord.location === "天空" || editRecord.mode === "manual") ? (editRecord.headcount || 8) : 8
+    editRecord && (editRecord.location === "天空教室" || editRecord.mode === "manual") ? (editRecord.headcount || 8) : 8
   );
   const [manualAmount, setManualAmount] = useStateMod(
     editRecord && editRecord.mode === "manual" ? (editRecord.totalAmount || 0) : 2400
@@ -455,7 +455,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
   const lastClassMap = window.Store ? window.Store.derived.lastClassByStudent() : {};
   const studentsHere = allStudents.filter(s =>
     !s.archived && (
-      loc === "園頂" ? (s.location === "園頂") :
+      loc === "社區小班" ? (s.location === "社區小班") :
       loc === "到府" ? (s.location === "到府") :
       false
     )
@@ -469,7 +469,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
   });
   // 確保進場時每個學生都有 default state
   React.useEffect(() => {
-    if (loc === "園頂") {
+    if (loc === "社區小班") {
       setStudentState(prev => {
         const next = { ...prev };
         studentsHere.forEach(s => {
@@ -483,7 +483,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
   }, [loc, studentsHere.length]);
 
   const buildRecord = () => {
-    if (loc === "園頂") {
+    if (loc === "社區小班") {
       const attendees = studentsHere
         .filter(s => studentState[s.id] && studentState[s.id].checked)
         .map(s => {
@@ -521,7 +521,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
       const planMap = {
         "1on1": { label: "一對一", price: 1800, people: 1 },
         "1on2": { label: "一對二", price: 2000, people: 2 },
-        "1on3": { label: "一對三", price: 1500, people: 3 }
+        "1on3": { label: "一對三", price: 2400, people: 3 }
       };
       let p;
       if (homePlan === "custom") {
@@ -538,7 +538,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
         note
       };
     }
-    if (loc === "天空") {
+    if (loc === "天空教室") {
       const amount = SKY_RATE_TABLE[headcount] ?? 0;
       return { date, location: loc, mode: "sky",
         headcount, totalAmount: amount, attendees: null, note };
@@ -584,7 +584,7 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
       </div>
 
       {/* ===== 園頂 ===== */}
-      {loc === "園頂" &&
+      {loc === "社區小班" &&
         <>
           <div style={{ height: 18 }} />
           <FieldLabel>選擇學生 &amp; 收費方式</FieldLabel>
@@ -640,10 +640,10 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
       }
 
       {/* ===== 天空 · 公共課人頭費 ===== */}
-      {loc === "天空" && <SkySection count={headcount} setCount={setHeadcount} />}
+      {loc === "天空教室" && <SkySection count={headcount} setCount={setHeadcount} />}
 
       {/* ===== 台中 / 其他 · 手動輸入金額 ===== */}
-      {(loc === "台中" || loc === "其他") &&
+      {(loc === "包班" || loc === "其他") &&
         <>
           <div style={{ height: 18 }} />
           <FieldLabel>到場人數</FieldLabel>
@@ -746,7 +746,7 @@ function HomeStudentCard({ student, plan, onChangePlan, customLabel, setCustomLa
   const plans = [
     { id: "1on1", label: "一對一", price: 1800 },
     { id: "1on2", label: "一對二", price: 2000 },
-    { id: "1on3", label: "一對三", price: 1500 },
+    { id: "1on3", label: "一對三", price: 2400 },
     { id: "custom", label: "自訂", price: null },
   ];
   return (
@@ -900,11 +900,11 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
       }}>
         {student ? (
           <>
-            <Avatar id={student.id} tone={LOC[student.location || "園頂"] || LOC["園頂"]} />
+            <Avatar id={student.id} tone={LOC[student.location || "社區小班"] || LOC["社區小班"]} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{student.name}</div>
               <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 1 }}>
-                {student.location || "園頂"} · 剩 {window.Store ? window.Store.derived.studentStats(student.id).remaining : (student.remaining || 0)} 堂
+                {student.location || "社區小班"} · 剩 {window.Store ? window.Store.derived.studentStats(student.id).remaining : (student.remaining || 0)} 堂
               </div>
             </div>
             <span style={{ color: T.inkSoft, fontSize: 12 }}>{pickerOpen ? "收合 ▴" : "更換 ›"}</span>
@@ -928,7 +928,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
           border: `1px solid ${T.border}`, maxHeight: 220, overflowY: "auto"
         }}>
           {students.map(s => {
-            const stTone = LOC[s.location || "園頂"] || LOC["園頂"];
+            const stTone = LOC[s.location || "社區小班"] || LOC["社區小班"];
             return (
               <div key={s.id} onClick={() => { setStudentId(s.id); setPickerOpen(false); }}
                 style={{
@@ -1145,7 +1145,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
 // ====== 3. 新增學生 ======
 function D_Modal_AddStudent({ embedded, onClose, editStudent }) {
   const isEdit = !!editStudent;
-  const [loc, setLoc] = useStateMod(isEdit ? (editStudent.location || "園頂") : "園頂");
+  const [loc, setLoc] = useStateMod(isEdit ? (editStudent.location || "社區小班") : "社區小班");
   const [name, setName] = useStateMod(isEdit ? (editStudent.name || "") : "");
   const [note, setNote] = useStateMod(isEdit ? (editStudent.note || "") : "");
   const [archived, setArchived] = useStateMod(isEdit ? !!editStudent.archived : false);
@@ -1299,7 +1299,7 @@ function D_Modal_History({ embedded, onClose, student, onEditRecord }) {
                 fontSize: 24, fontWeight: 600, letterSpacing: 0.5
               }}>{stu.name}</div>
               <div style={{ fontSize: 11, opacity: 0.75, marginTop: 6 }}>
-                {stu.location || "園頂"} · 加入 2025/08
+                {stu.location || "社區小班"} · 加入 2025/08
               </div>
             </div>
             <div style={{ textAlign: "right" }}>
