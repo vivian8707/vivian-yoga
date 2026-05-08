@@ -21,10 +21,10 @@ const D_TOKENS = {
 };
 
 const D_LOC = {
-  "社區小班": { bg: "#e1e5dc", fg: "#5b6650" },
+  "園頂": { bg: "#e1e5dc", fg: "#5b6650" },
   "到府": { bg: "#ecdfdf", fg: "#7c5e5e" },
-  "天空教室": { bg: "#dee2e8", fg: "#5d6776" },
-  "包班": { bg: "#ece2d7", fg: "#7a624e" }
+  "天空": { bg: "#dee2e8", fg: "#5d6776" },
+  "台中": { bg: "#ece2d7", fg: "#7a624e" }
 };
 
 // 月份 → 季節字
@@ -654,7 +654,7 @@ function D_ClassList({ T, onEdit }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       {records.map((r, i) => {
-        const tone = D_LOC[r.location] || D_LOC["社區小班"];
+        const tone = D_LOC[r.location] || D_LOC["園頂"];
         const names = r.attendees ? r.attendees.map((a) => a.studentName).join("、") : `${r.headcount} 人`;
         const date = new Date(r.date);
         const isOpen = expanded[r.id];
@@ -880,7 +880,7 @@ function D_Students({ T, onSelect }) {
   }
   const groups = {};
   window.SAMPLE_STUDENTS.forEach((s) => {
-    const k = s.location || "社區小班";
+    const k = s.location || "園頂";
     if (!groups[k]) groups[k] = [];
     groups[k].push(s);
   });
@@ -912,7 +912,7 @@ function D_Students({ T, onSelect }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {Object.entries(groups).map(([loc, list]) => {
-        const tone = D_LOC[loc] || D_LOC["社區小班"];
+        const tone = D_LOC[loc] || D_LOC["園頂"];
         return (
           <div key={loc}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px 8px" }}>
