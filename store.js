@@ -104,7 +104,7 @@
   // 對單筆上課紀錄計算「顯示用總金額」(含扣堂折算)
   function classDisplayTotal(record, _cache) {
     if (!record || record.type !== "class") return 0;
-    if (record.location === "天空教室" || record.location === "包班" || record.location === "其他") {
+    if (record.location === "天空" || record.location === "台中" || record.location === "其他") {
       return record.totalAmount || 0;
     }
     if (record.location === "到府") {
