@@ -739,13 +739,18 @@ function D_ClassList({ T, onEdit }) {
                 }}>
                   <span style={{ minWidth: 56, fontWeight: 500 }}>{a.studentName}</span>
                   <span style={{ color: T.inkSoft, fontSize: 11 }}>
-                    {a.classType}{a.count > 1 ? ` × ${a.count}` : ""}
+                    {a.classType} ×{a.count || 1}
                   </span>
                   <span style={{
                     marginLeft: "auto", fontWeight: 400, color: T.primary,
                     fontFamily: "'Cormorant Garamond', serif", fontSize: 13
                   }}>
-                    {a.usedPackage ? `扣 ${a.count || 1} 堂` : a.amount > 0 ? `$${a.amount.toLocaleString()}` : "—"}
+                    {(() => {
+                      if (!a.usedPackage) return a.amount > 0 ? `$${a.amount.toLocaleString()}` : "—";
+                      const rev = lessonIdx[r.id + ":" + a.studentId];
+                      const amt = rev ? rev.amount : 0;
+                      return amt > 0 ? `$${amt.toLocaleString()}` : "—";
+                    })()}
                   </span>
                 </div>
               )}
