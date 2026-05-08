@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vivian Yoga Class — Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,500&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #000; overflow: hidden; height: 100%; }
+  body { font-family: 'Noto Sans TC', system-ui, sans-serif; }
+  #stage {
+    position: absolute; left: 50%; top: 50%;
+    width: 1080px; height: 1920px;
+    transform-origin: center center;
+    background: linear-gradient(180deg, #efebe2 0%, #e6e0d3 100%);
+    overflow: hidden;
+  }
+  /* Phone bezel */
+  .phone {
+    position: absolute; left: 50%; top: 50%;
+    width: 750px; height: 1624px;
+    transform: translate(-50%, -50%);
+    background: #1a1815;
+    border-radius: 88px;
+    padding: 12px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.35), 0 0 0 2px #2a2622;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    border-radius: 76px;
+    overflow: hidden;
+    position: relative;
+    background: #f6f3ee;
+  }
+  .scene-mount {
+    width: 750px; height: 1624px;
+    transform-origin: top left;
+    transform: scale(2);
+  }
+  /* Caption pill — global, above phone */
+  .caption-band {
+    position: absolute; left: 0; right: 0; bottom: 110px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    pointer-events: none; z-index: 10;
+  }
+  .caption-pill {
+    background: rgba(31,29,26,0.92); color: #fff;
+    padding: 18px 36px; border-radius: 999px;
+    font-size: 38px; font-weight: 600; letter-spacing: 1px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .caption-sub {
+    background: rgba(255,255,255,0.92); color: #1f1d1a;
+    padding: 8px 20px; border-radius: 999px;
+    font-size: 22px; font-weight: 500;
+  }
+  /* Top label */
+  .top-label {
+    position: absolute; left: 50%; top: 80px;
+    transform: translateX(-50%);
+    color: #5b6650; font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; letter-spacing: 6px; font-weight: 500;
+    z-index: 10;
+  }
+  .progress-bar {
+    position: absolute; left: 60px; right: 60px; bottom: 50px;
+    height: 4px; background: rgba(31,29,26,0.1); border-radius: 2px;
+    overflow: hidden; z-index: 10;
+  }
+  .progress-fill {
+    height: 100%; background: #8b9587;
+    width: 0%; transition: width 0.1s linear;
+  }
+  /* Controls (only visible when paused) */
+  .ctrl {
+    position: absolute; right: 20px; top: 20px;
+    display: flex; gap: 10px; z-index: 100;
+  }
+  .ctrl button {
+    padding: 8px 14px; border: none; border-radius: 8px;
+    background: rgba(255,255,255,0.85); color: #1f1d1a;
+    font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  @keyframes tapPulse {
+    from { transform: scale(0.4); opacity: 1; }
+    to { transform: scale(1.4); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="top-label">VIVIAN YOGA CLASS</div>
+  <div class="phone">
+    <div class="phone-screen">
+      <div id="scene-root" class="scene-mount"></div>
+    </div>
+  </div>
+  <div class="caption-band" id="caption"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+</div>
+<div class="ctrl">
+  <button onclick="window.__demo.toggle()">⏯</button>
+  <button onclick="window.__demo.restart()">↻</button>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="demo-scenes.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { useEffect, useState, useRef } = React;
+
+// Timeline (seconds): start, duration, scene, captions
+const TIMELINE = [
+  { s: 0,    d: 3,  scene: "Title",       cap: null },
+  { s: 3,    d: 5,  scene: "AddStudent",  cap: { text: "新增學生", sub: "選地點" } },
+  { s: 8,    d: 6,  scene: "AddClass",    cap: { text: "記錄一堂課", sub: "選方案、學生" } },
+  { s: 14,   d: 5,  scene: "Topup",       cap: { text: "儲值", sub: "自動扣堂、累加金額" } },
+  { s: 19,   d: 5,  scene: "Student",     cap: { text: "看剩餘堂數", sub: "誰快沒了一目了然" } },
+  { s: 24,   d: 4,  scene: "Income",      cap: { text: "看收入", sub: "本月、過去六個月" } },
+  { s: 28,   d: 2,  scene: "Outro",       cap: null },
+];
+const TOTAL = 30;
+
+function App() {
+  const [t, setT] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const startRef = useRef(performance.now());
+  const playingRef = useRef(true);
+  const tRef = useRef(0);
+
+  useEffect(() => {
+    let raf;
+    const tick = (now) => {
+      if (playingRef.current) {
+        const elapsed = (now - startRef.current) / 1000;
+        const time = elapsed % TOTAL;
+        tRef.current = time;
+        setT(time);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  useEffect(() => {
+    window.__demo = {
+      toggle: () => {
+        if (playingRef.current) {
+          playingRef.current = false;
+          setPlaying(false);
+        } else {
+          // resume — adjust startRef so tRef is preserved
+          startRef.current = performance.now() - tRef.current * 1000;
+          playingRef.current = true;
+          setPlaying(true);
+        }
+      },
+      restart: () => {
+        startRef.current = performance.now();
+        tRef.current = 0;
+        playingRef.current = true;
+        setPlaying(true);
+      }
+    };
+  }, []);
+
+  // Find current segment
+  const seg = TIMELINE.find((s) => t >= s.s && t < s.s + s.d) || TIMELINE[0];
+  const localProgress = Math.max(0, Math.min(1, (t - seg.s) / seg.d));
+
+  // Update caption + progress
+  useEffect(() => {
+    const cap = document.getElementById("caption");
+    if (seg.cap) {
+      cap.innerHTML = `
+        <div class="caption-pill">${seg.cap.text}</div>
+        ${seg.cap.sub ? `<div class="caption-sub">${seg.cap.sub}</div>` : ""}
+      `;
+    } else {
+      cap.innerHTML = "";
+    }
+    document.getElementById("progress").style.width = (t / TOTAL * 100) + "%";
+  }, [seg, t]);
+
+  // Render scene
+  const SceneMap = {
+    Title: window.Scene_Title,
+    AddStudent: window.Scene_AddStudent,
+    AddClass: window.Scene_AddClass,
+    Topup: window.Scene_Topup,
+    Student: window.Scene_Student,
+    Income: window.Scene_Income,
+    Outro: window.Scene_Outro
+  };
+  const Scene = SceneMap[seg.scene];
+  return Scene ? <Scene progress={localProgress} /> : null;
+}
+
+// Mount
+ReactDOM.createRoot(document.getElementById("scene-root")).render(<App />);
+
+// Auto-fit stage to viewport
+function fit() {
+  const stage = document.getElementById("stage");
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const scale = Math.min(sw / 1080, sh / 1920);
+  stage.style.transform = `translate(-50%, -50%) scale(${scale})`;
+}
+window.addEventListener("resize", fit);
+fit();
+</script>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#f6f3ee"/>
+    <circle cx="50" cy="50" r="22" fill="#8b9587" opacity="0.85"/>
+    <text x="50" y="56" font-family="serif" font-size="20" fill="#fff" text-anchor="middle" font-style="italic">V</text>
+  </svg>
+</template>
+</body>
+</html>
