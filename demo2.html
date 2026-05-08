@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vivian Yoga — Demo Video</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet" />
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: #0d0c0a;
+  overflow: hidden;
+  font-family: 'Noto Sans TC', system-ui, sans-serif;
+}
+
+/* ── Stage ── */
+#stage {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 40% 40%, #1e1b16 0%, #0a0908 100%);
+}
+
+/* ── iPhone 15 Pro frame ── */
+.phone-wrap {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  transform-origin: center center;
+}
+
+/* Outer bezel */
+.phone-bezel {
+  position: absolute;
+  inset: -14px -14px -14px -14px;
+  background: linear-gradient(160deg, #4a4540 0%, #2e2b26 40%, #3a3630 70%, #4a4540 100%);
+  border-radius: 62px;
+  box-shadow:
+    0 0 0 1.5px #5a5550,
+    0 0 0 3px #1a1815,
+    0 40px 120px rgba(0,0,0,0.8),
+    0 10px 40px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* Inner screen area */
+.phone-screen {
+  position: absolute;
+  inset: 0;
+  border-radius: 47px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.5);
+}
+
+/* Dynamic Island */
+.dynamic-island {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  width: 126px; height: 37px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 20;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.8);
+}
+
+/* Side buttons */
+.btn-vol1, .btn-vol2, .btn-vol3, .btn-power {
+  position: absolute;
+  background: linear-gradient(90deg, #3a3630, #4a4540);
+  border-radius: 2px;
+}
+.btn-vol1  { left: -17px; top: 160px; width: 4px; height: 34px; }
+.btn-vol2  { left: -17px; top: 208px; width: 4px; height: 66px; }
+.btn-vol3  { left: -17px; top: 286px; width: 4px; height: 66px; }
+.btn-power { right: -17px; top: 220px; width: 4px; height: 82px; }
+
+/* App iframe */
+#app-frame {
+  width: 100%; height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── Intro overlay ── */
+#intro {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  background: #0a0908;
+  z-index: 200;
+  transition: opacity 1s ease;
+}
+#intro.fade-out { opacity: 0; pointer-events: none; }
+
+.intro-badge {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; letter-spacing: 6px; font-weight: 400;
+  color: #8b9587; text-transform: uppercase;
+  margin-bottom: 32px;
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.intro-badge.show { opacity: 1; }
+
+.intro-msg {
+  font-size: 32px; font-weight: 600;
+  color: #f0ece4;
+  text-align: center;
+  line-height: 1.5;
+  max-width: 420px;
+  padding: 0 32px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.intro-msg.show { opacity: 1; transform: translateY(0); }
+
+.intro-sub {
+  margin-top: 20px;
+  font-size: 15px; font-weight: 400;
+  color: #8b9587; letter-spacing: 1px;
+  opacity: 0; transition: opacity 0.6s ease 0.3s;
+}
+.intro-sub.show { opacity: 1; }
+
+/* ── Caption band ── */
+#caption-band {
+  position: fixed;
+  bottom: max(48px, 6vh);
+  left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  pointer-events: none; z-index: 100;
+  transition: opacity 0.4s;
+}
+#caption-band.hidden { opacity: 0; }
+
+.caption-pill {
+  background: rgba(15,13,10,0.88);
+  color: #f0ece4;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-size: 20px; font-weight: 600; letter-spacing: 0.5px;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  white-space: nowrap;
+}
+.caption-sub {
+  background: rgba(255,255,255,0.9);
+  color: #1f1d1a;
+  padding: 5px 16px;
+  border-radius: 999px;
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Controls ── */
+#controls {
+  position: fixed; top: 20px; right: 20px;
+  display: flex; gap: 8px; z-index: 300;
+}
+#controls button {
+  padding: 8px 14px; border: none; border-radius: 10px;
+  background: rgba(255,255,255,0.12); color: #f0ece4;
+  font-family: inherit; font-size: 13px; cursor: pointer;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: background 0.2s;
+}
+#controls button:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Progress bar ── */
+#prog-bar {
+  position: fixed; bottom: 20px;
+  left: 50%; transform: translateX(-50%);
+  width: min(400px, 80vw); height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 1px;
+  z-index: 100;
+}
+#prog-fill {
+  height: 100%; background: #8b9587;
+  border-radius: 1px; width: 0%;
+  transition: width 0.3s linear;
+}
+
+@keyframes tapRing {
+  from { transform: scale(0.3); opacity: 0.8; }
+  to   { transform: scale(2);   opacity: 0; }
+}
+.tap-ring {
+  position: absolute;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid #8b9587;
+  background: rgba(139,149,135,0.25);
+  animation: tapRing 0.6s ease-out forwards;
+  pointer-events: none; z-index: 50;
+  transform-origin: center center;
+}
+</style>
+</head>
+<body>
+
+<!-- Intro overlay -->
+<div id="intro">
+  <div class="intro-badge" id="badge">Vivian Yoga Class</div>
+  <div class="intro-msg" id="msg">太快樂了！！！<br/>再也不用手動記<br/>學生剩幾堂課了～</div>
+  <div class="intro-sub" id="sub">管帳本的時代，結束了</div>
+</div>
+
+<!-- Main stage -->
+<div id="stage">
+  <div class="phone-wrap" id="phone">
+    <div class="phone-bezel">
+      <div class="btn-vol1"></div>
+      <div class="btn-vol2"></div>
+      <div class="btn-vol3"></div>
+      <div class="btn-power"></div>
+    </div>
+    <div class="phone-screen" id="screen">
+      <div class="dynamic-island"></div>
+      <iframe id="app-frame" src="demo-app.html" scrolling="no"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Captions -->
+<div id="caption-band" class="hidden"></div>
+
+<!-- Progress -->
+<div id="prog-bar"><div id="prog-fill"></div></div>
+
+<!-- Controls -->
+<div id="controls">
+  <button id="btn-pause">⏸ 暫停</button>
+  <button id="btn-restart">↺ 重播</button>
+</div>
+
+<script>
+// ── Scale phone to fit viewport ──────────────────────────────────────────
+function fitPhone() {
+  const phone = document.getElementById('phone');
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const scale = Math.min(sw / (393 + 60), sh / (852 + 80));
+  phone.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitPhone);
+fitPhone();
+
+// ── Demo timeline ─────────────────────────────────────────────────────────
+// Each segment: { t: start_sec, d: duration_sec, tab: index|null, cap: text|null, sub: text|null, fab: bool }
+const INTRO_DUR = 6;   // seconds for intro overlay
+const TOTAL    = 36;   // total demo length (seconds, loops)
+
+const SEGMENTS = [
+  { t: 0,  d: 5,  tab: 0, cap: "上課記錄",    sub: "每次上課，一鍵記錄" },
+  { t: 5,  d: 5,  tab: 1, cap: "儲值記錄",    sub: "學生付款即時入帳" },
+  { t: 10, d: 6,  tab: 2, cap: "學生管理",    sub: "剩餘堂數一目了然" },
+  { t: 16, d: 6,  tab: 3, cap: "收入記錄",    sub: "月趨勢 · 年度總覽" },
+  { t: 22, d: 6,  tab: 0, cap: "新增上課紀錄", sub: "選學生、選方案，存檔" },
+  { t: 28, d: 8,  tab: 0, cap: null,           sub: null },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────
+let elapsed   = 0;       // seconds since demo started (after intro)
+let lastTick  = null;
+let playing   = false;
+let rafId     = null;
+let appReady  = false;
+let introGone = false;
+let prevTab   = -1;
+let fabOpened = false;
+
+const iframe = document.getElementById('app-frame');
+const capBand = document.getElementById('caption-band');
+const progFill = document.getElementById('prog-fill');
+
+// ── Intro sequence ────────────────────────────────────────────────────────
+setTimeout(() => document.getElementById('badge').classList.add('show'), 300);
+setTimeout(() => document.getElementById('msg').classList.add('show'),   900);
+setTimeout(() => document.getElementById('sub').classList.add('show'),  1800);
+setTimeout(() => {
+  const intro = document.getElementById('intro');
+  intro.classList.add('fade-out');
+  setTimeout(() => { intro.style.display = 'none'; introGone = true; }, 1000);
+}, INTRO_DUR * 1000);
+
+// ── Wait for iframe + intro to finish, then start ─────────────────────────
+iframe.addEventListener('load', () => {
+  setTimeout(() => {
+    appReady = true;
+    startDemo();
+  }, (INTRO_DUR + 0.5) * 1000);
+});
+
+function startDemo() {
+  if (!appReady || !introGone) return;
+  playing = true;
+  lastTick = performance.now();
+  rafId = requestAnimationFrame(tick);
+}
+
+function tick(now) {
+  if (playing) {
+    elapsed += (now - lastTick) / 1000;
+    lastTick = now;
+    const t = elapsed % TOTAL;
+    update(t);
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+function update(t) {
+  // Progress bar
+  progFill.style.width = (t / TOTAL * 100) + '%';
+
+  // Find current segment
+  const seg = SEGMENTS.slice().reverse().find(s => t >= s.t) || SEGMENTS[0];
+
+  // Switch tab
+  if (seg.tab !== null && seg.tab !== prevTab) {
+    clickTab(seg.tab);
+    prevTab = seg.tab;
+    fabOpened = false;
+  }
+
+  // Open FAB modal once when in the "add record" segment (segment starting at t=22)
+  if (seg.t === 22 && !fabOpened && (t - seg.t) > 1.2) {
+    fabOpened = true;
+    clickFab();
+  }
+
+  // Captions
+  if (seg.cap) {
+    capBand.classList.remove('hidden');
+    capBand.innerHTML =
+      `<div class="caption-pill">${seg.cap}</div>` +
+      (seg.sub ? `<div class="caption-sub">${seg.sub}</div>` : '');
+  } else {
+    capBand.classList.add('hidden');
+  }
+}
+
+// ── DOM helpers ───────────────────────────────────────────────────────────
+const TAB_NAMES = ['上課記錄', '儲值記錄', '學生管理', '收入記錄'];
+
+function getDoc() {
+  try { return iframe.contentDocument; } catch(e) { return null; }
+}
+
+function clickTab(idx) {
+  const doc = getDoc(); if (!doc) return;
+  const btns = [...doc.querySelectorAll('button')];
+  const btn = btns.find(b => b.textContent.trim() === TAB_NAMES[idx]);
+  if (btn) {
+    showTapAt(btn);
+    btn.click();
+  }
+}
+
+function clickFab() {
+  const doc = getDoc(); if (!doc) return;
+  const btns = [...doc.querySelectorAll('button')];
+  // FAB: circular + button
+  const fab = btns.find(b => b.textContent.trim() === '+' && b.style.borderRadius);
+  if (fab) {
+    showTapAt(fab);
+    fab.click();
+  }
+}
+
+function showTapAt(el) {
+  try {
+    const doc = getDoc(); if (!doc) return;
+    const scr = document.getElementById('screen');
+    const scrRect = scr.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    // el is inside iframe, getBoundingClientRect is relative to iframe viewport
+    const iRect = iframe.getBoundingClientRect();
+    const x = iRect.left + elRect.left + elRect.width / 2;
+    const y = iRect.top  + elRect.top  + elRect.height / 2;
+    const ring = document.createElement('div');
+    ring.className = 'tap-ring';
+    ring.style.left = (x - 20) + 'px';
+    ring.style.top  = (y - 20) + 'px';
+    ring.style.position = 'fixed';
+    document.body.appendChild(ring);
+    setTimeout(() => ring.remove(), 700);
+  } catch(e) {}
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────
+document.getElementById('btn-pause').addEventListener('click', () => {
+  if (playing) {
+    playing = false;
+    document.getElementById('btn-pause').textContent = '▶ 繼續';
+  } else {
+    playing = true;
+    lastTick = performance.now();
+    document.getElementById('btn-pause').textContent = '⏸ 暫停';
+  }
+});
+
+document.getElementById('btn-restart').addEventListener('click', () => {
+  elapsed = 0;
+  prevTab = -1;
+  fabOpened = false;
+  playing = true;
+  lastTick = performance.now();
+  document.getElementById('btn-pause').textContent = '⏸ 暫停';
+});
+</script>
+</body>
+</html>
