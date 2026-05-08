@@ -29,6 +29,8 @@
 
   // --- Network ---
   async function pullNow() {
+    // 本地有待上傳的變更時，不以雲端舊資料覆蓋，避免新增記錄瞬間消失
+    if (hasPendingChanges || pushing) return;
     setStatus("syncing", "下載最新資料…");
     try {
       const res = await fetch(ENDPOINT, { method: "GET", redirect: "follow" });
@@ -38,6 +40,11 @@
         // 雲端是空的 — 把目前本機資料推上去當第一份
         setStatus("syncing", "首次同步,上傳本機資料…");
         await pushNow();
+        setStatus("synced", "已同步");
+        return;
+      }
+      // fetch 期間若產生新的本地變更，同樣不覆蓋
+      if (hasPendingChanges || pushing) {
         setStatus("synced", "已同步");
         return;
       }
@@ -53,8 +60,10 @@
 
   let pushTimer = null;
   let pushing = false;
+  let hasPendingChanges = false;
   function schedulePush(delay) {
     clearTimeout(pushTimer);
+    hasPendingChanges = true;
     setStatus("pending", "等待上傳…");
     pushTimer = setTimeout(pushNow, delay == null ? DEBOUNCE_MS : delay);
   }
@@ -62,6 +71,7 @@
   async function pushNow() {
     if (pushing) { schedulePush(500); return; }
     pushing = true;
+    hasPendingChanges = false;
     setStatus("syncing", "上傳中…");
     try {
       const raw = localStorage.getItem(KEY) || "{}";
@@ -75,6 +85,7 @@
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] push failed", err);
+      hasPendingChanges = true;
       setStatus("offline", "上傳失敗,稍後重試");
       // 5 秒後重試
       setTimeout(() => schedulePush(0), 5000);
