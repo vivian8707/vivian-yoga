@@ -136,7 +136,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
         <div style={{ padding: "8px 22px 4px", fontSize: 17, fontWeight: 600, letterSpacing: 0.5 }}>
           {title}
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "12px 22px 18px", maxHeight: 480 }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "12px 22px 18px", minHeight: 0 }}>
           {children}
         </div>
         <div style={{
@@ -202,7 +202,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
           {title}
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "12px 22px 18px" }}>
+        <div style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "12px 22px 18px" }}>
           {children}
         </div>
 
@@ -719,7 +719,7 @@ function SkySection({ count, setCount, skyRates }) {
         <span style={{
           fontSize: 20, fontWeight: 700, color: T.primaryDeep,
           fontFamily: "'Cormorant Garamond', serif"
-        }}>${amount.toLocaleString()}</span>
+        }}>${ amount.toLocaleString()}</span>
       </div>
     </>
   );
