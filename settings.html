@@ -62,10 +62,8 @@ Object.defineProperty(window, "SAMPLE_MONTHS", {
 });
 </script>
 <script src="store.js"></script>
-<script src="sync.js"></script>
 <script type="text/babel" src="use-store.jsx"></script>
 <script type="text/babel" src="tweaks-panel.jsx"></script>
-<script type="text/babel" src="sync-badge.jsx"></script>
 <script type="text/babel" src="settings-variant-d.jsx"></script>
 <script type="text/babel" src="settings-variant-d-modals.jsx"></script>
 
@@ -129,19 +127,7 @@ function App() {
               { value: "minimal",          label: "④ 極簡橫線" },
             ]} />
         </window.TweakSection>
-        <window.TweakSection title="雲端同步" subtitle="手機與電腦資料互通">
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button onClick={() => window.SyncStatus && window.SyncStatus.forcePull()} style={{
-              padding: "8px 14px", borderRadius: 8, border: "1px solid #d4cfc4",
-              background: "#fff", color: "#1a1a1a", fontSize: 12, cursor: "pointer", fontFamily: "inherit"
-            }}>下載雲端最新</button>
-            <button onClick={() => window.SyncStatus && window.SyncStatus.forcePush()} style={{
-              padding: "8px 14px", borderRadius: 8, border: "1px solid #d4cfc4",
-              background: "#fff", color: "#1a1a1a", fontSize: 12, cursor: "pointer", fontFamily: "inherit"
-            }}>立即上傳</button>
-          </div>
-        </window.TweakSection>
-        <window.TweakSection title="本機資料" subtitle="備份 / 還原">
+<window.TweakSection title="本機資料" subtitle="備份 / 還原">
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button onClick={() => {
               const json = window.Store.actions.exportJSON();

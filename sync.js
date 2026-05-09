@@ -7,7 +7,7 @@
 
 (function () {
   const ENDPOINT = "https://script.google.com/macros/s/AKfycby-TYIyBNFa51N4NzYGhkO5YUpRw0eVmzgRzEaDdLYO2S-px5tW3QscX36XU7K5e8dA0A/exec";
-  const KEY = "vyc.v1";
+  const KEY = window.VYC_KEY || "vyc.v1";
   const DEBOUNCE_MS = 1200;
   const POLL_MS = 30000; // 每 30 秒輪詢一次
 
