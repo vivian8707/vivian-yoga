@@ -175,9 +175,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 
 <script>
+  // settings.html 不需要 SW — 取消現有 SW 以確保永遠取得最新檔案
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      Promise.all(regs.map(r => r.unregister())).then(() => {
+        if (regs.length > 0) location.reload();
+      });
     });
   }
 </script>
