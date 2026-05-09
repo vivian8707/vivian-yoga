@@ -35,9 +35,9 @@
 <script>
 // 獨立儲存空間 — 不共用 Vivian 的資料
 const _ls = { get: localStorage.getItem.bind(localStorage), set: localStorage.setItem.bind(localStorage), remove: localStorage.removeItem.bind(localStorage) };
-localStorage.getItem    = k => _ls.get(k === 'vyc.v1' ? 'vyc.s1' : k);
-localStorage.setItem    = (k, v) => _ls.set(k === 'vyc.v1' ? 'vyc.s1' : k, v);
-localStorage.removeItem = k => _ls.remove(k === 'vyc.v1' ? 'vyc.s1' : k);
+localStorage.getItem    = k => _ls.get(k === 'vyc.v1' ? 'vyc.pub.v1' : k);
+localStorage.setItem    = (k, v) => _ls.set(k === 'vyc.v1' ? 'vyc.pub.v1' : k, v);
+localStorage.removeItem = k => _ls.remove(k === 'vyc.v1' ? 'vyc.pub.v1' : k);
 
 // 新使用者從空白開始（不載入 data.js）
 window.SEED_STUDENTS = [];
