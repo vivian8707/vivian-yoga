@@ -308,7 +308,7 @@ function Stepper({ value, onChange, suffix = "人" }) {
 }
 
 // ====== 學生卡 (扣堂/單堂/體驗/自訂) ======
-function StudentCard({ student, state, onChange }) {
+function StudentCard({ student, state, onChange, singlePrice = 400, trialPrice = 200 }) {
   const checked = state.checked;
   const count = state.count;
   const pricing = state.pricing;
@@ -317,8 +317,8 @@ function StudentCard({ student, state, onChange }) {
 
   const sub =
     pricing === "package" ? `扣 ${count} 堂` :
-    pricing === "single"  ? `$${400 * count}` :
-    pricing === "trial"   ? `$${200 * count}` :
+    pricing === "single"  ? `$${singlePrice * count}` :
+    pricing === "trial"   ? `$${trialPrice * count}` :
                             `自訂 $${customPrice}`;
 
   return (
@@ -354,8 +354,8 @@ function StudentCard({ student, state, onChange }) {
             display: "flex", flexWrap: "wrap", gap: 6, marginTop: 12
           }}>
             <PriceChip label="扣堂數" active={pricing === "package"} onClick={() => set({ pricing: "package" })} />
-            <PriceChip label="社區單堂" sub="$400" active={pricing === "single"} onClick={() => set({ pricing: "single" })} />
-            <PriceChip label="社區體驗" sub="$200" active={pricing === "trial"} onClick={() => set({ pricing: "trial" })} />
+            <PriceChip label="單堂" sub={`$${singlePrice}`} active={pricing === "single"} onClick={() => set({ pricing: "single" })} />
+            <PriceChip label="體驗" sub={`$${trialPrice}`} active={pricing === "trial"} onClick={() => set({ pricing: "trial" })} />
             <PriceChip label="自訂金額" active={pricing === "custom"} onClick={() => set({ pricing: "custom" })} />
           </div>
           {pricing === "custom" &&
@@ -453,6 +453,9 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
     editRecord && editRecord.mode === "manual" ? (editRecord.totalAmount || 0) : 2400
   );
 
+  const singlePrice = currentVenue.singlePrice ?? 400;
+  const trialPrice  = currentVenue.trialPrice  ?? 200;
+
   const allStudents = window.Store ? window.Store.getState().students : window.SAMPLE_STUDENTS;
   const lastClassMap = window.Store ? window.Store.derived.lastClassByStudent() : {};
   const studentsHere = allStudents.filter(s => !s.archived && s.location === loc)
@@ -489,12 +492,12 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
             usedPackage: true, perClassPrice: 360, count: cnt, amount: 0
           };
           if (st.pricing === "single") return {
-            studentId: s.id, studentName: s.name, classType: "社區單堂",
-            usedPackage: false, perClassPrice: 0, count: cnt, amount: 400 * cnt
+            studentId: s.id, studentName: s.name, classType: "單堂",
+            usedPackage: false, perClassPrice: 0, count: cnt, amount: singlePrice * cnt
           };
           if (st.pricing === "trial") return {
-            studentId: s.id, studentName: s.name, classType: "社區體驗",
-            usedPackage: false, perClassPrice: 0, count: cnt, amount: 200 * cnt
+            studentId: s.id, studentName: s.name, classType: "體驗",
+            usedPackage: false, perClassPrice: 0, count: cnt, amount: trialPrice * cnt
           };
           return {
             studentId: s.id, studentName: s.name, classType: "自訂金額",
@@ -583,7 +586,7 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
           }
           {studentsHere.map((s) => {
             const st = studentState[s.id] || { checked: false, count: 1, pricing: "package", customPrice: 0 };
-            return <StudentCard key={s.id} student={s} state={st} onChange={(next) => onStudentChange(s.id, next)} />;
+            return <StudentCard key={s.id} student={s} state={st} onChange={(next) => onStudentChange(s.id, next)} singlePrice={singlePrice} trialPrice={trialPrice} />;
           })}
         </>
       }
@@ -1452,11 +1455,10 @@ function D_Modal_Settings({ embedded, onClose }) {
       const next = venues.map((v, i) => i === vIdx ? { ...v, ...patch } : v);
       setVenues(next);
     };
-    const isDefault = (window.DEFAULT_VENUES || []).some(d => d.id === venue.id);
     return (
       <BottomSheet title="編輯場地" primaryLabel="完成" sheetHeight="90%" embedded={embedded}
         onClose={() => setEditingVenueId(null)} onSubmit={() => setEditingVenueId(null)}
-        showDelete={!isDefault}
+        showDelete={true}
         onDelete={() => {
           setVenues(venues.filter(v => v.id !== venue.id));
           setEditingVenueId(null);
@@ -1505,16 +1507,51 @@ function D_Modal_Settings({ embedded, onClose }) {
         </div>
         <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 6 }}>
           {venue.mode === "community" && "學生個別付款，扣堂/單堂/體驗/自訂"}
-          {venue.mode === "home" && "單一學生付款，支援一對一/二/三與自訂方案"}
+          {venue.mode === "home" && "單一學生付款，支援自訂方案"}
           {venue.mode === "sky" && "依到場人數查對照表計算教室分潤"}
           {venue.mode === "manual" && "直接輸入收到的總金額"}
         </div>
+
+        {venue.mode === "community" &&
+          <>
+            <div style={{ height: 16 }} />
+            <FieldLabel>金額設定</FieldLabel>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div style={{ background: T.bg, borderRadius: 8, padding: "8px 12px", border: `1px solid ${T.borderSoft}` }}>
+                <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>單堂</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*"
+                    value={venue.singlePrice ?? 400}
+                    onChange={e => patchVenue({ singlePrice: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
+                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+                </div>
+              </div>
+              <div style={{ background: T.bg, borderRadius: 8, padding: "8px 12px", border: `1px solid ${T.borderSoft}` }}>
+                <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>體驗</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
+                  <input type="text" inputMode="numeric" pattern="[0-9]*"
+                    value={venue.trialPrice ?? 200}
+                    onChange={e => patchVenue({ trialPrice: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
+                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+                </div>
+              </div>
+            </div>
+          </>
+        }
 
         {/* 私人包課: 方案編輯 */}
         {venue.mode === "home" &&
           <>
             <div style={{ height: 16 }} />
-            <FieldLabel>方案設定</FieldLabel>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <FieldLabel>方案設定</FieldLabel>
+              <button onClick={() => {
+                const plans = [...(venue.homePlans || window.DEFAULT_HOME_PLANS || []), { id: "hp_" + Date.now().toString(36), label: "新方案", price: 1000 }];
+                patchVenue({ homePlans: plans });
+              }} style={{ padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.surface, color: T.primary, fontSize: 11, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>+ 新增</button>
+            </div>
             {(venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((p, pi) => (
               <div key={p.id} style={{
                 display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
@@ -1544,6 +1581,10 @@ function D_Modal_Settings({ embedded, onClose }) {
                     fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit"
                   }}
                 />
+                <button onClick={() => {
+                  const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).filter((_, i) => i !== pi);
+                  patchVenue({ homePlans: plans });
+                }} style={{ padding: 0, width: 22, height: 22, borderRadius: 11, border: `1px solid ${T.border}`, background: "transparent", color: T.inkSoft, fontSize: 14, cursor: "pointer", flexShrink: 0, lineHeight: 1 }}>×</button>
               </div>
             ))}
           </>
