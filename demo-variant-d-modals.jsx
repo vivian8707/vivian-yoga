@@ -1058,20 +1058,20 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                 />
               </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <div style={{ flexShrink: 0 }}>
+                <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>堂數</div>
                   <div style={{
-                    background: T.surface, borderRadius: 10,
+                    flex: 1, background: T.surface, borderRadius: 10,
                     border: `1px solid ${T.border}`, padding: "8px 12px",
                     display: "flex", alignItems: "center", justifyContent: "space-between"
                   }}>
                     <Stepper value={cClasses} onChange={setCClasses} suffix="堂" />
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>金額</div>
                   <div style={{
-                    background: T.surface, borderRadius: 10,
+                    flex: 1, background: T.surface, borderRadius: 10,
                     border: `1px solid ${T.border}`, padding: "8px 12px",
                     display: "flex", alignItems: "center", gap: 4
                   }}>
