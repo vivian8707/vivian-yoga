@@ -69,7 +69,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
     <span style={{
       fontSize: size, fontWeight: 700, letterSpacing: 0.3,
       fontFamily: "'Cormorant Garamond', 'Noto Sans TC', serif", lineHeight: 1, color
-    }}>\${income.toLocaleString()}</span>
+    }}>{income.toLocaleString()}</span>
   );
 
   if (variant === "split" || variant === "split-3col" || variant === "split-stack" || variant === "split-bottom-date" ||
@@ -302,7 +302,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
             <SerifMonth size={26} yearSize={16} />
           </div>
           <div style={{ marginTop: 6 }}>
-            <Row label="本月收入" value={`\${income.toLocaleString()}`} accent={T.primary} />
+            <Row label="本月收入" value={`${income.toLocaleString()}`} accent={T.primary} />
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               padding: "8px 0"
@@ -369,7 +369,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
           <span style={{ width: 3, height: 3, borderRadius: 2, background: T.borderSoft }} />
           <span>單堂均價 <span style={{
             color: T.ink, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", fontSize: 14
-          }}>\${Math.round(income / lessons).toLocaleString()}</span></span>
+          }}>{Math.round(income / lessons).toLocaleString()}</span></span>
         </div>
       </div>
     );
@@ -738,7 +738,7 @@ function D_ClassList({ T, onEdit }) {
               <div style={{ alignSelf: "center", textAlign: "right" }}>
                 <div style={{ fontSize: 18, fontWeight: 600, color: T.accent,
                   fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
-                  ${displayTotal(r).toLocaleString()}
+                  {displayTotal(r).toLocaleString()}
                 </div>
               </div>
               <button
@@ -769,10 +769,10 @@ function D_ClassList({ T, onEdit }) {
                     fontFamily: "'Cormorant Garamond', serif", fontSize: 13
                   }}>
                     {(() => {
-                      if (!a.usedPackage) return a.amount > 0 ? `\${a.amount.toLocaleString()}` : "—";
+                      if (!a.usedPackage) return a.amount > 0 ? `${a.amount.toLocaleString()}` : "—";
                       const rev = lessonIdx[r.id + ":" + a.studentId];
                       const amt = rev ? rev.amount : 0;
-                      return amt > 0 ? `\${amt.toLocaleString()}` : "—";
+                      return amt > 0 ? `${amt.toLocaleString()}` : "—";
                     })()}
                   </span>
                 </div>
@@ -843,7 +843,7 @@ function D_PayList({ T, onEdit }) {
               <div style={{
                 fontSize: 18, fontWeight: 600, color: T.accent,
                 fontFamily: "'Cormorant Garamond', serif", lineHeight: 1
-              }}>\${r.amount.toLocaleString()}</div>
+              }}>{r.amount.toLocaleString()}</div>
             </div>
           </div>);
       })}
@@ -1069,12 +1069,12 @@ function D_Income({ T, chartStyle }) {
         <div style={{
           fontSize: 32, fontWeight: 600, marginTop: 6,
           fontFamily: "'Cormorant Garamond', serif", letterSpacing: 1
-        }}>\${yearTotal.toLocaleString()}</div>
+        }}>{yearTotal.toLocaleString()}</div>
         <div style={{ display: "flex", gap: 24, marginTop: 14, fontSize: 11, opacity: 0.95 }}>
           <div>
             <div style={{ opacity: 0.75 }}>{sel.key.slice(5)}月</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>\${sel.value.toLocaleString()}</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{sel.value.toLocaleString()}</span>
               <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(sel.key)} 堂</span>
             </div>
           </div>
@@ -1082,7 +1082,7 @@ function D_Income({ T, chartStyle }) {
           <div>
             <div style={{ opacity: 0.75 }}>{prev.key.slice(5)}月</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>\${prev.value.toLocaleString()}</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{prev.value.toLocaleString()}</span>
               <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(prev.key)} 堂</span>
             </div>
           </div>
@@ -1192,7 +1192,7 @@ function D_Income({ T, chartStyle }) {
               <div style={{
                 fontSize: 16, fontWeight: 600,
                 fontFamily: "'Cormorant Garamond', serif", color: T.ink, flex: 1
-              }}>\${m.value.toLocaleString()}</div>
+              }}>{m.value.toLocaleString()}</div>
               {diff != null &&
               <div style={{
                 fontSize: 11, fontWeight: 600,

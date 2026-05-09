@@ -1,5 +1,5 @@
 (function () {
-  const KEY = "vyc.v1";
+  const KEY = window.VYC_KEY || "vyc.v1";
   const listeners = new Set();
 
   const DEFAULT_HOME_PLANS = [
