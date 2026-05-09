@@ -365,12 +365,13 @@ function StudentCard({ student, state, onChange }) {
             <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6,
               background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px" }}>
               <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
-              <input type="number" inputMode="numeric" value={customPrice}
-                onChange={(e) => set({ customPrice: parseInt(e.target.value || "0", 10) })}
+              <input type="text" inputMode="numeric" pattern="[0-9]*" value={customPrice || ""}
+                onChange={(e) => set({ customPrice: parseInt(e.target.value.replace(/\D/g, "") || "0", 10) })}
                 style={{
                   flex: 1, minWidth: 0, border: "none", outline: "none",
                   background: "transparent", fontSize: 14, fontWeight: 600,
-                  color: T.ink, fontFamily: "'Cormorant Garamond', serif"
+                  color: T.ink, fontFamily: "'Cormorant Garamond', serif",
+                  WebkitAppearance: "none"
                 }} />
             </div>
           }
@@ -664,13 +665,14 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
             display: "flex", alignItems: "center", gap: 4
           }}>
             <span style={{ color: T.inkSoft, fontSize: 14 }}>$</span>
-            <input type="number" inputMode="numeric"
-              value={manualAmount}
-              onChange={(e) => setManualAmount(parseInt(e.target.value || "0", 10))}
+            <input type="text" inputMode="numeric" pattern="[0-9]*"
+              value={manualAmount || ""}
+              onChange={(e) => setManualAmount(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
               style={{
                 flex: 1, minWidth: 0, border: "none", outline: "none",
                 background: "transparent", fontSize: 18, fontWeight: 700,
-                color: T.ink, fontFamily: "'Cormorant Garamond', serif"
+                color: T.ink, fontFamily: "'Cormorant Garamond', serif",
+                WebkitAppearance: "none"
               }}
             />
           </div>
@@ -797,14 +799,14 @@ function HomeStudentCard({ student, plan, onChangePlan, customLabel, setCustomLa
           }}>
             <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
             <input
-              type="number" inputMode="numeric"
-              value={customPrice}
-              onChange={(e) => setCustomPrice(parseInt(e.target.value || "0", 10))}
+              type="text" inputMode="numeric" pattern="[0-9]*"
+              value={customPrice || ""}
+              onChange={(e) => setCustomPrice(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
               style={{
                 flex: 1, minWidth: 0, border: "none", outline: "none",
                 background: "transparent", fontSize: 14, fontWeight: 600,
                 color: T.ink, fontFamily: "'Cormorant Garamond', serif",
-                padding: "8px 0"
+                padding: "8px 0", WebkitAppearance: "none"
               }}
             />
           </div>
@@ -1056,17 +1058,18 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                 />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>堂數</div>
                   <div style={{
                     background: T.surface, borderRadius: 10,
                     border: `1px solid ${T.border}`, padding: "8px 12px",
-                    display: "flex", alignItems: "center", justifyContent: "space-between"
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    overflow: "hidden"
                   }}>
                     <Stepper value={cClasses} onChange={setCClasses} suffix="堂" />
                   </div>
                 </div>
-                <div>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>金額</div>
                   <div style={{
                     background: T.surface, borderRadius: 10,
@@ -1075,14 +1078,15 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                   }}>
                     <span style={{ color: T.inkSoft, fontWeight: 400 }}>$</span>
                     <input
-                      type="number" inputMode="numeric"
-                      value={cPrice}
-                      onChange={(e) => setCPrice(parseInt(e.target.value || "0", 10))}
+                      type="text" inputMode="numeric" pattern="[0-9]*"
+                      value={cPrice || ""}
+                      onChange={(e) => setCPrice(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
                       style={{
                         flex: 1, minWidth: 0,
                         border: "none", outline: "none", background: "transparent",
                         fontSize: 14, fontWeight: 600, color: T.ink,
-                        fontFamily: "'Cormorant Garamond', serif"
+                        fontFamily: "'Cormorant Garamond', serif",
+                        WebkitAppearance: "none"
                       }}
                     />
                   </div>
