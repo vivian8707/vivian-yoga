@@ -12,15 +12,14 @@
     [10,2200],[11,2500],[12,2800],[13,3100],[14,3400],[15,3700],[16,4000]
   ];
   const DEFAULT_VENUES = [
-    { id: "v1", name: "園頂",  mode: "community", colorIndex: 0 },
-    { id: "v2", name: "到府",  mode: "home",      colorIndex: 1,
+    { id: "v1", name: "小班課", mode: "community", colorIndex: 0, singlePrice: 400, trialPrice: 200 },
+    { id: "v2", name: "到府",   mode: "home",      colorIndex: 1,
       homePlans: DEFAULT_HOME_PLANS.map(p => ({...p})),
     },
-    { id: "v3", name: "天空",  mode: "sky",       colorIndex: 2,
+    { id: "v3", name: "教室",   mode: "sky",       colorIndex: 2,
       skyRates: DEFAULT_SKY_RATES.map(r => [...r]),
     },
-    { id: "v4", name: "台中",  mode: "manual",    colorIndex: 3 },
-    { id: "v5", name: "其他",  mode: "manual",    colorIndex: 4 },
+    { id: "v4", name: "其他",   mode: "manual",    colorIndex: 4 },
   ];
   window.DEFAULT_VENUES      = DEFAULT_VENUES;
   window.DEFAULT_HOME_PLANS  = DEFAULT_HOME_PLANS;
@@ -67,7 +66,7 @@
   function uid(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
   // ===== FIFO 扣堂折算: 對每位學生時序模擬，回傳每筆 class attendee 的折算金額 =====
-  // 結果結構: { [recordId+":"+studentId]: { perPrice, amount, count } }
+  // 結果結構: { [recordId+":"+ studentId]: { perPrice, amount, count } }
   function buildLessonRevenueIndex() {
     const idx = {};
     // group events by student
@@ -129,7 +128,7 @@
   // 對單筆上課紀錄計算「顯示用總金額」(含扣堂折算)
   function classDisplayTotal(record, _cache) {
     if (!record || record.type !== "class") return 0;
-    if (record.location === "天空" || record.location === "台中" || record.location === "其他") {
+    if (record.location === "天空" || record.location === "其他") {
       return record.totalAmount || 0;
     }
     if (record.location === "到府") {
@@ -147,7 +146,7 @@
 
   // ===== derived =====
   function months() {
-    // 月收入 = 該月所有上課的「實收金額」總和 (含天空/台中/其他/到府)
+    // 月收入 = 該月所有上課的「實收金額」總和 (含天空/其他/到府)
     const idx = buildLessonRevenueIndex();
     const map = {};
     state.records.forEach(r => {
