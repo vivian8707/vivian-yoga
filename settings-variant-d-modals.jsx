@@ -719,7 +719,7 @@ function SkySection({ count, setCount, skyRates }) {
         <span style={{
           fontSize: 20, fontWeight: 700, color: T.primaryDeep,
           fontFamily: "'Cormorant Garamond', serif"
-        }}>${ amount.toLocaleString()}</span>
+        }}>${amount.toLocaleString()}</span>
       </div>
     </>
   );
