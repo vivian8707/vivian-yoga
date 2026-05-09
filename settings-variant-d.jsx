@@ -558,12 +558,12 @@ function VariantD({ chartStyle = "area", initialTab = 0, monthCardVariant = "spl
       <div onClick={closeModal} style={{
         position: "absolute", inset: 0, background: "rgba(20,18,15,0.42)",
         zIndex: 20, display: "flex", alignItems: "flex-end",
-        animation: "dOverlayIn .2s ease"
+        animation: "dOverlayIn .2s ease", overflow: "hidden"
       }}>
         <div onClick={(e) => e.stopPropagation()} style={{
           width: "100%", background: T.bg,
           borderTopLeftRadius: 24, borderTopRightRadius: 24,
-          maxHeight: "92%", overflowY: "auto",
+          maxHeight: "92%", overflow: "hidden",
           animation: "dSheetIn .28s cubic-bezier(.2,.8,.3,1)"
         }}>
           {activeModal === "class" && <window.D_Modal_Class onClose={closeModal} embedded editRecord={editClassRecord} />}
