@@ -43,6 +43,26 @@ localStorage.removeItem = k => _ls.remove(k === 'vyc.v1' ? 'vyc.s1' : k);
 window.SEED_STUDENTS = [];
 window.SEED_RECORDS  = [];
 window.TABS = ["上課記錄", "儲值記錄", "學生管理", "收入記錄"];
+
+// 動態 getter（同 data.js）
+Object.defineProperty(window, "SAMPLE_STUDENTS", {
+  get() { return window.Store ? window.Store.getState().students : []; }
+});
+Object.defineProperty(window, "SAMPLE_RECORDS", {
+  get() {
+    const list = window.Store ? window.Store.getState().records : [];
+    const order = new Map();
+    list.forEach((r, i) => order.set(r, i));
+    return list.slice().sort((a, b) => {
+      const da = a.date || "", db = b.date || "";
+      if (da !== db) return db.localeCompare(da);
+      return (order.get(b) || 0) - (order.get(a) || 0);
+    });
+  }
+});
+Object.defineProperty(window, "SAMPLE_MONTHS", {
+  get() { return window.Store ? window.Store.derived.months() : []; }
+});
 </script>
 <script src="store.js"></script>
 <script src="sync.js"></script>
