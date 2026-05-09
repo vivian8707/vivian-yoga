@@ -29,6 +29,7 @@
 
   // --- Network ---
   async function pullNow() {
+    if (hasPendingChanges || pushing) return;
     setStatus("syncing", "下載最新資料…");
     try {
       const res = await fetch(ENDPOINT, { method: "GET", redirect: "follow" });
@@ -41,6 +42,8 @@
         setStatus("synced", "已同步");
         return;
       }
+      // 若在 fetch 期間有新的本機變更，放棄覆蓋
+      if (hasPendingChanges || pushing) { setStatus("synced", "已同步"); return; }
       // 寫入 localStorage 並讓 store 重新載入
       localStorage.setItem(KEY, JSON.stringify(data));
       if (window.Store && window.Store._reload) window.Store._reload();
@@ -53,8 +56,10 @@
 
   let pushTimer = null;
   let pushing = false;
+  let hasPendingChanges = false;
   function schedulePush(delay) {
     clearTimeout(pushTimer);
+    hasPendingChanges = true;
     setStatus("pending", "等待上傳…");
     pushTimer = setTimeout(pushNow, delay == null ? DEBOUNCE_MS : delay);
   }
@@ -62,6 +67,7 @@
   async function pushNow() {
     if (pushing) { schedulePush(500); return; }
     pushing = true;
+    hasPendingChanges = false;
     setStatus("syncing", "上傳中…");
     try {
       const raw = localStorage.getItem(KEY) || "{}";
@@ -75,6 +81,7 @@
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] push failed", err);
+      hasPendingChanges = true;
       setStatus("offline", "上傳失敗,稍後重試");
       // 5 秒後重試
       setTimeout(() => schedulePush(0), 5000);
