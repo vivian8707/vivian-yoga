@@ -917,7 +917,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
               border: `1.5px dashed ${T.border}`,
               display: "flex", alignItems: "center", justifyContent: "center",
               color: T.inkSoft, fontSize: 16
-            }}>＋</div>
+            }}>+</div>
             <div style={{ flex: 1, fontSize: 14, color: T.inkSoft }}>請選擇學生</div>
             <span style={{ color: T.inkSoft, fontSize: 12 }}>{pickerOpen ? "收合 ▴" : "選擇 ›"}</span>
           </>
@@ -1016,7 +1016,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
             padding: "10px 0", borderRadius: 12,
             border: `1px dashed ${T.border}`, background: "transparent",
             color: T.inkSoft, fontSize: 12, fontFamily: "inherit", cursor: "pointer"
-          }}>＋ 自訂方案</button>
+          }}>+ 自訂方案</button>
           :
           <div style={{
             background: isCustom ? T.primarySoft : T.surface,
@@ -1047,7 +1047,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                 <input
                   value={cName}
                   onChange={(e) => setCName(e.target.value)}
-                  placeholder="例:私人 8 堂、體驗組合 …"
+                  placeholder="例:私人 8 堂、體驗組合 ..."
                   style={{
                     width: "100%", boxSizing: "border-box",
                     background: T.surface, borderRadius: 10,
@@ -1057,20 +1057,20 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                 />
               </div>
               <div style={{ display: "flex", gap: 10 }}>
-                <div style={{ flexShrink: 0 }}>
+                <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>堂數</div>
                   <div style={{
-                    background: T.surface, borderRadius: 10,
+                    flex: 1, background: T.surface, borderRadius: 10,
                     border: `1px solid ${T.border}`, padding: "8px 12px",
                     display: "flex", alignItems: "center", justifyContent: "space-between"
                   }}>
                     <Stepper value={cClasses} onChange={setCClasses} suffix="堂" />
                   </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
                   <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>金額</div>
                   <div style={{
-                    background: T.surface, borderRadius: 10,
+                    flex: 1, background: T.surface, borderRadius: 10,
                     border: `1px solid ${T.border}`, padding: "8px 12px",
                     display: "flex", alignItems: "center", gap: 4
                   }}>
@@ -1102,7 +1102,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                     background: saveAsPlan ? T.primaryDeep : T.surface,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: T.surface, fontSize: 10, lineHeight: 1
-                  }}>{saveAsPlan ? "✓" : ""}</span>
+                  }}>{saveAsPlan ? "" : ""}</span>
                   <span style={{ color: T.inkSoft }}>儲存為常用方案</span>
                 </label>
               </div>
@@ -1187,7 +1187,7 @@ function D_Modal_AddStudent({ embedded, onClose, editStudent }) {
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="輸入姓名 …"
+        placeholder="輸入姓名 ..."
         style={{
           width: "100%", boxSizing: "border-box",
           background: T.surface, borderRadius: 10,
@@ -1219,7 +1219,7 @@ function D_Modal_AddStudent({ embedded, onClose, editStudent }) {
               background: archived ? T.primaryDeep : T.surface,
               display: "flex", alignItems: "center", justifyContent: "center",
               color: T.surface, fontSize: 13, lineHeight: 1, flexShrink: 0
-            }}>{archived ? "✓" : ""}</span>
+            }}>{archived ? "" : ""}</span>
             <input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} style={{ display: "none" }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: T.ink }}>封存學生</div>
@@ -1410,7 +1410,7 @@ function D_Modal_History({ embedded, onClose, student, onEditRecord }) {
                       }</div>
                       {r.usedPackage && (
                         <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 4 }}>
-                          −{r.count || 1} 堂
+                          {r.count || 1} 堂
                         </div>
                       )}
                     </>
