@@ -365,12 +365,12 @@ function StudentCard({ student, state, onChange }) {
             <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6,
               background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8, padding: "6px 10px" }}>
               <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
-              <input type="number" inputMode="numeric" value={customPrice}
-                onChange={(e) => set({ customPrice: parseInt(e.target.value || "0", 10) })}
+              <input type="text" inputMode="numeric" pattern="[0-9]*" value={customPrice}
+                onChange={(e) => set({ customPrice: parseInt(e.target.value.replace(/\D/g, "") || "0", 10) })}
                 style={{
-                  flex: 1, minWidth: 0, border: "none", outline: "none",
+                  flex: 1, minWidth: 0, width: 0, border: "none", outline: "none",
                   background: "transparent", fontSize: 14, fontWeight: 600,
-                  color: T.ink, fontFamily: "'Cormorant Garamond', serif"
+                  color: T.ink, fontFamily: "inherit"
                 }} />
             </div>
           }
@@ -664,13 +664,13 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
             display: "flex", alignItems: "center", gap: 4
           }}>
             <span style={{ color: T.inkSoft, fontSize: 14 }}>$</span>
-            <input type="number" inputMode="numeric"
+            <input type="text" inputMode="numeric" pattern="[0-9]*"
               value={manualAmount}
-              onChange={(e) => setManualAmount(parseInt(e.target.value || "0", 10))}
+              onChange={(e) => setManualAmount(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
               style={{
-                flex: 1, minWidth: 0, border: "none", outline: "none",
+                flex: 1, minWidth: 0, width: 0, border: "none", outline: "none",
                 background: "transparent", fontSize: 18, fontWeight: 700,
-                color: T.ink, fontFamily: "'Cormorant Garamond', serif"
+                color: T.ink, fontFamily: "inherit"
               }}
             />
           </div>
@@ -797,13 +797,13 @@ function HomeStudentCard({ student, plan, onChangePlan, customLabel, setCustomLa
           }}>
             <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
             <input
-              type="number" inputMode="numeric"
+              type="text" inputMode="numeric" pattern="[0-9]*"
               value={customPrice}
-              onChange={(e) => setCustomPrice(parseInt(e.target.value || "0", 10))}
+              onChange={(e) => setCustomPrice(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
               style={{
-                flex: 1, minWidth: 0, border: "none", outline: "none",
+                flex: 1, minWidth: 0, width: 0, border: "none", outline: "none",
                 background: "transparent", fontSize: 14, fontWeight: 600,
-                color: T.ink, fontFamily: "'Cormorant Garamond', serif",
+                color: T.ink, fontFamily: "inherit",
                 padding: "8px 0"
               }}
             />
@@ -1075,14 +1075,14 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                   }}>
                     <span style={{ color: T.inkSoft, fontWeight: 400 }}>$</span>
                     <input
-                      type="number" inputMode="numeric"
+                      type="text" inputMode="numeric" pattern="[0-9]*"
                       value={cPrice}
-                      onChange={(e) => setCPrice(parseInt(e.target.value || "0", 10))}
+                      onChange={(e) => setCPrice(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
                       style={{
-                        flex: 1, minWidth: 0,
+                        flex: 1, minWidth: 0, width: 0,
                         border: "none", outline: "none", background: "transparent",
                         fontSize: 14, fontWeight: 600, color: T.ink,
-                        fontFamily: "'Cormorant Garamond', serif"
+                        fontFamily: "inherit"
                       }}
                     />
                   </div>
