@@ -558,7 +558,8 @@ function VariantD({ chartStyle = "area", initialTab = 0, monthCardVariant = "spl
       <div onClick={closeModal} style={{
         position: "absolute", inset: 0, background: "rgba(20,18,15,0.42)",
         zIndex: 20, display: "flex", alignItems: "flex-end",
-        animation: "dOverlayIn .2s ease", overflow: "hidden"
+        overflow: "hidden",
+        animation: "dOverlayIn .2s ease"
       }}>
         <div onClick={(e) => e.stopPropagation()} style={{
           width: "100%", background: T.bg,
@@ -761,8 +762,8 @@ function D_ClassList({ T, onEdit }) {
                   <span style={{ minWidth: 56, fontWeight: 500 }}>{a.studentName}</span>
                   <span style={{ color: T.inkSoft, fontSize: 11 }}>
                     {a.usedPackage
-                      ? `${a.classType || "扣堂數"} ×${a.count || 1}`
-                      : `${a.classType || ""}${(a.count || 1) > 1 ? ` ×${a.count}` : ""}`}
+                      ? `${a.classType || "扣堂數"} x${a.count || 1}`
+                      : `${a.classType || ""}${(a.count || 1) > 1 ? ` x${a.count}` : ""}`}
                   </span>
                   <span style={{
                     marginLeft: "auto", fontWeight: 400, color: T.primary,
