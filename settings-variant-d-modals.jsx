@@ -1552,28 +1552,19 @@ function D_Modal_Settings({ embedded, onClose }) {
           <>
             <div style={{ height: 16 }} />
             <FieldLabel>金額設定</FieldLabel>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-              <div style={{ background: T.bg, borderRadius: 8, padding: "8px 12px", border: `1px solid ${T.borderSoft}` }}>
-                <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>單堂</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*"
-                    value={venue.singlePrice ?? 400}
-                    onChange={e => patchVenue({ singlePrice: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
-                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                </div>
+            {[
+              { key: "singlePrice", label: "單堂", defaultVal: 400 },
+              { key: "trialPrice",  label: "體驗", defaultVal: 200 },
+            ].map(({ key, label, defaultVal }) => (
+              <div key={key} style={{ display: "flex", alignItems: "center", background: T.bg, borderRadius: 8, padding: "10px 14px", border: `1px solid ${T.borderSoft}`, marginBottom: 8 }}>
+                <span style={{ flex: 1, fontSize: 13, color: T.inkSoft }}>{label}</span>
+                <span style={{ fontSize: 12, color: T.inkSoft, marginRight: 2 }}>$</span>
+                <input type="text" inputMode="numeric" pattern="[0-9]*"
+                  value={venue[key] ?? defaultVal}
+                  onChange={e => patchVenue({ [key]: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
+                  style={{ width: 64, textAlign: "right", background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
               </div>
-              <div style={{ background: T.bg, borderRadius: 8, padding: "8px 12px", border: `1px solid ${T.borderSoft}` }}>
-                <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>體驗</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*"
-                    value={venue.trialPrice ?? 200}
-                    onChange={e => patchVenue({ trialPrice: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
-                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                </div>
-              </div>
-            </div>
+            ))}
           </>
         }
 
