@@ -7,12 +7,18 @@
     { id: "hp2", label: "一對二", price: 2000 },
     { id: "hp3", label: "一對三", price: 1500 },
   ];
+  const DEFAULT_COMMUNITY_PLANS = [
+    { id: "cmp1", label: "5 堂",  classes: 5,  price: 1800 },
+    { id: "cmp2", label: "10 堂", classes: 10, price: 3500 },
+  ];
   const DEFAULT_SKY_RATES = [
     [2,600],[3,800],[4,900],[5,1000],[6,1200],[7,1400],[8,1600],[9,1800],
     [10,2200],[11,2500],[12,2800],[13,3100],[14,3400],[15,3700],[16,4000]
   ];
   const DEFAULT_VENUES = [
-    { id: "v1", name: "小班課", mode: "community", colorIndex: 0, singlePrice: 400, trialPrice: 200 },
+    { id: "v1", name: "小班課", mode: "community", colorIndex: 0, singlePrice: 400, trialPrice: 200,
+      communityPlans: DEFAULT_COMMUNITY_PLANS.map(p => ({...p})),
+    },
     { id: "v2", name: "到府",   mode: "home",      colorIndex: 1,
       homePlans: DEFAULT_HOME_PLANS.map(p => ({...p})),
     },
@@ -21,9 +27,10 @@
     },
     { id: "v4", name: "其他",   mode: "manual",    colorIndex: 4 },
   ];
-  window.DEFAULT_VENUES      = DEFAULT_VENUES;
-  window.DEFAULT_HOME_PLANS  = DEFAULT_HOME_PLANS;
-  window.DEFAULT_SKY_RATES   = DEFAULT_SKY_RATES;
+  window.DEFAULT_VENUES         = DEFAULT_VENUES;
+  window.DEFAULT_HOME_PLANS     = DEFAULT_HOME_PLANS;
+  window.DEFAULT_COMMUNITY_PLANS = DEFAULT_COMMUNITY_PLANS;
+  window.DEFAULT_SKY_RATES      = DEFAULT_SKY_RATES;
 
   function defaultVenues() {
     return DEFAULT_VENUES.map(v => JSON.parse(JSON.stringify(v)));
