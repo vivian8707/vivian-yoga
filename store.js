@@ -41,7 +41,7 @@
       students: window.SEED_STUDENTS.slice(),
       records: window.SEED_RECORDS.slice(),
       customPlans: [],
-      settings: { displayName: "", venues: defaultVenues() },
+      settings: { displayName: "", venues: defaultVenues(), paymentPlans: DEFAULT_COMMUNITY_PLANS.map(p => ({...p})) },
     };
   }
 
@@ -54,6 +54,7 @@
       if (!obj.customPlans) obj.customPlans = [];
       if (!obj.settings) obj.settings = { displayName: "", venues: defaultVenues() };
       if (!obj.settings.venues) obj.settings.venues = defaultVenues();
+      if (!obj.settings.paymentPlans) obj.settings.paymentPlans = DEFAULT_COMMUNITY_PLANS.map(p => ({...p}));
       return obj;
     } catch (e) {
       return seed();
