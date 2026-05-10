@@ -335,7 +335,7 @@ function StudentCard({ student, state, onChange, singlePrice = 400, trialPrice =
           color: T.surface, fontSize: 12, cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0
-        }}>{checked ? "✓" : ""}</button>
+        }}>{checked ? "" : ""}</button>
         <div style={{ fontSize: 15, fontWeight: 600, flex: 1 }}>{student.name}</div>
         <Stepper value={count} onChange={(v) => set({ count: v })} />
         <div style={{
@@ -871,7 +871,25 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
     onClose && onClose();
   };
   const Avatar = window.StudentAvatar;
-  const LOC = window.D_LOC || {};
+  const getVenues = () => window.Store
+    ? ((window.Store.getState().settings || {}).venues || window.DEFAULT_VENUES || [])
+    : (window.DEFAULT_VENUES || []);
+  const venues = getVenues();
+  const getVenueColor = (venueName) => {
+    const venue = venues.find(v => v.name === venueName);
+    const palette = window.VENUE_PALETTE || [
+      { bg: "#e1e5dc", fg: "#5b6650" },
+      { bg: "#ecdfdf", fg: "#7c5e5e" },
+      { bg: "#dee2e8", fg: "#5d6776" },
+      { bg: "#ece2d7", fg: "#7a624e" },
+      { bg: "#e8e0ec", fg: "#6e5e7a" },
+      { bg: "#dce8e4", fg: "#4d6e66" },
+      { bg: "#ece8dc", fg: "#7a6e4e" },
+      { bg: "#e8dce0", fg: "#7a5e66" },
+    ];
+    if (!venue) return palette[0];
+    return palette[venue.colorIndex] || palette[0];
+  };
   return (
     <BottomSheet title={isEdit ? "編輯儲值紀錄" : "新增儲值紀錄"} primaryLabel={isEdit ? "儲存修改" : "完成儲值"} sheetHeight="78%" showDelete={isEdit} embedded={embedded} onClose={onClose} onSubmit={submit} onDelete={handleDelete}>
       <FieldLabel>學生</FieldLabel>
@@ -882,7 +900,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
       }}>
         {student ? (
           <>
-            <Avatar id={student.id} tone={LOC[student.location || "園頂"] || LOC["園頂"]} />
+            <Avatar id={student.id} tone={getVenueColor(student.location || "園頂")} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{student.name}</div>
               <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 1 }}>
@@ -910,7 +928,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
           border: `1px solid ${T.border}`, maxHeight: 220, overflowY: "auto"
         }}>
           {students.map(s => {
-            const stTone = LOC[s.location || "園頂"] || LOC["園頂"];
+            const stTone = getVenueColor(s.location || "園頂");
             return (
               <div key={s.id} onClick={() => { setStudentId(s.id); setPickerOpen(false); }}
                 style={{
@@ -1127,7 +1145,8 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
 // ====== 3. 新增學生 ======
 function D_Modal_AddStudent({ embedded, onClose, editStudent }) {
   const isEdit = !!editStudent;
-  const [loc, setLoc] = useStateMod(isEdit ? (editStudent.location || "園頂") : "園頂");
+  const getVenues = () => window.Store ? ((window.Store.getState().settings || {}).venues || window.DEFAULT_VENUES || []) : (window.DEFAULT_VENUES || []);
+  const [loc, setLoc] = useStateMod(isEdit ? (editStudent.location || "") : "");
   const [name, setName] = useStateMod(isEdit ? (editStudent.name || "") : "");
   const [note, setNote] = useStateMod(isEdit ? (editStudent.note || "") : "");
   const [archived, setArchived] = useStateMod(isEdit ? !!editStudent.archived : false);
@@ -1183,8 +1202,8 @@ function D_Modal_AddStudent({ embedded, onClose, editStudent }) {
       <div style={{ height: 16 }} />
       <FieldLabel>主要場地</FieldLabel>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {Object.keys(D_LOC_M).map(l => (
-          <LocChip key={l} label={l} active={loc === l} onClick={() => setLoc(l)} />
+        {getVenues().map(v => (
+          <LocChip key={v.id} label={v.name} active={loc === v.name} onClick={() => setLoc(v.name)} />
         ))}
       </div>
 
