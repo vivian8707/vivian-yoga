@@ -1689,21 +1689,21 @@ function D_Modal_Settings({ embedded, onClose }) {
         <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, background: T.surface, borderRadius: 12, padding: "10px 14px", border: `1px solid ${T.borderSoft}` }}>
           <input value={p.label}
             onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, label: e.target.value } : x))}
-            style={{ flex: 2, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+            style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
             <input type="text" inputMode="numeric" value={p.classes}
               onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, classes: parseInt(e.target.value.replace(/\D/g,"") || "1", 10) } : x))}
-              style={{ width: 32, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
+              style={{ width: 28, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
             <span style={{ fontSize: 11, color: T.inkSoft }}>堂</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
             <span style={{ fontSize: 11, color: T.inkSoft }}>$</span>
             <input type="text" inputMode="numeric" value={p.price}
               onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x))}
               style={{ width: 52, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
           </div>
           <button onClick={() => setPaymentPlans(prev => prev.filter((_, i) => i !== pi))}
-            style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1 }}>×</button>
+            style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0 }}>×</button>
         </div>
       ))}
       <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 20 }}>新增儲值時學生選擇的方案清單</div>
