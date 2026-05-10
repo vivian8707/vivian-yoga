@@ -827,10 +827,9 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
   const customPlans = (window.Store && window.Store.getState().customPlans) || [];
   const [studentId, setStudentId] = useStateMod(editRecord ? (editRecord.studentId || "") : "");
   const [pickerOpen, setPickerOpen] = useStateMod(!editRecord);
-  const allVenuesCfg = window.Store ? ((window.Store.getState().settings || {}).venues || window.DEFAULT_VENUES || []) : (window.DEFAULT_VENUES || []);
-  const communityVenueCfg = allVenuesCfg.find(v => v.mode === "community");
-  const communityPlansRaw = (communityVenueCfg && communityVenueCfg.communityPlans) || window.DEFAULT_COMMUNITY_PLANS || [];
-  const builtInPlans = communityPlansRaw.map(p => ({ id: p.id, name: p.label, classes: p.classes, price: p.price }));
+  const settings = window.Store ? (window.Store.getState().settings || {}) : {};
+  const paymentPlansRaw = settings.paymentPlans || window.DEFAULT_COMMUNITY_PLANS || [];
+  const builtInPlans = paymentPlansRaw.map(p => ({ id: p.id, name: p.label || p.name, classes: p.classes, price: p.price }));
   const allPlans = [...builtInPlans, ...customPlans];
   // detect if editRecord plan matches a known plan
   const matchedPlan = editRecord ? allPlans.find(p => p.name === editRecord.plan && p.classes === editRecord.classes && p.price === editRecord.amount) : null;
@@ -1462,6 +1461,9 @@ function D_Modal_Settings({ embedded, onClose }) {
     (getSettings().venues || window.DEFAULT_VENUES || []).map(v => JSON.parse(JSON.stringify(v)))
   );
   const [editingVenueId, setEditingVenueId] = useStateMod(null);
+  const [paymentPlans, setPaymentPlans] = useStateMod(() =>
+    (getSettings().paymentPlans || window.DEFAULT_COMMUNITY_PLANS || []).map(p => ({...p}))
+  );
   const palette = window.VENUE_PALETTE || [
     { bg: "#e1e5dc", fg: "#5b6650" },
     { bg: "#ecdfdf", fg: "#7c5e5e" },
@@ -1475,7 +1477,7 @@ function D_Modal_Settings({ embedded, onClose }) {
 
   const saveAll = () => {
     if (window.Store) {
-      window.Store.actions.updateSettings({ displayName: name.trim(), venues });
+      window.Store.actions.updateSettings({ displayName: name.trim(), venues, paymentPlans });
     }
     onClose && onClose();
   };
@@ -1572,35 +1574,6 @@ function D_Modal_Settings({ embedded, onClose }) {
                 </div>
               </div>
             </div>
-            <div style={{ height: 16 }} />
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <FieldLabel>儲值方案</FieldLabel>
-              <button onClick={() => {
-                const plans = [...(venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []), { id: "cmp_" + Date.now().toString(36), label: "新方案", classes: 8, price: 2800 }];
-                patchVenue({ communityPlans: plans });
-              }} style={{ padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.surface, color: T.primary, fontSize: 11, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>+ 新增</button>
-            </div>
-            {(venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((p, pi) => (
-              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, background: T.bg, borderRadius: 10, padding: "8px 12px", border: `1px solid ${T.borderSoft}` }}>
-                <input value={p.label}
-                  onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x); patchVenue({ communityPlans: plans }); }}
-                  style={{ flex: 2, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                <div style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
-                  <input type="text" inputMode="numeric" value={p.classes}
-                    onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: parseInt(e.target.value.replace(/\D/g,"") || "1", 10) } : x); patchVenue({ communityPlans: plans }); }}
-                    style={{ width: 36, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
-                  <span style={{ fontSize: 11, color: T.inkSoft }}>堂</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 2, flex: 1 }}>
-                  <span style={{ fontSize: 11, color: T.inkSoft }}>$</span>
-                  <input type="text" inputMode="numeric" value={p.price}
-                    onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x); patchVenue({ communityPlans: plans }); }}
-                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                </div>
-                <button onClick={() => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).filter((_, i) => i !== pi); patchVenue({ communityPlans: plans }); }}
-                  style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1 }}>×</button>
-              </div>
-            ))}
           </>
         }
 
@@ -1705,6 +1678,35 @@ function D_Modal_Settings({ embedded, onClose }) {
       <div style={{ fontSize: 12, color: T.inkSoft, marginTop: 8, marginBottom: 20 }}>
         顯示在首頁「Hi, 姓名」的問候語
       </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <FieldLabel>儲值方案</FieldLabel>
+        <button onClick={() => {
+          setPaymentPlans(prev => [...prev, { id: "cmp_" + Date.now().toString(36), label: "新方案", classes: 8, price: 2800 }]);
+        }} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.surface, color: T.primary, fontSize: 12, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>+ 新增</button>
+      </div>
+      {paymentPlans.map((p, pi) => (
+        <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, background: T.surface, borderRadius: 12, padding: "10px 14px", border: `1px solid ${T.borderSoft}` }}>
+          <input value={p.label}
+            onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, label: e.target.value } : x))}
+            style={{ flex: 2, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <input type="text" inputMode="numeric" value={p.classes}
+              onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, classes: parseInt(e.target.value.replace(/\D/g,"") || "1", 10) } : x))}
+              style={{ width: 32, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
+            <span style={{ fontSize: 11, color: T.inkSoft }}>堂</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <span style={{ fontSize: 11, color: T.inkSoft }}>$</span>
+            <input type="text" inputMode="numeric" value={p.price}
+              onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x))}
+              style={{ width: 52, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+          </div>
+          <button onClick={() => setPaymentPlans(prev => prev.filter((_, i) => i !== pi))}
+            style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1 }}>×</button>
+        </div>
+      ))}
+      <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 20 }}>新增儲值時學生選擇的方案清單</div>
 
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
         <FieldLabel>場地管理</FieldLabel>
