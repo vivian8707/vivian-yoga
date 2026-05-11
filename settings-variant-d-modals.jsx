@@ -1580,31 +1580,28 @@ function D_Modal_Settings({ embedded, onClose }) {
               }} style={{ padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.surface, color: T.primary, fontSize: 11, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>+ 新增</button>
             </div>
             {(venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((p, pi) => (
-              <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8, background: T.bg, borderRadius: 10, padding: "10px 14px", border: `1px solid ${T.borderSoft}` }}>
-                <div style={{ display: "flex", alignItems: "center" }}>
-                  <input
-                    value={p.label}
-                    onChange={e => {
-                      const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x);
-                      patchVenue({ homePlans: plans });
-                    }}
-                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }}
-                  />
-                  <button onClick={() => {
-                    const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).filter((_, i) => i !== pi);
+              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <input
+                  value={p.label}
+                  onChange={e => {
+                    const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x);
                     patchVenue({ homePlans: plans });
-                  }} style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 0 0 8px", lineHeight: 1, flexShrink: 0 }}>×</button>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 12, color: T.inkSoft }}>$</span>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*"
-                    value={p.price}
-                    onChange={e => {
-                      const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x);
-                      patchVenue({ homePlans: plans });
-                    }}
-                    style={{ width: 80, background: T.surface, borderRadius: 6, border: `1px solid ${T.borderSoft}`, padding: "4px 8px", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                </div>
+                  }}
+                  style={{ flex: 1, minWidth: 0, background: T.bg, borderRadius: 8, border: `1px solid ${T.borderSoft}`, padding: "10px 12px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }}
+                />
+                <span style={{ color: T.inkSoft, fontSize: 12, flexShrink: 0 }}>$</span>
+                <input type="text" inputMode="numeric" pattern="[0-9]*"
+                  value={p.price}
+                  onChange={e => {
+                    const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x);
+                    patchVenue({ homePlans: plans });
+                  }}
+                  style={{ width: 72, background: T.bg, borderRadius: 8, border: `1px solid ${T.borderSoft}`, padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none", flexShrink: 0 }}
+                />
+                <button onClick={() => {
+                  const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).filter((_, i) => i !== pi);
+                  patchVenue({ homePlans: plans });
+                }} style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 18, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0 }}>×</button>
               </div>
             ))}
           </>
