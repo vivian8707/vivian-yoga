@@ -422,6 +422,7 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
   // ===== home: 單一學生 + 方案 =====
   const initHomePlanId = () => {
     if (!editRecord || !editRecord.attendees || !editRecord.attendees[0]) return "hp1";
+    if (editRecord.attendees[0].usedPackage) return "package";
     const ct = editRecord.attendees[0].classType;
     const vPlans = (venues.find(v => v.name === editRecord.location) || {}).homePlans || window.DEFAULT_HOME_PLANS || [];
     const found = vPlans.find(p => p.label === ct);
@@ -513,6 +514,14 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
     if (venueMode === "home") {
       const stu = allStudents.find(s => s.id === homeStudentId);
       if (!stu) return null;
+      if (homePlanId === "package") {
+        return {
+          date, location: loc, mode: "home",
+          headcount: 1, totalAmount: 0,
+          attendees: [{ studentId: stu.id, studentName: stu.name, classType: "扣堂數", amount: 0, usedPackage: true, perClassPrice: 0, count: 1 }],
+          note
+        };
+      }
       const homePlans = currentVenue.homePlans || window.DEFAULT_HOME_PLANS || [];
       let classType, price;
       if (homePlanId === "custom") {
@@ -744,7 +753,12 @@ function SkySection({ count, setCount, skyRates }) {
 function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel, setCustomLabel, customPrice, setCustomPrice }) {
   if (!student) return null;
   const plans = homePlans || window.DEFAULT_HOME_PLANS || [];
-  const allOptions = [...plans, { id: "custom", label: "自訂", price: null }];
+  const remaining = window.Store ? (window.Store.derived.studentStats(student.id).remaining || 0) : 0;
+  const allOptions = [
+    { id: "package", label: "扣堂數", price: null },
+    ...plans,
+    { id: "custom", label: "自訂", price: null },
+  ];
   return (
     <div style={{
       background: T.surface, borderRadius: 14,
@@ -767,11 +781,16 @@ function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel
               fontSize: 11.5, fontWeight: active ? 600 : 500,
               fontFamily: "inherit", cursor: "pointer", whiteSpace: "nowrap"
             }}>
-              {p.id === "custom" ? p.label : `${p.label} $${p.price.toLocaleString()}`}
+              {p.id === "package" || p.id === "custom" ? p.label : `${p.label} $${p.price.toLocaleString()}`}
             </button>
           );
         })}
       </div>
+      {planId === "package" &&
+        <div style={{ fontSize: 11, color: remaining > 0 ? T.primaryDeep : T.danger, marginTop: 8, fontWeight: 500 }}>
+          剩餘 {remaining} 堂
+        </div>
+      }
       {planId === "custom" &&
         <div style={{ marginTop: 10 }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
@@ -803,7 +822,7 @@ function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel
           </div>
         </div>
       }
-      {planId !== "custom" && (() => {
+      {planId !== "custom" && planId !== "package" && (() => {
         const p = plans.find(x => x.id === planId);
         return p ? <div style={{ fontSize: 11, color: T.primaryDeep, marginTop: 8, fontWeight: 500 }}>{p.label} ${p.price.toLocaleString()}</div> : null;
       })()}
