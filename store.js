@@ -139,10 +139,11 @@
     if (record.location === "天空" || record.location === "其他") {
       return record.totalAmount || 0;
     }
-    if (record.location === "到府") {
+    if (!record.attendees) return record.totalAmount || 0;
+    // 到府若無 usedPackage 直接用 totalAmount，有 usedPackage 走 FIFO
+    if (record.location === "到府" && !record.attendees.some(a => a.usedPackage)) {
       return record.totalAmount || 0;
     }
-    if (!record.attendees) return record.totalAmount || 0;
     const idx = _cache || buildLessonRevenueIndex();
     let sum = 0;
     record.attendees.forEach(a => {
