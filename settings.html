@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Vivian Yoga" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#f6f3ee" />
+<link rel="manifest" href="manifest-settings.json" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<title>Vivian Yoga Class</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; padding: 0; background: #f6f3ee; font-family: 'Noto Sans TC', system-ui, sans-serif; overscroll-behavior: none; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
+  #root { width: 100%; height: 100%; }
+  .vyc-scroll::-webkit-scrollbar { width: 0; height: 0; }
+  input, textarea, select { font-size: 16px !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script>
+// 獨立儲存空間 — 不共用 Vivian 的資料
+window.VYC_KEY = 'vyc.settings.v1';
+
+// 新使用者從空白開始（不載入 data.js）
+window.SEED_STUDENTS = [];
+window.SEED_RECORDS  = [];
+window.TABS = ["上課記錄", "儲值記錄", "學生管理", "收入記錄"];
+
+// 動態 getter（同 data.js）
+Object.defineProperty(window, "SAMPLE_STUDENTS", {
+  get() { return window.Store ? window.Store.getState().students : []; }
+});
+Object.defineProperty(window, "SAMPLE_RECORDS", {
+  get() {
+    const list = window.Store ? window.Store.getState().records : [];
+    const order = new Map();
+    list.forEach((r, i) => order.set(r, i));
+    return list.slice().sort((a, b) => {
+      const da = a.date || "", db = b.date || "";
+      if (da !== db) return db.localeCompare(da);
+      return (order.get(b) || 0) - (order.get(a) || 0);
+    });
+  }
+});
+Object.defineProperty(window, "SAMPLE_MONTHS", {
+  get() { return window.Store ? window.Store.derived.months() : []; }
+});
+</script>
+<script src="store.js"></script>
+<script type="text/babel" src="use-store.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="settings-variant-d.jsx"></script>
+<script type="text/babel" src="settings-variant-d-modals.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState: useStateMain } = React;
+
+const TWEAK_DEFAULTS = {
+  "chartStyle": "bar",
+  "monthCardVariant": "split-monogram"
+};
+
+function App() {
+  const [tweaks, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
+
+  return (
+    <>
+      <div style={{
+        position: "fixed", inset: 0,
+        background: "#f6f3ee",
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        display: "flex", flexDirection: "column"
+      }}>
+        <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
+          <window.VariantD
+            chartStyle={tweaks.chartStyle}
+            monthCardVariant={tweaks.monthCardVariant}
+          />
+        </div>
+      </div>
+
+      <window.TweaksPanel title="Tweaks">
+        <window.TweakSection title="圖表樣式" subtitle="收入記錄 tab 的趨勢圖">
+          <window.TweakRadio
+            label="樣式"
+            value={tweaks.chartStyle}
+            onChange={(v) => setTweak("chartStyle", v)}
+            options={[
+              { value: "area", label: "面積" },
+              { value: "line", label: "折線" },
+              { value: "bar", label: "長條" },
+            ]} />
+        </window.TweakSection>
+        <window.TweakSection title="月份總覽卡" subtitle="頂部收入卡的版面風格">
+          <window.TweakSelect
+            label="風格"
+            value={tweaks.monthCardVariant}
+            onChange={(v) => setTweak("monthCardVariant", v)}
+            options={[
+              { value: "split",            label: "① 斜線 收入/堂數" },
+              { value: "split-3col",       label: "①b 三欄 / 月份右" },
+              { value: "split-stack",      label: "①c 月份頭部 / 兩欄" },
+              { value: "split-bottom-date",label: "①d 月份右下小字" },
+              { value: "split-rule",       label: "①e 頭行序 / 下行數字" },
+              { value: "split-tiles",      label: "①f 兩個方塊" },
+              { value: "split-monogram",   label: "①g 大月份水印" },
+              { value: "split-receipt",    label: "①h 收據列" },
+              { value: "split-stamp",      label: "①i 右側圖章" },
+              { value: "receipt",          label: "② 收據式" },
+              { value: "ribbon",           label: "③ 日曆方塊" },
+              { value: "minimal",          label: "④ 極簡橫線" },
+            ]} />
+        </window.TweakSection>
+<window.TweakSection title="本機資料" subtitle="備份 / 還原">
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button onClick={() => {
+              const json = window.Store.actions.exportJSON();
+              const blob = new Blob([json], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `vyc-backup-${new Date().toISOString().slice(0,10)}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }} style={{
+              padding: "8px 14px", borderRadius: 8, border: "1px solid #d4cfc4",
+              background: "#fff", color: "#1a1a1a", fontSize: 12, cursor: "pointer", fontFamily: "inherit"
+            }}>匯出備份</button>
+            <button onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "application/json";
+              input.onchange = (e) => {
+                const f = e.target.files[0];
+                if (!f) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (window.Store.actions.importJSON(reader.result)) {
+                    alert("匯入成功");
+                  } else {
+                    alert("匯入失敗 — 格式不正確");
+                  }
+                };
+                reader.readAsText(f);
+              };
+              input.click();
+            }} style={{
+              padding: "8px 14px", borderRadius: 8, border: "1px solid #d4cfc4",
+              background: "#fff", color: "#1a1a1a", fontSize: 12, cursor: "pointer", fontFamily: "inherit"
+            }}>匯入備份</button>
+          </div>
+        </window.TweakSection>
+      </window.TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+<script>
+  // settings.html 不需要 SW — 取消現有 SW 以確保永遠取得最新檔案
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      Promise.all(regs.map(r => r.unregister())).then(() => {
+        if (regs.length > 0) location.reload();
+      });
+    });
+  }
+</script>
+</body>
+</html>
