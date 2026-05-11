@@ -1477,7 +1477,12 @@ function D_Modal_Settings({ embedded, onClose }) {
 
   const saveAll = () => {
     if (window.Store) {
-      window.Store.actions.updateSettings({ displayName: name.trim(), venues, paymentPlans });
+      const plansToSave = paymentPlans.map(p => ({
+        ...p,
+        classes: parseInt(p.classes || 1, 10) || 1,
+        price: parseInt(p.price || 0, 10) || 0,
+      }));
+      window.Store.actions.updateSettings({ displayName: name.trim(), venues, paymentPlans: plansToSave });
     }
     onClose && onClose();
   };
@@ -1678,14 +1683,14 @@ function D_Modal_Settings({ embedded, onClose }) {
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <input type="text" inputMode="numeric" value={p.classes}
-                onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, classes: parseInt(e.target.value.replace(/\D/g,"") || "1", 10) } : x))}
+                onChange={e => { const v = e.target.value.replace(/\D/g,""); setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x)); }}
                 style={{ width: 36, background: T.bg, borderRadius: 6, border: `1px solid ${T.borderSoft}`, padding: "4px 6px", textAlign: "right", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
               <span style={{ fontSize: 12, color: T.inkSoft }}>堂</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
               <span style={{ fontSize: 12, color: T.inkSoft }}>$</span>
               <input type="text" inputMode="numeric" value={p.price}
-                onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x))}
+                onChange={e => { const v = e.target.value.replace(/\D/g,""); setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x)); }}
                 style={{ width: 72, background: T.bg, borderRadius: 6, border: `1px solid ${T.borderSoft}`, padding: "4px 6px", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
             </div>
           </div>
