@@ -1676,7 +1676,7 @@ function D_Modal_Settings({ embedded, onClose }) {
           <div style={{ display: "flex", alignItems: "center" }}>
             <input value={p.label}
               onChange={e => setPaymentPlans(prev => prev.map((x, i) => i === pi ? { ...x, label: e.target.value } : x))}
-              style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+              style={{ flex: 1, minWidth: 0, background: T.bg, borderRadius: 8, border: `1px solid ${T.borderSoft}`, padding: "6px 10px", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
             <button onClick={() => setPaymentPlans(prev => prev.filter((_, i) => i !== pi))}
               style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 0 0 8px", lineHeight: 1, flexShrink: 0 }}>×</button>
           </div>
