@@ -13,6 +13,7 @@
   body { width: 100vw; height: 100vh; overflow: hidden; }
   #root { width: 100%; height: 100%; }
   .vyc-scroll::-webkit-scrollbar { width: 0; height: 0; }
+  input, textarea, select { font-size: 16px !important; }
 </style>
 </head>
 <body>
@@ -34,8 +35,8 @@ localStorage.removeItem = k => localStorage.removeItem(k === 'vyc.v1' ? 'vyc.dem
 // Pre-seed demo data into isolated key
 const DEMO_DATA = {
   students: [
-    { id: "s1", name: "美玲", location: "園頂", remaining: 8 },
-    { id: "s2", name: "雅婷", location: "園頂", remaining: 3 },
+    { id: "s1", name: "美玲", location: "社區小班", remaining: 8 },
+    { id: "s2", name: "雅婷", location: "社區小班", remaining: 3 },
     { id: "s3", name: "怡君", location: "到府",  remaining: 5 },
   ],
   records: [
@@ -49,14 +50,14 @@ const DEMO_DATA = {
     // ── May 2026 classes ──
     { id: "rm4", type: "class", date: "2026-05-08", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rm3", type: "class", date: "2026-05-06", location: "園頂", totalAmount: 1030,
+    { id: "rm3", type: "class", date: "2026-05-06", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "rm2", type: "class", date: "2026-05-03", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rm1", type: "class", date: "2026-05-01", location: "園頂", totalAmount: 1030,
+    { id: "rm1", type: "class", date: "2026-05-01", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
@@ -65,21 +66,21 @@ const DEMO_DATA = {
     // ── April 2026 classes ──
     { id: "ra6", type: "class", date: "2026-04-29", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "ra5", type: "class", date: "2026-04-24", location: "園頂", totalAmount: 1030,
+    { id: "ra5", type: "class", date: "2026-04-24", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "ra4", type: "class", date: "2026-04-22", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "ra3", type: "class", date: "2026-04-17", location: "園頂", totalAmount: 1030,
+    { id: "ra3", type: "class", date: "2026-04-17", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "ra2", type: "class", date: "2026-04-15", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "ra1", type: "class", date: "2026-04-10", location: "園頂", totalAmount: 1030,
+    { id: "ra1", type: "class", date: "2026-04-10", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
@@ -88,21 +89,21 @@ const DEMO_DATA = {
     // ── March 2026 classes ──
     { id: "rr6", type: "class", date: "2026-03-28", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rr5", type: "class", date: "2026-03-25", location: "園頂", totalAmount: 1030,
+    { id: "rr5", type: "class", date: "2026-03-25", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "rr4", type: "class", date: "2026-03-20", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rr3", type: "class", date: "2026-03-18", location: "園頂", totalAmount: 1030,
+    { id: "rr3", type: "class", date: "2026-03-18", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "rr2", type: "class", date: "2026-03-11", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rr1", type: "class", date: "2026-03-06", location: "園頂", totalAmount: 1030,
+    { id: "rr1", type: "class", date: "2026-03-06", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
@@ -111,14 +112,14 @@ const DEMO_DATA = {
     // ── February 2026 classes ──
     { id: "rf4", type: "class", date: "2026-02-25", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rf3", type: "class", date: "2026-02-20", location: "園頂", totalAmount: 1030,
+    { id: "rf3", type: "class", date: "2026-02-20", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "rf2", type: "class", date: "2026-02-13", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rf1", type: "class", date: "2026-02-06", location: "園頂", totalAmount: 1030,
+    { id: "rf1", type: "class", date: "2026-02-06", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
@@ -127,14 +128,14 @@ const DEMO_DATA = {
     // ── January 2026 classes ──
     { id: "rj4", type: "class", date: "2026-01-23", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rj3", type: "class", date: "2026-01-16", location: "園頂", totalAmount: 1030,
+    { id: "rj3", type: "class", date: "2026-01-16", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "rj2", type: "class", date: "2026-01-09", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rj1", type: "class", date: "2026-01-06", location: "園頂", totalAmount: 1030,
+    { id: "rj1", type: "class", date: "2026-01-06", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
@@ -143,14 +144,14 @@ const DEMO_DATA = {
     // ── December 2025 classes ──
     { id: "rd4", type: "class", date: "2025-12-26", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rd3", type: "class", date: "2025-12-19", location: "園頂", totalAmount: 1030,
+    { id: "rd3", type: "class", date: "2025-12-19", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
       ]},
     { id: "rd2", type: "class", date: "2025-12-12", location: "到府", totalAmount: 600,
       attendees: [{ studentId: "s3", studentName: "怡君", usedPackage: true, count: 1 }] },
-    { id: "rd1", type: "class", date: "2025-12-05", location: "園頂", totalAmount: 1030,
+    { id: "rd1", type: "class", date: "2025-12-05", location: "社區小班", totalAmount: 1030,
       attendees: [
         { studentId: "s1", studentName: "美玲", usedPackage: true, count: 1 },
         { studentId: "s2", studentName: "雅婷", usedPackage: true, count: 1 }
@@ -197,8 +198,8 @@ window.SyncStatus = {
 <script type="text/babel" src="use-store.jsx"></script>
 <script type="text/babel" src="tweaks-panel.jsx"></script>
 <script type="text/babel" src="sync-badge.jsx"></script>
-<script type="text/babel" src="variant-d.jsx"></script>
-<script type="text/babel" src="variant-d-modals.jsx"></script>
+<script type="text/babel" src="demo-variant-d.jsx"></script>
+<script type="text/babel" src="demo-variant-d-modals.jsx"></script>
 
 <script type="text/babel" data-presets="react">
 function App() {

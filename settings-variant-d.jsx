@@ -20,12 +20,30 @@ const D_TOKENS = {
   danger: "#a87878"
 };
 
-const D_LOC = {
-  "園頂": { bg: "#e1e5dc", fg: "#5b6650" },
-  "到府": { bg: "#ecdfdf", fg: "#7c5e5e" },
-  "天空": { bg: "#dee2e8", fg: "#5d6776" },
-  "台中": { bg: "#ece2d7", fg: "#7a624e" }
-};
+// Palette for up to 8 venues, indexed by colorIndex
+const VENUE_PALETTE = [
+  { bg: "#e1e5dc", fg: "#5b6650" },
+  { bg: "#ecdfdf", fg: "#7c5e5e" },
+  { bg: "#dee2e8", fg: "#5d6776" },
+  { bg: "#ece2d7", fg: "#7a624e" },
+  { bg: "#e8e0ec", fg: "#6e5e7a" },
+  { bg: "#dce8e4", fg: "#4d6e66" },
+  { bg: "#ece8dc", fg: "#7a6e4e" },
+  { bg: "#e8dce0", fg: "#7a5e66" },
+];
+window.VENUE_PALETTE = VENUE_PALETTE;
+
+function getVenueColor(name) {
+  const venues = window.Store ? (window.Store.getState().settings || {}).venues : null;
+  const list = venues || window.DEFAULT_VENUES || [];
+  const v = list.find(v => v.name === name);
+  if (v) return VENUE_PALETTE[v.colorIndex % VENUE_PALETTE.length] || VENUE_PALETTE[0];
+  return { bg: "#ebe6dc", fg: "#7a756d" };
+}
+window.getVenueColor = getVenueColor;
+
+// Legacy alias
+const D_LOC = new Proxy({}, { get(_, name) { return getVenueColor(name); } });
 
 // 月份 → 季節字
 const SEASON_CHAR = (m) => {
@@ -51,7 +69,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
     <span style={{
       fontSize: size, fontWeight: 700, letterSpacing: 0.3,
       fontFamily: "'Cormorant Garamond', 'Noto Sans TC', serif", lineHeight: 1, color
-    }}>${income.toLocaleString()}</span>
+    }}>{'$'}{income.toLocaleString()}</span>
   );
 
   if (variant === "split" || variant === "split-3col" || variant === "split-stack" || variant === "split-bottom-date" ||
@@ -284,7 +302,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
             <SerifMonth size={26} yearSize={16} />
           </div>
           <div style={{ marginTop: 6 }}>
-            <Row label="本月收入" value={`$${income.toLocaleString()}`} accent={T.primary} />
+            <Row label="本月收入" value={'$' + income.toLocaleString()} accent={T.primary} />
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               padding: "8px 0"
@@ -351,7 +369,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
           <span style={{ width: 3, height: 3, borderRadius: 2, background: T.borderSoft }} />
           <span>單堂均價 <span style={{
             color: T.ink, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", fontSize: 14
-          }}>${Math.round(income / lessons).toLocaleString()}</span></span>
+          }}>{'$'}{Math.round(income / lessons).toLocaleString()}</span></span>
         </div>
       </div>
     );
@@ -421,7 +439,7 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
 function VariantD({ chartStyle = "area", initialTab = 0, monthCardVariant = "split" }) {
   window.useStore(); // re-render on store change
   const [tab, setTab] = useStateD(initialTab);
-  const [activeModal, setActiveModal] = useStateD(null); // 'class' | 'pay' | 'addStudent' | 'history'
+  const [activeModal, setActiveModal] = useStateD(null); // 'class' | 'pay' | 'addStudent' | 'history' | 'settings'
   const [historyStudent, setHistoryStudent] = useStateD(null);
   const [editClassRecord, setEditClassRecord] = useStateD(null);
   const [editPaymentRecord, setEditPaymentRecord] = useStateD(null);
@@ -471,17 +489,19 @@ function VariantD({ chartStyle = "area", initialTab = 0, monthCardVariant = "spl
       {/* Header */}
       <div style={{ background: T.bg, padding: "8px 22px 14px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: 0.5 }}>Hi, Vivian</div>
+          <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: 0.5 }}>
+            Hi, {(window.Store && window.Store.getState().settings && window.Store.getState().settings.displayName) || "您好"}
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {window.SyncBadge && <window.SyncBadge T={T} />}
-            <div style={{
-              width: 42, height: 42, borderRadius: 21,
+            <button onClick={() => setActiveModal("settings")} style={{
+              width: 42, height: 42, borderRadius: 21, border: `1px solid ${T.border}`,
               background: `linear-gradient(135deg, ${T.primarySoft}, ${T.accentSoft})`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              border: `1px solid ${T.border}`
+              cursor: "pointer", padding: 0
             }}>
               <span style={{ width: 18, height: 18, borderRadius: 9, background: T.primary, opacity: 0.6 }} />
-            </div>
+            </button>
           </div>
         </div>
 
@@ -538,17 +558,19 @@ function VariantD({ chartStyle = "area", initialTab = 0, monthCardVariant = "spl
       <div onClick={closeModal} style={{
         position: "absolute", inset: 0, background: "rgba(20,18,15,0.42)",
         zIndex: 20, display: "flex", alignItems: "flex-end",
+        overflow: "hidden",
         animation: "dOverlayIn .2s ease"
       }}>
         <div onClick={(e) => e.stopPropagation()} style={{
           width: "100%", background: T.bg,
           borderTopLeftRadius: 24, borderTopRightRadius: 24,
-          maxHeight: "92%", overflowY: "auto",
+          maxHeight: "92%", overflow: "hidden",
           animation: "dSheetIn .28s cubic-bezier(.2,.8,.3,1)"
         }}>
           {activeModal === "class" && <window.D_Modal_Class onClose={closeModal} embedded editRecord={editClassRecord} />}
           {activeModal === "pay" && <window.D_Modal_Payment onClose={closeModal} embedded editRecord={editPaymentRecord} />}
           {activeModal === "addStudent" && <window.D_Modal_AddStudent onClose={closeModal} embedded />}
+          {activeModal === "settings" && <window.D_Modal_Settings onClose={closeModal} embedded />}
         </div>
       </div>
       }
@@ -717,7 +739,7 @@ function D_ClassList({ T, onEdit }) {
               <div style={{ alignSelf: "center", textAlign: "right" }}>
                 <div style={{ fontSize: 18, fontWeight: 600, color: T.accent,
                   fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
-                  ${displayTotal(r).toLocaleString()}
+                  {displayTotal(r).toLocaleString()}
                 </div>
               </div>
               <button
@@ -740,18 +762,18 @@ function D_ClassList({ T, onEdit }) {
                   <span style={{ minWidth: 56, fontWeight: 500 }}>{a.studentName}</span>
                   <span style={{ color: T.inkSoft, fontSize: 11 }}>
                     {a.usedPackage
-                      ? `${a.classType || "扣堂數"} ×${a.count || 1}`
-                      : `${a.classType || ""}${(a.count || 1) > 1 ? ` ×${a.count}` : ""}`}
+                      ? `${a.classType || "扣堂數"} x${a.count || 1}`
+                      : `${a.classType || ""}${(a.count || 1) > 1 ? ` x${a.count}` : ""}`}
                   </span>
                   <span style={{
                     marginLeft: "auto", fontWeight: 400, color: T.primary,
                     fontFamily: "'Cormorant Garamond', serif", fontSize: 13
                   }}>
                     {(() => {
-                      if (!a.usedPackage) return a.amount > 0 ? `$${a.amount.toLocaleString()}` : "—";
+                      if (!a.usedPackage) return a.amount > 0 ? '$' + a.amount.toLocaleString() : "—";
                       const rev = lessonIdx[r.id + ":" + a.studentId];
                       const amt = rev ? rev.amount : 0;
-                      return amt > 0 ? `$${amt.toLocaleString()}` : "—";
+                      return amt > 0 ? '$' + amt.toLocaleString() : "—";
                     })()}
                   </span>
                 </div>
@@ -822,7 +844,7 @@ function D_PayList({ T, onEdit }) {
               <div style={{
                 fontSize: 18, fontWeight: 600, color: T.accent,
                 fontFamily: "'Cormorant Garamond', serif", lineHeight: 1
-              }}>${r.amount.toLocaleString()}</div>
+              }}>{'$'}{r.amount.toLocaleString()}</div>
             </div>
           </div>);
       })}
@@ -1048,12 +1070,12 @@ function D_Income({ T, chartStyle }) {
         <div style={{
           fontSize: 32, fontWeight: 600, marginTop: 6,
           fontFamily: "'Cormorant Garamond', serif", letterSpacing: 1
-        }}>${yearTotal.toLocaleString()}</div>
+        }}>{'$'}{yearTotal.toLocaleString()}</div>
         <div style={{ display: "flex", gap: 24, marginTop: 14, fontSize: 11, opacity: 0.95 }}>
           <div>
             <div style={{ opacity: 0.75 }}>{sel.key.slice(5)}月</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>${sel.value.toLocaleString()}</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{'$'}{sel.value.toLocaleString()}</span>
               <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(sel.key)} 堂</span>
             </div>
           </div>
@@ -1061,7 +1083,7 @@ function D_Income({ T, chartStyle }) {
           <div>
             <div style={{ opacity: 0.75 }}>{prev.key.slice(5)}月</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>${prev.value.toLocaleString()}</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{'$'}{prev.value.toLocaleString()}</span>
               <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(prev.key)} 堂</span>
             </div>
           </div>
@@ -1171,7 +1193,7 @@ function D_Income({ T, chartStyle }) {
               <div style={{
                 fontSize: 16, fontWeight: 600,
                 fontFamily: "'Cormorant Garamond', serif", color: T.ink, flex: 1
-              }}>${m.value.toLocaleString()}</div>
+              }}>{'$'}{m.value.toLocaleString()}</div>
               {diff != null &&
               <div style={{
                 fontSize: 11, fontWeight: 600,

@@ -1,18 +1,47 @@
-// Lightweight localStorage-backed store with subscriber model.
-// Usage:
-//   const s = window.Store.getState();
-//   const unsub = window.Store.subscribe(() => render());
-//   window.Store.actions.addClass({...});
-
 (function () {
-  const KEY = "vyc.v1";
+  const KEY = window.VYC_KEY || "vyc.v1";
   const listeners = new Set();
+
+  const DEFAULT_HOME_PLANS = [
+    { id: "hp1", label: "一對一", price: 1800 },
+    { id: "hp2", label: "一對二", price: 2000 },
+    { id: "hp3", label: "一對三", price: 1500 },
+  ];
+  const DEFAULT_COMMUNITY_PLANS = [
+    { id: "cmp1", label: "5 堂",  classes: 5,  price: 1800 },
+    { id: "cmp2", label: "10 堂", classes: 10, price: 3500 },
+  ];
+  const DEFAULT_SKY_RATES = [
+    [2,600],[3,800],[4,900],[5,1000],[6,1200],[7,1400],[8,1600],[9,1800],
+    [10,2200],[11,2500],[12,2800],[13,3100],[14,3400],[15,3700],[16,4000]
+  ];
+  const DEFAULT_VENUES = [
+    { id: "v1", name: "小班課", mode: "community", colorIndex: 0, singlePrice: 400, trialPrice: 200,
+      communityPlans: DEFAULT_COMMUNITY_PLANS.map(p => ({...p})),
+    },
+    { id: "v2", name: "到府",   mode: "home",      colorIndex: 1,
+      homePlans: DEFAULT_HOME_PLANS.map(p => ({...p})),
+    },
+    { id: "v3", name: "教室",   mode: "sky",       colorIndex: 2,
+      skyRates: DEFAULT_SKY_RATES.map(r => [...r]),
+    },
+    { id: "v4", name: "其他",   mode: "manual",    colorIndex: 4 },
+  ];
+  window.DEFAULT_VENUES         = DEFAULT_VENUES;
+  window.DEFAULT_HOME_PLANS     = DEFAULT_HOME_PLANS;
+  window.DEFAULT_COMMUNITY_PLANS = DEFAULT_COMMUNITY_PLANS;
+  window.DEFAULT_SKY_RATES      = DEFAULT_SKY_RATES;
+
+  function defaultVenues() {
+    return DEFAULT_VENUES.map(v => JSON.parse(JSON.stringify(v)));
+  }
 
   function seed() {
     return {
       students: window.SEED_STUDENTS.slice(),
       records: window.SEED_RECORDS.slice(),
       customPlans: [],
+      settings: { displayName: "", venues: defaultVenues(), paymentPlans: DEFAULT_COMMUNITY_PLANS.map(p => ({...p})) },
     };
   }
 
@@ -23,6 +52,9 @@
       const obj = JSON.parse(raw);
       if (!obj.students || !obj.records) return seed();
       if (!obj.customPlans) obj.customPlans = [];
+      if (!obj.settings) obj.settings = { displayName: "", venues: defaultVenues() };
+      if (!obj.settings.venues) obj.settings.venues = defaultVenues();
+      if (!obj.settings.paymentPlans) obj.settings.paymentPlans = DEFAULT_COMMUNITY_PLANS.map(p => ({...p}));
       return obj;
     } catch (e) {
       return seed();
@@ -42,7 +74,7 @@
   function uid(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
   // ===== FIFO 扣堂折算: 對每位學生時序模擬，回傳每筆 class attendee 的折算金額 =====
-  // 結果結構: { [recordId+":"+studentId]: { perPrice, amount, count } }
+  // 結果結構: { [recordId+":"+ studentId]: { perPrice, amount, count } }
   function buildLessonRevenueIndex() {
     const idx = {};
     // group events by student
@@ -104,13 +136,14 @@
   // 對單筆上課紀錄計算「顯示用總金額」(含扣堂折算)
   function classDisplayTotal(record, _cache) {
     if (!record || record.type !== "class") return 0;
-    if (record.location === "天空" || record.location === "台中" || record.location === "其他") {
-      return record.totalAmount || 0;
-    }
-    if (record.location === "到府") {
+    if (record.location === "天空" || record.location === "其他") {
       return record.totalAmount || 0;
     }
     if (!record.attendees) return record.totalAmount || 0;
+    // 到府若無 usedPackage 直接用 totalAmount，有 usedPackage 走 FIFO
+    if (record.location === "到府" && !record.attendees.some(a => a.usedPackage)) {
+      return record.totalAmount || 0;
+    }
     const idx = _cache || buildLessonRevenueIndex();
     let sum = 0;
     record.attendees.forEach(a => {
@@ -122,7 +155,7 @@
 
   // ===== derived =====
   function months() {
-    // 月收入 = 該月所有上課的「實收金額」總和 (含天空/台中/其他/到府)
+    // 月收入 = 該月所有上課的「實收金額」總和 (含天空/其他/到府)
     const idx = buildLessonRevenueIndex();
     const map = {};
     state.records.forEach(r => {
@@ -295,6 +328,10 @@
       commit();
     },
     reset() { state = seed(); commit(); },
+    updateSettings(patch) {
+      state.settings = Object.assign({}, state.settings || {}, patch);
+      commit();
+    },
     addCustomPlan(plan) {
       // dedupe by name+classes+price
       const exists = (state.customPlans || []).some(p =>
@@ -306,6 +343,19 @@
     },
     removeCustomPlan(id) {
       state.customPlans = (state.customPlans || []).filter(p => p.id !== id);
+      commit();
+    },
+    updateVenue(id, patch) {
+      const v = (state.settings.venues || []).find(v => v.id === id);
+      if (v) { Object.assign(v, patch); commit(); }
+    },
+    addVenue(venue) {
+      if (!state.settings.venues) state.settings.venues = [];
+      state.settings.venues.push(Object.assign({ id: uid("v") }, venue));
+      commit();
+    },
+    removeVenue(id) {
+      state.settings.venues = (state.settings.venues || []).filter(v => v.id !== id);
       commit();
     },
     importJSON(json) {
