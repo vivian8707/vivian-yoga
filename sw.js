@@ -1,5 +1,5 @@
 // Service Worker — 快取本地檔案，讓 App 在網路不穩時也能使用
-const CACHE = "vyc-v4";
+const CACHE = "vyc-v5";
 
 const LOCAL_ASSETS = [
   "./",
@@ -10,8 +10,8 @@ const LOCAL_ASSETS = [
   "./use-store.jsx",
   "./tweaks-panel.jsx",
   "./sync-badge.jsx",
-  "./variant-d.jsx",
-  "./variant-d-modals.jsx",
+  "./settings-variant-d.jsx",
+  "./settings-variant-d-modals.jsx",
   "./manifest.json",
   "./icon.svg",
 ];
