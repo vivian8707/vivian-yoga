@@ -445,6 +445,10 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
     const vPlans = (venues.find(v => v.name === editRecord.location) || {}).homePlans || window.DEFAULT_HOME_PLANS || [];
     return vPlans.find(p => p.label === ct) ? 1600 : (editRecord.totalAmount || 1600);
   });
+  const [homePackageCount, setHomePackageCount] = useStateMod(
+    editRecord && editRecord.attendees && editRecord.attendees[0] && editRecord.attendees[0].usedPackage
+      ? (editRecord.attendees[0].count || 1) : 1
+  );
 
   // ===== sky / manual =====
   const [headcount, setHeadcount] = useStateMod(
@@ -517,8 +521,8 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       if (homePlanId === "package") {
         return {
           date, location: loc, mode: "home",
-          headcount: 1, totalAmount: 0,
-          attendees: [{ studentId: stu.id, studentName: stu.name, classType: "扣堂數", amount: 0, usedPackage: true, perClassPrice: 0, count: 1 }],
+          headcount: homePackageCount, totalAmount: 0,
+          attendees: [{ studentId: stu.id, studentName: stu.name, classType: "扣堂數", amount: 0, usedPackage: true, perClassPrice: 0, count: homePackageCount }],
           note
         };
       }
@@ -643,6 +647,8 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
                   homePlans={homePlans}
                   planId={homePlanId}
                   onChangePlan={setHomePlanId}
+                  packageCount={homePackageCount}
+                  setPackageCount={setHomePackageCount}
                   customLabel={homeCustomLabel}
                   setCustomLabel={setHomeCustomLabel}
                   customPrice={homeCustomPrice}
@@ -750,7 +756,7 @@ function SkySection({ count, setCount, skyRates }) {
 }
 
 // ====== 到府學生卡 (一對一/二/三方案) ======
-function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel, setCustomLabel, customPrice, setCustomPrice }) {
+function HomeStudentCard({ student, homePlans, planId, onChangePlan, packageCount, setPackageCount, customLabel, setCustomLabel, customPrice, setCustomPrice }) {
   if (!student) return null;
   const plans = homePlans || window.DEFAULT_HOME_PLANS || [];
   const remaining = window.Store ? (window.Store.derived.studentStats(student.id).remaining || 0) : 0;
@@ -787,24 +793,24 @@ function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel
         })}
       </div>
       {planId === "package" &&
-        <div style={{ fontSize: 11, color: remaining > 0 ? T.primaryDeep : T.danger, marginTop: 8, fontWeight: 500 }}>
-          剩餘 {remaining} 堂
+        <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontSize: 11, color: remaining > 0 ? T.primaryDeep : T.danger, fontWeight: 500 }}>剩餘 {remaining} 堂</span>
+          <Stepper value={packageCount} onChange={setPackageCount} suffix="堂" />
         </div>
       }
       {planId === "custom" &&
         <div style={{ marginTop: 10 }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            <input
-              value={customLabel}
-              onChange={e => setCustomLabel(e.target.value)}
-              placeholder="方案名稱(選填)"
-              style={{
-                flex: 1, background: T.bg, borderRadius: 8,
-                border: `1px solid ${T.border}`, padding: "8px 10px",
-                fontSize: 13, color: T.ink, fontFamily: "inherit", outline: "none"
-              }}
-            />
-          </div>
+          <input
+            value={customLabel}
+            onChange={e => setCustomLabel(e.target.value)}
+            placeholder="方案名稱(選填)"
+            style={{
+              width: "100%", boxSizing: "border-box", marginBottom: 8,
+              background: T.bg, borderRadius: 8,
+              border: `1px solid ${T.border}`, padding: "8px 10px",
+              fontSize: 13, color: T.ink, fontFamily: "inherit", outline: "none"
+            }}
+          />
           <div style={{
             background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8,
             padding: "6px 10px", display: "flex", alignItems: "center", gap: 6
