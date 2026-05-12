@@ -666,12 +666,13 @@ function D_Modal_Class({ initialLoc = "園頂", embedded, onClose, editRecord })
           }}>
             <span style={{ color: T.inkSoft, fontSize: 14 }}>$</span>
             <input type="text" inputMode="numeric" pattern="[0-9]*"
-              value={manualAmount}
+              value={manualAmount || ""}
               onChange={(e) => setManualAmount(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
               style={{
                 flex: 1, minWidth: 0, width: 0, border: "none", outline: "none",
                 background: "transparent", fontSize: 18, fontWeight: 700,
-                color: T.ink, fontFamily: "inherit"
+                color: T.ink, fontFamily: "'Cormorant Garamond', serif",
+                WebkitAppearance: "none"
               }}
             />
           </div>
@@ -1062,7 +1063,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                   <div style={{
                     flex: 1, background: T.surface, borderRadius: 10,
                     border: `1px solid ${T.border}`, padding: "8px 12px",
-                    display: "flex", alignItems: "center", justifyContent: "space-between"
+                    display: "flex", alignItems: "center"
                   }}>
                     <Stepper value={cClasses} onChange={setCClasses} suffix="堂" />
                   </div>
@@ -1083,7 +1084,8 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
                         flex: 1, minWidth: 0,
                         border: "none", outline: "none", background: "transparent",
                         fontSize: 14, fontWeight: 600, color: T.ink,
-                        fontFamily: "inherit", WebkitAppearance: "none"
+                        fontFamily: "'Cormorant Garamond', serif",
+                        WebkitAppearance: "none"
                       }}
                     />
                   </div>

@@ -7,7 +7,7 @@
 
 (function () {
   const ENDPOINT = "https://script.google.com/macros/s/AKfycby-TYIyBNFa51N4NzYGhkO5YUpRw0eVmzgRzEaDdLYO2S-px5tW3QscX36XU7K5e8dA0A/exec";
-  const KEY = window.VYC_KEY || "vyc.v1";
+  const KEY = "vyc.v1";
   const DEBOUNCE_MS = 1200;
   const POLL_MS = 30000; // 每 30 秒輪詢一次
 
@@ -29,6 +29,7 @@
 
   // --- Network ---
   async function pullNow() {
+    // 本地有待上傳的變更時，不以雲端舊資料覆蓋，避免新增記錄瞬間消失
     if (hasPendingChanges || pushing) return;
     setStatus("syncing", "下載最新資料…");
     try {
@@ -42,8 +43,11 @@
         setStatus("synced", "已同步");
         return;
       }
-      // 若在 fetch 期間有新的本機變更，放棄覆蓋
-      if (hasPendingChanges || pushing) { setStatus("synced", "已同步"); return; }
+      // fetch 期間若產生新的本地變更，同樣不覆蓋
+      if (hasPendingChanges || pushing) {
+        setStatus("synced", "已同步");
+        return;
+      }
       // 寫入 localStorage 並讓 store 重新載入
       localStorage.setItem(KEY, JSON.stringify(data));
       if (window.Store && window.Store._reload) window.Store._reload();
