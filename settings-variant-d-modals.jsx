@@ -128,7 +128,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
       <div style={{
         width: "100%", background: T.surface,
         display: "flex", flexDirection: "column",
-        maxHeight: "92vh", ...dragStyle
+        maxHeight: "92vh", overflow: "hidden", ...dragStyle
       }}>
         <div {...grabberHandlers} style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", cursor: "grab", touchAction: "none" }}>
           <div style={{ width: 38, height: 4, borderRadius: 2, background: T.border }} />
@@ -422,6 +422,7 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
   // ===== home: 單一學生 + 方案 =====
   const initHomePlanId = () => {
     if (!editRecord || !editRecord.attendees || !editRecord.attendees[0]) return "hp1";
+    if (editRecord.attendees[0].usedPackage) return "package";
     const ct = editRecord.attendees[0].classType;
     const vPlans = (venues.find(v => v.name === editRecord.location) || {}).homePlans || window.DEFAULT_HOME_PLANS || [];
     const found = vPlans.find(p => p.label === ct);
@@ -432,6 +433,10 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       ? editRecord.attendees[0].studentId : null
   );
   const [homePlanId, setHomePlanId] = useStateMod(initHomePlanId());
+  const [homePackageCount, setHomePackageCount] = useStateMod(
+    editRecord && editRecord.attendees && editRecord.attendees[0] && editRecord.attendees[0].usedPackage
+      ? (editRecord.attendees[0].count || 1) : 1
+  );
   const [homeCustomLabel, setHomeCustomLabel] = useStateMod(() => {
     if (!editRecord || !editRecord.attendees || !editRecord.attendees[0]) return "";
     const ct = editRecord.attendees[0].classType;
@@ -514,6 +519,14 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       const stu = allStudents.find(s => s.id === homeStudentId);
       if (!stu) return null;
       const homePlans = currentVenue.homePlans || window.DEFAULT_HOME_PLANS || [];
+      if (homePlanId === "package") {
+        return {
+          date, location: loc, mode: "home",
+          headcount: homePackageCount, totalAmount: 0,
+          attendees: [{ studentId: stu.id, studentName: stu.name, classType: "扣堂數", amount: 0, usedPackage: true, perClassPrice: 0, count: homePackageCount }],
+          note
+        };
+      }
       let classType, price;
       if (homePlanId === "custom") {
         classType = (homeCustomLabel || "").trim() || "自訂";
@@ -634,6 +647,8 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
                   homePlans={homePlans}
                   planId={homePlanId}
                   onChangePlan={setHomePlanId}
+                  packageCount={homePackageCount}
+                  setPackageCount={setHomePackageCount}
                   customLabel={homeCustomLabel}
                   setCustomLabel={setHomeCustomLabel}
                   customPrice={homeCustomPrice}
@@ -741,10 +756,15 @@ function SkySection({ count, setCount, skyRates }) {
 }
 
 // ====== 到府學生卡 (一對一/二/三方案) ======
-function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel, setCustomLabel, customPrice, setCustomPrice }) {
+function HomeStudentCard({ student, homePlans, planId, onChangePlan, packageCount, setPackageCount, customLabel, setCustomLabel, customPrice, setCustomPrice }) {
   if (!student) return null;
   const plans = homePlans || window.DEFAULT_HOME_PLANS || [];
-  const allOptions = [...plans, { id: "custom", label: "自訂", price: null }];
+  const remaining = window.Store ? (window.Store.derived.studentStats(student.id).remaining || 0) : 0;
+  const allOptions = [
+    { id: "package", label: "扣堂數", price: null },
+    ...plans,
+    { id: "custom", label: "自訂", price: null },
+  ];
   return (
     <div style={{
       background: T.surface, borderRadius: 14,
@@ -767,11 +787,17 @@ function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel
               fontSize: 11.5, fontWeight: active ? 600 : 500,
               fontFamily: "inherit", cursor: "pointer", whiteSpace: "nowrap"
             }}>
-              {p.id === "custom" ? p.label : `${p.label} $${p.price.toLocaleString()}`}
+              {p.id === "package" ? p.label : p.id === "custom" ? p.label : `${p.label} $${p.price.toLocaleString()}`}
             </button>
           );
         })}
       </div>
+      {planId === "package" &&
+        <div style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontSize: 11, color: remaining > 0 ? T.primaryDeep : T.danger, fontWeight: 500 }}>剩餘 {remaining} 堂</span>
+          <Stepper value={packageCount} onChange={setPackageCount} suffix="堂" />
+        </div>
+      }
       {planId === "custom" &&
         <div style={{ marginTop: 10 }}>
           <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
@@ -803,7 +829,7 @@ function HomeStudentCard({ student, homePlans, planId, onChangePlan, customLabel
           </div>
         </div>
       }
-      {planId !== "custom" && (() => {
+      {planId !== "custom" && planId !== "package" && (() => {
         const p = plans.find(x => x.id === planId);
         return p ? <div style={{ fontSize: 11, color: T.primaryDeep, marginTop: 8, fontWeight: 500 }}>{p.label} ${p.price.toLocaleString()}</div> : null;
       })()}
@@ -1475,7 +1501,19 @@ function D_Modal_Settings({ embedded, onClose }) {
 
   const saveAll = () => {
     if (window.Store) {
-      window.Store.actions.updateSettings({ displayName: name.trim(), venues });
+      const parsedVenues = venues.map(v => ({
+        ...v,
+        communityPlans: (v.communityPlans || []).map(p => ({
+          ...p,
+          classes: parseInt(p.classes || 1, 10) || 1,
+          price: parseInt(p.price || 0, 10) || 0,
+        })),
+        homePlans: (v.homePlans || []).map(p => ({
+          ...p,
+          price: parseInt(p.price || 0, 10) || 0,
+        })),
+      }));
+      window.Store.actions.updateSettings({ displayName: name.trim(), venues: parsedVenues });
     }
     onClose && onClose();
   };
@@ -1622,8 +1660,6 @@ function D_Modal_Settings({ embedded, onClose }) {
             {(venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((p, pi) => (
               <div key={p.id} style={{
                 display: "flex", alignItems: "center", gap: 8, marginBottom: 8,
-                background: T.bg, borderRadius: 10, padding: "8px 12px",
-                border: `1px solid ${T.borderSoft}`
               }}>
                 <input
                   value={p.label}
@@ -1632,20 +1668,24 @@ function D_Modal_Settings({ embedded, onClose }) {
                     patchVenue({ homePlans: plans });
                   }}
                   style={{
-                    flex: 2, background: "transparent", border: "none", outline: "none",
-                    fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit"
+                    flex: 1, minWidth: 0, background: T.bg, borderRadius: 8,
+                    border: `1px solid ${T.borderSoft}`, padding: "10px 12px",
+                    fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none"
                   }}
                 />
-                <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
+                <span style={{ color: T.inkSoft, fontSize: 12, flexShrink: 0 }}>$</span>
                 <input type="text" inputMode="numeric" pattern="[0-9]*"
                   value={p.price}
                   onChange={e => {
-                    const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((x, i) => i === pi ? { ...x, price: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) } : x);
+                    const v = e.target.value.replace(/\D/g,"");
+                    const plans = (venue.homePlans || window.DEFAULT_HOME_PLANS || []).map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x);
                     patchVenue({ homePlans: plans });
                   }}
                   style={{
-                    flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none",
-                    fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit"
+                    width: 72, flexShrink: 0, background: T.bg, borderRadius: 8,
+                    border: `1px solid ${T.borderSoft}`, padding: "10px 8px",
+                    textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink,
+                    fontFamily: "inherit", outline: "none"
                   }}
                 />
                 <button onClick={() => {
