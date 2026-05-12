@@ -1626,7 +1626,7 @@ function D_Modal_Settings({ embedded, onClose }) {
                   <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, borderRight: `1px solid ${T.borderSoft}`, padding: "10px 12px" }}>
                     <input type="text" inputMode="numeric" value={p.classes}
                       onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
-                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
+                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
                     <span style={{ fontSize: 11, color: T.inkSoft, flexShrink: 0 }}>堂</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, padding: "10px 12px" }}>
