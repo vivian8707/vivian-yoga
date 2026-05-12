@@ -1588,19 +1588,19 @@ function D_Modal_Settings({ embedded, onClose }) {
           <>
             <div style={{ height: 16 }} />
             <FieldLabel>金額設定</FieldLabel>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
                 { key: "singlePrice", label: "單堂", val: venue.singlePrice ?? 400 },
                 { key: "trialPrice",  label: "體驗", val: venue.trialPrice ?? 200 },
               ].map(({ key, label, val }) => (
-                <div key={key} style={{ background: T.surface, borderRadius: 8, padding: "10px 12px", border: `1px solid ${T.border}`, overflow: "hidden" }}>
-                  <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>{label}</div>
+                <div key={key} style={{ background: T.bg, borderRadius: 8, padding: "12px 14px", border: `1px solid ${T.borderSoft}`, display: "flex", alignItems: "center", justifyContent: "space-between", overflow: "hidden" }}>
+                  <span style={{ fontSize: 13, color: T.inkSoft }}>{label}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
                     <input type="text" inputMode="numeric" pattern="[0-9]*"
                       value={val}
                       onChange={e => patchVenue({ [key]: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
-                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+                      style={{ width: 60, background: "transparent", border: "none", outline: "none", fontSize: 16, fontWeight: 700, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
                   </div>
                 </div>
               ))}
