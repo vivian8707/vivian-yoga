@@ -1589,26 +1589,21 @@ function D_Modal_Settings({ embedded, onClose }) {
             <div style={{ height: 16 }} />
             <FieldLabel>金額設定</FieldLabel>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-              <div style={{ background: T.bg, borderRadius: 8, padding: "8px 12px", border: `1px solid ${T.borderSoft}`, overflow: "hidden" }}>
-                <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>單堂</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*"
-                    value={venue.singlePrice ?? 400}
-                    onChange={e => patchVenue({ singlePrice: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
-                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+              {[
+                { key: "singlePrice", label: "單堂", val: venue.singlePrice ?? 400 },
+                { key: "trialPrice",  label: "體驗", val: venue.trialPrice ?? 200 },
+              ].map(({ key, label, val }) => (
+                <div key={key} style={{ background: T.surface, borderRadius: 8, padding: "10px 12px", border: `1px solid ${T.border}`, overflow: "hidden" }}>
+                  <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>{label}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*"
+                      value={val}
+                      onChange={e => patchVenue({ [key]: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
+                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
+                  </div>
                 </div>
-              </div>
-              <div style={{ background: T.bg, borderRadius: 8, padding: "8px 12px", border: `1px solid ${T.borderSoft}`, overflow: "hidden" }}>
-                <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 4 }}>體驗</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
-                  <input type="text" inputMode="numeric" pattern="[0-9]*"
-                    value={venue.trialPrice ?? 200}
-                    onChange={e => patchVenue({ trialPrice: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
-                    style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                </div>
-              </div>
+              ))}
             </div>
             <div style={{ height: 16 }} />
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -1669,7 +1664,7 @@ function D_Modal_Settings({ embedded, onClose }) {
                   }}
                   style={{
                     flex: 1, minWidth: 0, background: T.surface, borderRadius: 8,
-                    border: `1px solid ${T.borderSoft}`, padding: "10px 12px",
+                    border: `1px solid ${T.border}`, padding: "10px 12px",
                     fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none"
                   }}
                 />
@@ -1706,8 +1701,8 @@ function D_Modal_Settings({ embedded, onClose }) {
               {(venue.skyRates || window.DEFAULT_SKY_RATES || []).map(([n, price], ri) => (
                 <div key={n} style={{
                   display: "flex", alignItems: "center", gap: 6,
-                  background: T.bg, borderRadius: 8, padding: "6px 10px",
-                  border: `1px solid ${T.borderSoft}`, overflow: "hidden"
+                  background: T.surface, borderRadius: 8, padding: "6px 10px",
+                  border: `1px solid ${T.border}`, overflow: "hidden"
                 }}>
                   <span style={{ fontSize: 12, color: T.inkSoft, minWidth: 24 }}>{n}人</span>
                   <span style={{ color: T.inkSoft, fontSize: 11 }}>$</span>
