@@ -1618,12 +1618,12 @@ function D_Modal_Settings({ embedded, onClose }) {
                   style={{ flex: 1, minWidth: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "10px 12px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
                 <input type="text" inputMode="numeric" value={p.classes}
                   onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
-                  style={{ width: 36, flexShrink: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "10px 6px", textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
+                  style={{ width: 32, flexShrink: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "10px 6px", textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
                 <span style={{ color: T.inkSoft, fontSize: 12, flexShrink: 0 }}>堂</span>
                 <span style={{ color: T.inkSoft, fontSize: 12, flexShrink: 0 }}>$</span>
                 <input type="text" inputMode="numeric" value={p.price}
                   onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
-                  style={{ width: 60, flexShrink: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
+                  style={{ width: 72, flexShrink: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "10px 8px", textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
                 <button onClick={() => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).filter((_, i) => i !== pi); patchVenue({ communityPlans: plans }); }}
                   style={{ padding: 0, width: 22, height: 22, borderRadius: 11, border: `1px solid ${T.border}`, background: "transparent", color: T.inkSoft, fontSize: 14, cursor: "pointer", flexShrink: 0, lineHeight: 1 }}>×</button>
               </div>
