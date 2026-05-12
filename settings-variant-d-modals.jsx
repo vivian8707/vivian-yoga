@@ -1628,13 +1628,13 @@ function D_Modal_Settings({ embedded, onClose }) {
                     style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0 }}>×</button>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 2, flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 10px" }}>
                     <input type="text" inputMode="numeric" value={p.classes}
                       onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
-                      style={{ width: 40, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
+                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
                     <span style={{ fontSize: 11, color: T.inkSoft, flexShrink: 0 }}>堂</span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 2, flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 10px" }}>
                     <span style={{ fontSize: 11, color: T.inkSoft, flexShrink: 0 }}>$</span>
                     <input type="text" inputMode="numeric" value={p.price}
                       onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
@@ -1668,7 +1668,7 @@ function D_Modal_Settings({ embedded, onClose }) {
                     patchVenue({ homePlans: plans });
                   }}
                   style={{
-                    flex: 1, minWidth: 0, background: T.bg, borderRadius: 8,
+                    flex: 1, minWidth: 0, background: T.surface, borderRadius: 8,
                     border: `1px solid ${T.borderSoft}`, padding: "10px 12px",
                     fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none"
                   }}
@@ -1682,8 +1682,8 @@ function D_Modal_Settings({ embedded, onClose }) {
                     patchVenue({ homePlans: plans });
                   }}
                   style={{
-                    width: 72, flexShrink: 0, background: T.bg, borderRadius: 8,
-                    border: `1px solid ${T.borderSoft}`, padding: "10px 8px",
+                    width: 72, flexShrink: 0, background: T.surface, borderRadius: 8,
+                    border: `1px solid ${T.border}`, padding: "10px 8px",
                     textAlign: "right", fontSize: 13, fontWeight: 600, color: T.ink,
                     fontFamily: "inherit", outline: "none"
                   }}
