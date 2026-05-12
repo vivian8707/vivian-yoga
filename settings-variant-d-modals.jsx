@@ -1588,7 +1588,7 @@ function D_Modal_Settings({ embedded, onClose }) {
           <>
             <div style={{ height: 16 }} />
             <FieldLabel>金額設定</FieldLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
               {[
                 { key: "singlePrice", label: "單堂", val: venue.singlePrice ?? 400 },
                 { key: "trialPrice",  label: "體驗", val: venue.trialPrice ?? 200 },
