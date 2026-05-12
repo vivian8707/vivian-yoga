@@ -128,7 +128,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
       <div style={{
         width: "100%", background: T.surface,
         display: "flex", flexDirection: "column",
-        maxHeight: "92vh", overflow: "hidden", ...dragStyle
+        maxHeight: "92vh", overflowX: "hidden", ...dragStyle
       }}>
         <div {...grabberHandlers} style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", cursor: "grab", touchAction: "none" }}>
           <div style={{ width: 38, height: 4, borderRadius: 2, background: T.border }} />
