@@ -140,7 +140,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
           {children}
         </div>
         <div style={{
-          padding: "12px 22px 22px", borderTop: `1px solid ${T.borderSoft}`,
+          padding: "16px 22px", borderTop: `1px solid ${T.borderSoft}`,
           display: "flex", gap: 10, background: T.surface
         }}>
           {showDelete &&
@@ -207,7 +207,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
         </div>
 
         <div style={{
-          padding: "12px 22px 22px", borderTop: `1px solid ${T.borderSoft}`,
+          padding: "16px 22px", borderTop: `1px solid ${T.borderSoft}`,
           display: "flex", gap: 10, background: T.surface
         }}>
           {showDelete &&
