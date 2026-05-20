@@ -565,6 +565,7 @@ function VariantD({ chartStyle = "area", initialTab = 0, monthCardVariant = "spl
           width: "100%", background: T.bg,
           borderTopLeftRadius: 24, borderTopRightRadius: 24,
           maxHeight: "92%", overflow: "hidden",
+          display: "flex", flexDirection: "column",
           animation: "dSheetIn .28s cubic-bezier(.2,.8,.3,1)"
         }}>
           {activeModal === "class" && <window.D_Modal_Class onClose={closeModal} embedded editRecord={editClassRecord} />}

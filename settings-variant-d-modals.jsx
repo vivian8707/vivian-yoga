@@ -128,7 +128,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
       <div style={{
         width: "100%", background: T.surface,
         display: "flex", flexDirection: "column",
-        maxHeight: "92vh", overflowX: "hidden", ...dragStyle
+        flex: 1, minHeight: 0, overflow: "hidden", ...dragStyle
       }}>
         <div {...grabberHandlers} style={{ display: "flex", justifyContent: "center", padding: "10px 0 4px", cursor: "grab", touchAction: "none" }}>
           <div style={{ width: 38, height: 4, borderRadius: 2, background: T.border }} />
@@ -1593,14 +1593,14 @@ function D_Modal_Settings({ embedded, onClose }) {
                 { key: "singlePrice", label: "單堂", val: venue.singlePrice ?? 400 },
                 { key: "trialPrice",  label: "體驗", val: venue.trialPrice ?? 200 },
               ].map(({ key, label, val }) => (
-                <div key={key} style={{ background: T.bg, borderRadius: 8, padding: "12px 14px", border: `1px solid ${T.borderSoft}`, display: "flex", alignItems: "center", justifyContent: "space-between", overflow: "hidden" }}>
+                <div key={key} style={{ background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <span style={{ fontSize: 13, color: T.inkSoft }}>{label}</span>
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
                     <input type="text" inputMode="numeric" pattern="[0-9]*"
                       value={val}
                       onChange={e => patchVenue({ [key]: parseInt(e.target.value.replace(/\D/g,"") || "0", 10) })}
-                      style={{ minWidth: 0, width: 50, background: "transparent", border: "none", outline: "none", fontSize: 16, fontWeight: 700, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
+                      style={{ width: 48, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 14, fontWeight: 700, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
                   </div>
                 </div>
               ))}
@@ -1614,28 +1614,24 @@ function D_Modal_Settings({ embedded, onClose }) {
               }} style={{ padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.surface, color: T.primary, fontSize: 11, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>+ 新增</button>
             </div>
             {(venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((p, pi) => (
-              <div key={p.id} style={{ marginBottom: 8, background: T.bg, borderRadius: 10, border: `1px solid ${T.borderSoft}`, overflow: "hidden" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px 8px" }}>
-                  <input value={p.label}
-                    onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x); patchVenue({ communityPlans: plans }); }}
-                    style={{ flex: 1, minWidth: 0, background: T.surface, border: `1px solid ${T.border}`, borderRadius: 8, padding: "7px 10px", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                  <button onClick={() => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).filter((_, i) => i !== pi); patchVenue({ communityPlans: plans }); }}
-                    style={{ background: "transparent", border: "none", color: T.inkSoft, fontSize: 16, cursor: "pointer", padding: "0 2px", lineHeight: 1, flexShrink: 0 }}>×</button>
+              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <input value={p.label}
+                  onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x); patchVenue({ communityPlans: plans }); }}
+                  style={{ flex: 1, minWidth: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "7px 12px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "5px 8px", flexShrink: 0 }}>
+                  <input type="text" inputMode="numeric" value={p.classes}
+                    onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
+                    style={{ width: 44, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
+                  <span style={{ fontSize: 12, color: T.inkSoft }}>堂</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "stretch" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, background: T.surface, borderTop: `1px solid ${T.border}`, borderRight: `1px solid ${T.border}`, padding: "7px 10px" }}>
-                    <input type="text" inputMode="numeric" value={p.classes}
-                      onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
-                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
-                    <span style={{ fontSize: 11, color: T.inkSoft, flexShrink: 0 }}>堂</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, background: T.surface, borderTop: `1px solid ${T.border}`, padding: "7px 10px" }}>
-                    <span style={{ fontSize: 11, color: T.inkSoft, flexShrink: 0 }}>$</span>
-                    <input type="text" inputMode="numeric" value={p.price}
-                      onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
-                      style={{ flex: 1, minWidth: 0, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit" }} />
-                  </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "5px 8px", flexShrink: 0 }}>
+                  <span style={{ fontSize: 12, color: T.inkSoft }}>$</span>
+                  <input type="text" inputMode="numeric" value={p.price}
+                    onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
+                    style={{ width: 64, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
                 </div>
+                <button onClick={() => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).filter((_, i) => i !== pi); patchVenue({ communityPlans: plans }); }}
+                  style={{ padding: 0, width: 22, height: 22, borderRadius: 11, border: `1px solid ${T.border}`, background: "transparent", color: T.inkSoft, fontSize: 14, cursor: "pointer", flexShrink: 0, lineHeight: 1 }}>×</button>
               </div>
             ))}
           </>
