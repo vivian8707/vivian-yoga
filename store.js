@@ -5,7 +5,7 @@
   const DEFAULT_HOME_PLANS = [
     { id: "hp1", label: "一對一", price: 1800 },
     { id: "hp2", label: "一對二", price: 2000 },
-    { id: "hp3", label: "一對三", price: 1500 },
+    { id: "hp3", label: "一對三", price: 2400 },
   ];
   const DEFAULT_COMMUNITY_PLANS = [
     { id: "cmp1", label: "5 堂",  classes: 5,  price: 1800 },

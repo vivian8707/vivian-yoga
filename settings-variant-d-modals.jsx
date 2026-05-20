@@ -140,7 +140,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
           {children}
         </div>
         <div style={{
-          padding: "12px 22px 22px", borderTop: `1px solid ${T.borderSoft}`,
+          padding: "16px 22px", borderTop: `1px solid ${T.borderSoft}`,
           display: "flex", gap: 10, background: T.surface
         }}>
           {showDelete &&
@@ -207,7 +207,7 @@ function BottomSheet({ title, children, primaryLabel = "儲存修改", showDelet
         </div>
 
         <div style={{
-          padding: "12px 22px 22px", borderTop: `1px solid ${T.borderSoft}`,
+          padding: "16px 22px", borderTop: `1px solid ${T.borderSoft}`,
           display: "flex", gap: 10, background: T.surface
         }}>
           {showDelete &&
@@ -1618,13 +1618,13 @@ function D_Modal_Settings({ embedded, onClose }) {
                 <input value={p.label}
                   onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x); patchVenue({ communityPlans: plans }); }}
                   style={{ flex: 1, minWidth: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "7px 12px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
-                <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "7px 8px", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "5px 8px", flexShrink: 0 }}>
                   <input type="text" inputMode="numeric" value={p.classes}
                     onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
                     style={{ width: 44, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
                   <span style={{ fontSize: 12, color: T.inkSoft }}>堂</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "7px 8px", flexShrink: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "5px 8px", flexShrink: 0 }}>
                   <span style={{ fontSize: 12, color: T.inkSoft }}>$</span>
                   <input type="text" inputMode="numeric" value={p.price}
                     onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, price: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
