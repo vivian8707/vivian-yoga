@@ -1614,10 +1614,10 @@ function D_Modal_Settings({ embedded, onClose }) {
               }} style={{ padding: "4px 10px", borderRadius: 6, border: `1px solid ${T.border}`, background: T.surface, color: T.primary, fontSize: 11, fontWeight: 600, fontFamily: "inherit", cursor: "pointer" }}>+ 新增</button>
             </div>
             {(venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((p, pi) => (
-              <div key={p.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <div key={p.id} style={{ display: "flex", alignItems: "stretch", gap: 8, marginBottom: 8 }}>
                 <input value={p.label}
                   onChange={e => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, label: e.target.value } : x); patchVenue({ communityPlans: plans }); }}
-                  style={{ flex: 1, minWidth: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "7px 12px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
+                  style={{ flex: 1, minWidth: 0, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "0 12px", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", outline: "none" }} />
                 <div style={{ display: "flex", alignItems: "center", gap: 3, background: T.surface, borderRadius: 8, border: `1px solid ${T.border}`, padding: "7px 8px", flexShrink: 0 }}>
                   <input type="text" inputMode="numeric" value={p.classes}
                     onChange={e => { const v = e.target.value.replace(/\D/g,""); const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).map((x, i) => i === pi ? { ...x, classes: v === "" ? "" : parseInt(v, 10) } : x); patchVenue({ communityPlans: plans }); }}
@@ -1631,7 +1631,7 @@ function D_Modal_Settings({ embedded, onClose }) {
                     style={{ width: 64, background: "transparent", border: "none", outline: "none", fontSize: 13, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right" }} />
                 </div>
                 <button onClick={() => { const plans = (venue.communityPlans || window.DEFAULT_COMMUNITY_PLANS || []).filter((_, i) => i !== pi); patchVenue({ communityPlans: plans }); }}
-                  style={{ padding: 0, width: 22, height: 22, borderRadius: 11, border: `1px solid ${T.border}`, background: "transparent", color: T.inkSoft, fontSize: 14, cursor: "pointer", flexShrink: 0, lineHeight: 1 }}>×</button>
+                  style={{ padding: 0, width: 22, height: 22, borderRadius: 11, border: `1px solid ${T.border}`, background: "transparent", color: T.inkSoft, fontSize: 14, cursor: "pointer", flexShrink: 0, lineHeight: 1, alignSelf: "center" }}>×</button>
               </div>
             ))}
           </>
