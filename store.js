@@ -98,12 +98,18 @@
         return (a.kind === "pay" ? 0 : 1) - (b.kind === "pay" ? 0 : 1);
       });
       const lots = []; // { remaining, perPrice }
-      events.forEach(ev => {
+      events.forEach((ev, evIdx) => {
         if (ev.kind === "pay") {
           const pp = ev.classes > 0 ? Math.round(ev.amount / ev.classes) : 0;
           lots.push({ remaining: ev.classes, perPrice: pp });
         } else {
-          let need = ev.count, gross = 0, used = 0, lastPrice = 360;
+          // 若目前無餘額，往後找最近一筆儲值的單價來估算
+          let lastPrice = 360;
+          if (lots.length === 0) {
+            const nextPay = events.slice(evIdx + 1).find(e => e.kind === "pay");
+            if (nextPay && nextPay.classes > 0) lastPrice = Math.round(nextPay.amount / nextPay.classes);
+          }
+          let need = ev.count, gross = 0, used = 0;
           while (need > 0 && lots.length > 0) {
             const lot = lots[0];
             const take = Math.min(lot.remaining, need);
