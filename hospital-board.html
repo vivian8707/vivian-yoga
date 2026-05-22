@@ -121,8 +121,8 @@
     #keyboard {
       flex: 1 1 0;
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: repeat(6, 1fr);
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(5, 1fr);
       gap: 7px;
       min-height: 0;
     }
@@ -220,43 +220,42 @@
     <button class="phrase-btn" data-phrase="謝謝">謝謝<br><small>Thanks</small></button>
   </div>
 
-  <!-- 鍵盤：A-Z 字母順序，5欄6列 -->
+  <!-- 鍵盤：A-Z 字母順序，橫排每列6個 -->
   <div id="keyboard">
-    <!-- 欄1: A-F -->
+    <!-- 列1: A-F -->
     <button class="key" data-char="A">A</button>
-    <button class="key" data-char="G">G</button>
-    <button class="key" data-char="M">M</button>
-    <button class="key" data-char="S">S</button>
-    <button class="key" data-char="Y">Y</button>
-
     <button class="key" data-char="B">B</button>
-    <button class="key" data-char="H">H</button>
-    <button class="key" data-char="N">N</button>
-    <button class="key" data-char="T">T</button>
-    <button class="key" data-char="Z">Z</button>
-
     <button class="key" data-char="C">C</button>
-    <button class="key" data-char="I">I</button>
-    <button class="key" data-char="O">O</button>
-    <button class="key" data-char="U">U</button>
-    <button class="key space" data-char=" ">空白<br>Space</button>
-
     <button class="key" data-char="D">D</button>
-    <button class="key" data-char="J">J</button>
-    <button class="key" data-char="P">P</button>
-    <button class="key" data-char="V">V</button>
-    <button class="key backspace" data-action="back">⌫</button>
-
     <button class="key" data-char="E">E</button>
-    <button class="key" data-char="K">K</button>
-    <button class="key" data-char="Q">Q</button>
-    <button class="key" data-char="W">W</button>
-    <button class="key clear" data-action="clear">清除<br>Clear</button>
-
     <button class="key" data-char="F">F</button>
+    <!-- 列2: G-L -->
+    <button class="key" data-char="G">G</button>
+    <button class="key" data-char="H">H</button>
+    <button class="key" data-char="I">I</button>
+    <button class="key" data-char="J">J</button>
+    <button class="key" data-char="K">K</button>
     <button class="key" data-char="L">L</button>
+    <!-- 列3: M-R -->
+    <button class="key" data-char="M">M</button>
+    <button class="key" data-char="N">N</button>
+    <button class="key" data-char="O">O</button>
+    <button class="key" data-char="P">P</button>
+    <button class="key" data-char="Q">Q</button>
     <button class="key" data-char="R">R</button>
+    <!-- 列4: S-X -->
+    <button class="key" data-char="S">S</button>
+    <button class="key" data-char="T">T</button>
+    <button class="key" data-char="U">U</button>
+    <button class="key" data-char="V">V</button>
+    <button class="key" data-char="W">W</button>
     <button class="key" data-char="X">X</button>
+    <!-- 列5: Y-Z + 功能鍵 -->
+    <button class="key" data-char="Y">Y</button>
+    <button class="key" data-char="Z">Z</button>
+    <button class="key space" data-char=" ">空白<br>Space</button>
+    <button class="key backspace" data-action="back">⌫</button>
+    <button class="key clear" data-action="clear">清除<br>Clear</button>
     <button class="key empty"></button>
   </div>
 
