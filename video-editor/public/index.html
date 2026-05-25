@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>影片自動剪輯</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <h1>影片自動剪輯</h1>
+    <p class="sub">上傳影片 → 用文字說你要怎麼剪 → 自動去廢鏡頭、上中英字幕、輸出直式 Reels/Story</p>
+
+    <form id="form">
+      <label class="file">
+        <input type="file" id="video" accept="video/*" required />
+        <span id="fileLabel">選擇影片…</span>
+      </label>
+
+      <label class="field">
+        <span>你想怎麼剪？（可用中文描述）</span>
+        <textarea id="instructions" rows="4" placeholder="例：開頭寒暄刪掉，只留示範下犬式那段和結尾收操；節奏緊湊一點。"></textarea>
+      </label>
+
+      <label class="check">
+        <input type="checkbox" id="useVision" checked />
+        <span>讓 AI 也看畫面內容（較慢、較花費，但能用「畫面長相」指認片段）</span>
+      </label>
+
+      <button type="submit" id="go">開始剪輯</button>
+    </form>
+
+    <section id="progress" class="hidden">
+      <div class="bar"><div id="barFill"></div></div>
+      <p id="step">準備中…</p>
+    </section>
+
+    <section id="result" class="hidden">
+      <p id="summary" class="summary"></p>
+      <video id="player" controls playsinline></video>
+      <a id="download" download="reels.mp4" class="btn">下載影片</a>
+    </section>
+
+    <p id="error" class="error hidden"></p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
