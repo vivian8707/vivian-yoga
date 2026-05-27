@@ -988,32 +988,120 @@ function D_Students({ T, onSelect }) {
 
 }
 
+function D_IncBars({ T, months, selIdx, setSelIdx }) {
+  const max = Math.max(1, ...months.map(m => m.value));
+  const COL_W = 28;
+  const scrollRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    el.scrollLeft = Math.max(0, selIdx * COL_W - el.clientWidth / 2 + COL_W / 2);
+  }, []);
+  return (
+    <div style={{ background: T.surface, borderRadius: 20, padding: "14px 16px 12px", border: `1px solid ${T.borderSoft}` }}>
+      <div style={{ fontSize: 11, color: T.inkSoft, letterSpacing: 1.5, padding: "0 2px" }}>月收趨勢</div>
+      <div style={{ marginTop: 8 }}>
+        <div ref={scrollRef} style={{ overflowX: "auto", overflowY: "hidden", scrollbarWidth: "none", WebkitOverflowScrolling: "touch" }}>
+          <div style={{ width: COL_W * months.length, display: "flex", gap: 4, height: 90, alignItems: "flex-end" }}>
+            {months.map((m, i) => {
+              const h = Math.max(2, m.value / max * 100);
+              const isSel = i === selIdx;
+              return (
+                <div key={m.key} onClick={() => setSelIdx(i)} style={{ width: COL_W - 4, display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer", height: "100%", justifyContent: "flex-end", gap: 3, flexShrink: 0 }}>
+                  <div style={{ fontSize: 8, color: isSel ? T.ink : "transparent", fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", transition: "color .2s", whiteSpace: "nowrap" }}>
+                    {(m.value / 1000).toFixed(m.value >= 10000 ? 0 : 1)}k
+                  </div>
+                  <div style={{ width: "100%", height: `${h}%`, background: isSel ? T.primary : T.primarySoft, borderRadius: "4px 4px 1px 1px", transition: "background .2s" }} />
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ width: COL_W * months.length, display: "flex", gap: 4, marginTop: 6 }}>
+            {months.map((m, i) => {
+              const mo = parseInt(m.key.slice(5));
+              const showYear = mo === 1 || i === 0;
+              return (
+                <div key={m.key} style={{ width: COL_W - 4, flexShrink: 0, fontSize: 9, color: i === selIdx ? T.ink : T.inkSoft, fontWeight: i === selIdx ? 700 : 400, textAlign: "center", letterSpacing: 0.5 }}>
+                  {showYear ? `${m.key.slice(2, 4)}/${mo}` : `${mo} 月`}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function D_IncDetail({ T, sel, monthNum, diff, pct, monthLoc, monthLocTotal, lessons, maxSingle, topLoc, newStudents }) {
+  const avg = lessons > 0 ? Math.round(sel.value / lessons) : 0;
+  return (
+    <div style={{ background: T.surface, borderRadius: 20, padding: "16px 18px", border: `1px solid ${T.borderSoft}` }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div>
+          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.5, marginBottom: 4 }}>{monthNum} 月詳情</div>
+          <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", color: T.primary }}>${sel.value.toLocaleString()}</div>
+          <div style={{ fontSize: 11, color: T.inkSoft, marginTop: 2 }}>{lessons} 堂 · 平均 ${avg}/堂</div>
+        </div>
+        {diff != null && (
+          <div style={{ textAlign: "right", paddingBottom: 6 }}>
+            <div style={{ fontSize: 12, color: diff >= 0 ? T.primary : T.danger, fontWeight: 600 }}>
+              {diff >= 0 ? "↗" : "↘"} {pct >= 0 ? "+" : ""}{pct}%
+            </div>
+            <div style={{ fontSize: 10, color: T.inkSoft }}>比上月</div>
+          </div>
+        )}
+      </div>
+      {monthLoc.length > 0 && (
+        <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px dashed ${T.borderSoft}` }}>
+          <div style={{ fontSize: 11, color: T.inkSoft, marginBottom: 8 }}>場地分布</div>
+          {monthLoc.map(l => {
+            const pct2 = monthLocTotal > 0 ? Math.round(l.v / monthLocTotal * 100) : 0;
+            return (
+              <div key={l.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                <div style={{ width: 28, fontSize: 11, color: l.color, fontWeight: 500 }}>{l.name}</div>
+                <div style={{ flex: 1, height: 6, background: T.borderSoft, borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ width: `${pct2}%`, height: "100%", background: l.color }} />
+                </div>
+                <div style={{ fontSize: 11, color: T.inkSoft, fontFamily: "'Cormorant Garamond', serif", minWidth: 28, textAlign: "right" }}>{pct2}%</div>
+                <div style={{ fontSize: 11, color: T.inkSoft, fontFamily: "'Cormorant Garamond', serif", minWidth: 56, textAlign: "right" }}>${l.v.toLocaleString()}</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div style={{ marginTop: 14, paddingTop: 12, borderTop: `1px dashed ${T.borderSoft}`, display: "flex", justifyContent: "space-around", textAlign: "center" }}>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", color: T.primary }}>{maxSingle > 0 ? `$${maxSingle.toLocaleString()}` : "—"}</div>
+          <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 2, letterSpacing: 0.5 }}>最高單堂</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", color: T.primary }}>{topLoc || "—"}</div>
+          <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 2, letterSpacing: 0.5 }}>最常上的</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", color: T.primary }}>{newStudents} 位</div>
+          <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 2, letterSpacing: 0.5 }}>新學生</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function D_Income({ T, chartStyle }) {
   const months = window.SAMPLE_MONTHS;
   const [selIdx, setSelIdx] = useStateD(months.length - 1);
   const currentYear = new Date().getFullYear().toString();
-  const yearTotal = months
-    .filter((m) => m.key.startsWith(currentYear))
-    .reduce((s, m) => s + m.value, 0);
-  const max = Math.max(1, ...months.map((m) => m.value));
   const hasAnyIncome = months.some((m) => m.value > 0);
   if (!hasAnyIncome) {
     return <D_EmptyState T={T} iconKind="sprout" title="還沒有收入資料" hint={<>新增上課或儲值記錄之後,這裡會出現月度趨勢圖與年度總覽。</>} />;
   }
-  const COL_W = 36; // px per month
-  const W = Math.max(320, COL_W * months.length + 20);
-  const H = 140, padL = 10, padR = 10, padT = 16, padB = 26;
-  const innerW = W - padL - padR;
-  const innerH = H - padT - padB;
-  const pts = months.map((m, i) => ({
-    x: padL + i / (months.length - 1) * innerW,
-    y: padT + innerH - m.value / max * innerH,
-    v: m.value, k: m.key
-  }));
-  const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
-  const areaPath = linePath + ` L${pts[pts.length - 1].x},${padT + innerH} L${pts[0].x},${padT + innerH} Z`;
 
-  // 每月實際上課堂數 (一筆紀錄 = 一堂)
+  // 年度統計
+  const yearMonths = months.filter(m => m.key.startsWith(currentYear));
+  const yearTotal = yearMonths.reduce((s, m) => s + m.value, 0);
+
+  // 每月堂數
   const monthLessonCount = {};
   window.SAMPLE_RECORDS.forEach((r) => {
     if (r.type !== "class") return;
@@ -1022,171 +1110,88 @@ function D_Income({ T, chartStyle }) {
     monthLessonCount[k] = (monthLessonCount[k] || 0) + 1;
   });
   const mLessons = (key) => monthLessonCount[key] || 0;
+  const yearLessonCount = yearMonths.reduce((s, m) => s + mLessons(m.key), 0);
+
   const sel = months[selIdx];
   const prev = selIdx > 0 ? months[selIdx - 1] : null;
+  const diff = prev ? sel.value - prev.value : null;
+  const pct = prev && prev.value ? Math.round(diff / prev.value * 100) : null;
+  const monthNum = parseInt(sel.key.slice(5));
+
+  // 場地顏色
+  const LOC_COLORS = {
+    "園頂": T.primary, "到府": T.blush, "天空": T.haze, "台中": T.accent,
+  };
+
+  // 場地分布（當月真實資料）
+  const monthLocMap = {};
+  const getAmt = (r) => window.Store ? window.Store.derived.classDisplayTotal(r) : (r.totalAmount || 0);
+  window.SAMPLE_RECORDS.forEach(r => {
+    if (r.type !== "class" || (r.date || "").slice(0, 7) !== sel.key) return;
+    const loc = r.location || "園頂";
+    monthLocMap[loc] = (monthLocMap[loc] || 0) + getAmt(r);
+  });
+  const monthLocTotal = Object.values(monthLocMap).reduce((s, v) => s + v, 0);
+  const monthLoc = Object.entries(monthLocMap)
+    .map(([name, v]) => ({ name, v, color: LOC_COLORS[name] || T.inkSoft }))
+    .sort((a, b) => b.v - a.v);
+
+  // Mini 統計
+  const monthRecords = window.SAMPLE_RECORDS.filter(r => r.type === "class" && (r.date || "").slice(0, 7) === sel.key);
+  const maxSingle = monthRecords.reduce((max, r) => Math.max(max, getAmt(r)), 0);
+  const locCount = {};
+  monthRecords.forEach(r => { locCount[r.location] = (locCount[r.location] || 0) + 1; });
+  const topLoc = Object.entries(locCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+  const firstByStudent = {};
+  window.SAMPLE_RECORDS.filter(r => r.type === "class" && r.attendees).forEach(r => {
+    (r.attendees || []).forEach(a => {
+      if (!firstByStudent[a.studentId] || r.date < firstByStudent[a.studentId]) firstByStudent[a.studentId] = r.date;
+    });
+  });
+  const newStudents = Object.values(firstByStudent).filter(d => (d || "").slice(0, 7) === sel.key).length;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-      <div style={{
-        background: `linear-gradient(135deg, #b89e8b 0%, #c2a5a5 60%, #a8b1bd 100%)`,
-        borderRadius: 24, padding: "20px 22px", color: T.surface,
-        position: "relative", overflow: "hidden"
-      }}>
-        <div style={{
-          position: "absolute", right: -30, bottom: -30,
-          width: 140, height: 140, borderRadius: 70,
-          background: "rgba(255,255,255,0.12)"
-        }} />
-        <div style={{
-          position: "absolute", left: -20, top: -25,
-          width: 90, height: 90, borderRadius: 45,
-          background: "rgba(255,255,255,0.08)"
-        }} />
-        <div style={{ fontSize: 11, opacity: 0.85, letterSpacing: 2, fontWeight: 500 }}>
-          {currentYear} 年度總收入
+      {/* Hero */}
+      <div style={{ background: `linear-gradient(135deg, #b89e8b 0%, #c2a5a5 60%, #a8b1bd 100%)`, borderRadius: 24, padding: "20px 22px", color: T.surface, position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", right: -30, bottom: -30, width: 140, height: 140, borderRadius: 70, background: "rgba(255,255,255,0.12)" }} />
+        <div style={{ position: "absolute", left: -20, top: -25, width: 90, height: 90, borderRadius: 45, background: "rgba(255,255,255,0.08)" }} />
+        <div style={{ fontSize: 11, opacity: 0.85, letterSpacing: 2, fontWeight: 500 }}>{currentYear} 年度</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 6 }}>
+          <div style={{ fontSize: 32, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", letterSpacing: 1 }}>${yearTotal.toLocaleString()}</div>
+          <div style={{ fontSize: 12, opacity: 0.85 }}>
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 600 }}>{yearLessonCount}</span> 堂
+          </div>
         </div>
-        <div style={{
-          fontSize: 32, fontWeight: 600, marginTop: 6,
-          fontFamily: "'Cormorant Garamond', serif", letterSpacing: 1
-        }}>${yearTotal.toLocaleString()}</div>
-        <div style={{ display: "flex", gap: 24, marginTop: 14, fontSize: 11, opacity: 0.95 }}>
+        <div style={{ display: "flex", gap: 22, marginTop: 14, fontSize: 11, opacity: 0.95 }}>
           <div>
-            <div style={{ opacity: 0.75 }}>{sel.key.slice(5)}月</div>
+            <div style={{ opacity: 0.75 }}>{monthNum} 月</div>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
               <span style={{ fontSize: 14, fontWeight: 600 }}>${sel.value.toLocaleString()}</span>
               <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(sel.key)} 堂</span>
             </div>
           </div>
-          {prev &&
-          <div>
-            <div style={{ opacity: 0.75 }}>{prev.key.slice(5)}月</div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-              <span style={{ fontSize: 14, fontWeight: 600 }}>${prev.value.toLocaleString()}</span>
-              <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(prev.key)} 堂</span>
+          {prev && (
+            <div>
+              <div style={{ opacity: 0.75 }}>{parseInt(prev.key.slice(5))} 月</div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>${prev.value.toLocaleString()}</span>
+                <span style={{ fontSize: 11, opacity: 0.8 }}>/ {mLessons(prev.key)} 堂</span>
+              </div>
             </div>
-          </div>
-          }
+          )}
         </div>
       </div>
 
-      <div style={{
-        background: T.surface, borderRadius: 20,
-        padding: "14px 12px 8px", border: `1px solid ${T.borderSoft}`
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between",
-          padding: "0 6px 8px", alignItems: "baseline" }}>
-          <span style={{ fontSize: 12, fontWeight: 600 }}>近 12 個月趨勢</span>
-          <span style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1 }}>
-            {chartStyle === "bar" ? "BAR" : chartStyle === "line" ? "LINE" : "AREA"}
-          </span>
-        </div>
-        <div ref={(el) => { if (el && !el.__init) { el.__init = true; el.scrollLeft = el.scrollWidth; } }}
-          style={{ overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: W, height: 140, display: "block" }}>
-          <defs>
-            <linearGradient id="dFill" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor={T.accent} stopOpacity="0.5" />
-              <stop offset="100%" stopColor={T.blush} stopOpacity="0.05" />
-            </linearGradient>
-            <linearGradient id="dStroke" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%" stopColor={T.accent} />
-              <stop offset="100%" stopColor={T.blush} />
-            </linearGradient>
-            <linearGradient id="dBar" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor={T.accent} />
-              <stop offset="100%" stopColor={T.blush} />
-            </linearGradient>
-          </defs>
-          {[0.25, 0.5, 0.75].map((r) =>
-          <line key={r} x1={padL} x2={W - padR}
-          y1={padT + innerH - r * innerH} y2={padT + innerH - r * innerH}
-          stroke={T.borderSoft} strokeDasharray="2 4" strokeWidth="1" />
-          )}
-          {chartStyle === "bar" ?
-          <g>
-              {pts.map((p, i) => {
-              const bw = innerW / months.length * 0.5;
-              return (
-                <rect key={i} x={p.x - bw / 2} y={p.y}
-                width={bw} height={padT + innerH - p.y}
-                rx={bw / 2} fill="url(#dBar)"
-                opacity={i === selIdx ? 1 : 0.45}
-                style={{ cursor: "pointer", transition: "opacity .15s" }}
-                onClick={() => setSelIdx(i)} />);
+      {/* 互動趨勢圖 */}
+      <D_IncBars T={T} months={months} selIdx={selIdx} setSelIdx={setSelIdx} />
 
-            })}
-              {pts.map((p, i) => p.v > 0 &&
-                <text key={"v" + i} x={p.x} y={Math.max(p.y - 3, 8)} textAnchor="middle"
-                  fontSize="8" fontWeight={i === selIdx ? 700 : 500}
-                  fill={i === selIdx ? T.ink : T.inkSoft}
-                  fontFamily="'Cormorant Garamond', serif">
-                  {p.v >= 1000 ? `${(p.v / 1000).toFixed(p.v >= 10000 ? 0 : 1)}k` : p.v}
-                </text>
-              )}
-            </g> :
-
-          <g>
-              {chartStyle !== "line" && <path d={areaPath} fill="url(#dFill)" />}
-              <path d={linePath} fill="none" stroke="url(#dStroke)"
-            strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-              {pts.map((p, i) =>
-            <circle key={i} cx={p.x} cy={p.y} r={i === selIdx ? 5.5 : 2.8}
-            fill={i === selIdx ? T.accent : T.surface}
-            stroke={T.accent} strokeWidth={i === selIdx ? 0 : 1.5}
-            style={{ cursor: "pointer", transition: "r .15s" }}
-            onClick={() => setSelIdx(i)} />
-            )}
-            </g>
-          }
-          {/* 透明點擊熱區 — 確保在 line 模式上也好點 */}
-          {pts.map((p, i) =>
-          <rect key={"hit" + i}
-            x={p.x - innerW / months.length / 2} y={padT}
-            width={innerW / months.length} height={innerH}
-            fill="transparent" style={{ cursor: "pointer" }}
-            onClick={() => setSelIdx(i)} />
-          )}
-          {pts.map((p, i) =>
-          <text key={"x" + i} x={p.x} y={H - 8} textAnchor="middle"
-          fontSize="9" fill={i === selIdx ? T.ink : T.inkSoft}
-          fontWeight={i === selIdx ? 700 : 400}
-          letterSpacing="0.5">{p.k.slice(5)}月</text>
-          )}
-        </svg>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {[...months].reverse().map((m, i, arr) => {
-          const prev = arr[i + 1];
-          const diff = prev ? m.value - prev.value : null;
-          const pct = prev && prev.value ? Math.round(diff / prev.value * 100) : null;
-          return (
-            <div key={m.key} style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "12px 14px", background: T.surface,
-              borderRadius: 14, border: `1px solid ${T.borderSoft}`
-            }}>
-              <div style={{ fontSize: 11, color: T.inkSoft, width: 56, fontWeight: 500 }}>{m.key}</div>
-              <div style={{
-                fontSize: 16, fontWeight: 600,
-                fontFamily: "'Cormorant Garamond', serif", color: T.ink, flex: 1
-              }}>${m.value.toLocaleString()}</div>
-              {diff != null &&
-              <div style={{
-                fontSize: 11, fontWeight: 600,
-                color: diff >= 0 ? T.primary : T.danger,
-                display: "flex", alignItems: "center", gap: 3
-              }}>
-                  <span>{diff >= 0 ? "↗" : "↘"}</span>
-                  <span>{pct >= 0 ? "+" : ""}{pct}%</span>
-                </div>
-              }
-            </div>);
-
-        })}
-      </div>
-    </div>);
+      {/* 當月詳情 */}
+      <D_IncDetail T={T} sel={sel} monthNum={monthNum} diff={diff} pct={pct}
+        monthLoc={monthLoc} monthLocTotal={monthLocTotal} lessons={mLessons(sel.key)}
+        maxSingle={maxSingle} topLoc={topLoc} newStudents={newStudents} />
+    </div>
+  );
 
 }
 
