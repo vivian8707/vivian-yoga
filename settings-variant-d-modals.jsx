@@ -527,7 +527,7 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
           note
         };
       }
-      let classType, price;
+      let classType, price, pPeople = 1;
       if (homePlanId === "custom") {
         classType = (homeCustomLabel || "").trim() || "自訂";
         price = Math.max(0, parseInt(homeCustomPrice, 10) || 0);
@@ -535,10 +535,11 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
         const p = homePlans.find(p => p.id === homePlanId) || homePlans[0];
         classType = p ? p.label : "一對一";
         price = p ? p.price : 1800;
+        pPeople = p ? (p.people || (p.label?.includes("三") ? 3 : p.label?.includes("二") ? 2 : 1)) : 1;
       }
       return {
         date, location: loc, mode: "home",
-        headcount: 1, totalAmount: price,
+        headcount: pPeople, totalAmount: price,
         attendees: [{ studentId: stu.id, studentName: stu.name, classType, amount: price, usedPackage: false, perClassPrice: 0, count: 1 }],
         note
       };

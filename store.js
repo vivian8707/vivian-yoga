@@ -3,9 +3,9 @@
   const listeners = new Set();
 
   const DEFAULT_HOME_PLANS = [
-    { id: "hp1", label: "一對一", price: 1800 },
-    { id: "hp2", label: "一對二", price: 2000 },
-    { id: "hp3", label: "一對三", price: 2400 },
+    { id: "hp1", label: "一對一", price: 1800, people: 1 },
+    { id: "hp2", label: "一對二", price: 2000, people: 2 },
+    { id: "hp3", label: "一對三", price: 2400, people: 3 },
   ];
   const DEFAULT_COMMUNITY_PLANS = [
     { id: "cmp1", label: "5 堂",  classes: 5,  price: 1800 },
