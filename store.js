@@ -3,9 +3,9 @@
   const listeners = new Set();
 
   const DEFAULT_HOME_PLANS = [
-    { id: "hp1", label: "一對一", price: 1800 },
-    { id: "hp2", label: "一對二", price: 2000 },
-    { id: "hp3", label: "一對三", price: 2400 },
+    { id: "hp1", label: "一對一", price: 1800, people: 1 },
+    { id: "hp2", label: "一對二", price: 2000, people: 2 },
+    { id: "hp3", label: "一對三", price: 2400, people: 3 },
   ];
   const DEFAULT_COMMUNITY_PLANS = [
     { id: "cmp1", label: "5 堂",  classes: 5,  price: 1800 },
@@ -55,6 +55,16 @@
       if (!obj.settings) obj.settings = { displayName: "", venues: defaultVenues() };
       if (!obj.settings.venues) obj.settings.venues = defaultVenues();
       if (!obj.settings.paymentPlans) obj.settings.paymentPlans = DEFAULT_COMMUNITY_PLANS.map(p => ({...p}));
+      // 遷移：修正到府記錄的 headcount（一對二→2，一對三→3）
+      let migrated = false;
+      obj.records.forEach(r => {
+        if (r.mode !== "home" || r.headcount !== 1) return;
+        if (!r.attendees || !r.attendees.length) return;
+        const ct = r.attendees[0].classType || "";
+        const people = ct.includes("三") ? 3 : ct.includes("二") ? 2 : 1;
+        if (people !== 1) { r.headcount = people; migrated = true; }
+      });
+      if (migrated) { try { localStorage.setItem(KEY, JSON.stringify(obj)); } catch(e) {} }
       return obj;
     } catch (e) {
       return seed();
