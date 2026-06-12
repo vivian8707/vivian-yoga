@@ -55,13 +55,13 @@
       if (!obj.settings) obj.settings = { displayName: "", venues: defaultVenues() };
       if (!obj.settings.venues) obj.settings.venues = defaultVenues();
       if (!obj.settings.paymentPlans) obj.settings.paymentPlans = DEFAULT_COMMUNITY_PLANS.map(p => ({...p}));
-      // 遷移：修正到府記錄的 headcount（一對二→2，一對三→3）
+      // 遷移：修正到府記錄的 headcount（一對二→2，一對三→3，一對四→4）
       let migrated = false;
       obj.records.forEach(r => {
         if (r.mode !== "home" || r.headcount !== 1) return;
         if (!r.attendees || !r.attendees.length) return;
         const ct = r.attendees[0].classType || "";
-        const people = ct.includes("三") ? 3 : ct.includes("二") ? 2 : 1;
+        const people = ct.includes("四") ? 4 : ct.includes("三") ? 3 : ct.includes("二") ? 2 : 1;
         if (people !== 1) { r.headcount = people; migrated = true; }
       });
       if (migrated) { try { localStorage.setItem(KEY, JSON.stringify(obj)); } catch(e) {} }
