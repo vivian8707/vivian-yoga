@@ -531,6 +531,8 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       if (homePlanId === "custom") {
         classType = (homeCustomLabel || "").trim() || "自訂";
         price = Math.max(0, parseInt(homeCustomPrice, 10) || 0);
+        const ct = classType;
+        pPeople = ct.includes("四") ? 4 : ct.includes("三") ? 3 : ct.includes("二") ? 2 : 1;
       } else {
         const p = homePlans.find(p => p.id === homePlanId) || homePlans[0];
         classType = p ? p.label : "一對一";
@@ -800,29 +802,28 @@ function HomeStudentCard({ student, homePlans, planId, onChangePlan, packageCoun
         </div>
       }
       {planId === "custom" &&
-        <div style={{ marginTop: 10 }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            <input
-              value={customLabel}
-              onChange={e => setCustomLabel(e.target.value)}
-              placeholder="方案名稱(選填)"
-              style={{
-                flex: 1, background: T.bg, borderRadius: 8,
-                border: `1px solid ${T.border}`, padding: "8px 10px",
-                fontSize: 13, color: T.ink, fontFamily: "inherit", outline: "none"
-              }}
-            />
-          </div>
+        <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+          <input
+            value={customLabel}
+            onChange={e => setCustomLabel(e.target.value)}
+            placeholder="名稱(選填)"
+            style={{
+              flex: 1, minWidth: 0, background: T.bg, borderRadius: 8,
+              border: `1px solid ${T.border}`, padding: "8px 10px",
+              fontSize: 13, color: T.ink, fontFamily: "inherit", outline: "none"
+            }}
+          />
           <div style={{
             background: T.bg, border: `1px solid ${T.border}`, borderRadius: 8,
-            padding: "6px 10px", display: "flex", alignItems: "center", gap: 6
+            padding: "6px 10px", display: "flex", alignItems: "center", gap: 4,
+            flexShrink: 0
           }}>
             <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
             <input type="text" inputMode="numeric" pattern="[0-9]*"
               value={customPrice || ""}
               onChange={e => setCustomPrice(parseInt(e.target.value.replace(/\D/g, "") || "0", 10))}
               style={{
-                flex: 1, minWidth: 0, border: "none", outline: "none",
+                width: 64, border: "none", outline: "none",
                 background: "transparent", fontSize: 14, fontWeight: 600,
                 color: T.ink, fontFamily: "inherit"
               }}
