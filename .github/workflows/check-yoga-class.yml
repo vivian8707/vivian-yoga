@@ -1,0 +1,59 @@
+name: 週二瑜珈課程查課
+
+on:
+  schedule:
+    # 每週一 02:00 UTC (台灣時間週一 10:00) 執行，查詢下週二課程
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: '查詢日期 (YYYY-MM-DD，留空自動計算下週二)'
+        required: false
+        default: ''
+
+jobs:
+  check-class:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install chromium
+
+      - name: Run class check script
+        env:
+          BOOKFAST_EMAIL: ${{ secrets.BOOKFAST_EMAIL }}
+          BOOKFAST_PASSWORD: ${{ secrets.BOOKFAST_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          cd scripts
+          python check_yoga_class.py
+
+      - name: Upload screenshots (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: /tmp/*.png
+          retention-days: 3
+
+      - name: Commit report to repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f report.md ]; then
+            cp report.md scripts/
+            git add scripts/report.md
+            git diff --staged --quiet || git commit -m "chore: 更新週二課程查課報告 $(date +'%Y-%m-%d')"
+            git push
+          fi
