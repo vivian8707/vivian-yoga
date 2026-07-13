@@ -23,3 +23,9 @@
 2. 或改為呼叫 BookFast 是否提供的官方 API（若有文件化的 REST API，可用 curl/程式直接查詢，不需要模擬瀏覽器操作）
 
 在具備上述能力之前，此排程任務無法可靠地完成查課與報告。
+
+## 附加問題：Telegram 通知也無法送出
+
+嘗試透過 curl 呼叫 Telegram Bot API（`api.telegram.org`）傳送通知時，被執行環境的網路出口政策（egress policy）以 403 拒絕（policy denial），非暫時性錯誤，不應重試或繞過。也就是說即使查課資料齊全，本環境目前也無法直接呼叫 Telegram API 送出通知。
+
+需要管理員將 `api.telegram.org` 加入此執行環境的出口白名單，才能讓「送 Telegram 通知」這一步驟正常運作。
