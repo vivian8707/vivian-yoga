@@ -800,6 +800,49 @@ function D_ClassList({ T, onEdit }) {
 
 }
 
+function D_PaySummary({ T }) {
+  const allRecords = window.SAMPLE_RECORDS;
+  const idx = window.Store ? window.Store.derived.buildLessonRevenueIndex() : {};
+
+  const totalPaid = allRecords
+    .filter(r => r.type === "payment")
+    .reduce((s, r) => s + (r.amount || 0), 0);
+
+  let totalUsed = 0;
+  allRecords.forEach(r => {
+    if (r.type !== "class" || !r.attendees) return;
+    r.attendees.forEach(a => {
+      if (!a.usedPackage) return;
+      totalUsed += (idx[r.id + ":" + a.studentId]?.amount || 0);
+    });
+  });
+
+  const remaining = totalPaid - totalUsed;
+
+  const stat = (label, value, color) => (
+    <div style={{ flex: 1, textAlign: "center" }}>
+      <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>{label}</div>
+      <div style={{
+        fontSize: 18, fontWeight: 700, color,
+        fontFamily: "'Cormorant Garamond', serif", lineHeight: 1
+      }}>${value.toLocaleString()}</div>
+    </div>
+  );
+
+  return (
+    <div style={{
+      background: T.surface, borderRadius: 20, padding: "16px 18px",
+      border: `1px solid ${T.borderSoft}`, display: "flex", alignItems: "stretch"
+    }}>
+      {stat("已收儲值", totalPaid, T.accent)}
+      <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
+      {stat("已消耗", totalUsed, T.primary)}
+      <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
+      {stat("剩餘估計", remaining, remaining >= 0 ? T.primaryDeep : T.danger)}
+    </div>
+  );
+}
+
 function D_PayList({ T, onEdit }) {
   const records = window.SAMPLE_RECORDS.filter((r) => r.type === "payment");
   if (records.length === 0) {
@@ -807,6 +850,7 @@ function D_PayList({ T, onEdit }) {
   }
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <D_PaySummary T={T} />
       {records.map((r) => {
         const date = new Date(r.date);
         return (
