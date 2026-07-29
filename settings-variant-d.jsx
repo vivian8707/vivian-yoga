@@ -833,40 +833,43 @@ function D_PaySummary({ T }) {
 
   return (
     <div style={{
-      background: T.surface, borderRadius: 20, padding: "14px 18px 16px",
-      border: `1px solid ${T.borderSoft}`
+      background: "linear-gradient(135deg, #b89e8b 0%, #c2a5a5 60%, #a8b1bd 100%)",
+      borderRadius: 24, padding: "18px 20px 20px",
+      color: "#fff", position: "relative", overflow: "hidden", marginBottom: 4
     }}>
-      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+      <div style={{ position: "absolute", right: -30, bottom: -30, width: 130, height: 130, borderRadius: 65, background: "rgba(255,255,255,0.10)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", left: -20, top: -24, width: 85, height: 85, borderRadius: 43, background: "rgba(255,255,255,0.07)", pointerEvents: "none" }} />
+      <div style={{ display: "flex", gap: 6, marginBottom: 18, position: "relative", zIndex: 1 }}>
         {["本月", "本年", "累計"].map(r => (
           <button key={r} onClick={() => setRange(r)} style={{
-            padding: "3px 10px", borderRadius: 999, fontSize: 11, fontFamily: "inherit",
+            padding: "3px 11px", borderRadius: 999, fontSize: 11, fontFamily: "inherit",
             border: "none", cursor: "pointer",
-            background: range === r ? T.primary : T.bg,
-            color: range === r ? T.surface : T.inkSoft,
-            fontWeight: range === r ? 600 : 400,
+            background: range === r ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.12)",
+            color: "#fff", fontWeight: range === r ? 600 : 400,
           }}>{r}</button>
         ))}
       </div>
-      <div style={{ display: "flex", alignItems: "stretch" }}>
-        <div style={{ flex: 1, textAlign: "center" }}>
-          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>已收儲值</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: T.accent, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
+      <div style={{ display: "flex", alignItems: "stretch", position: "relative", zIndex: 1 }}>
+        <div style={{ flex: 1, textAlign: "center", padding: "0 4px" }}>
+          <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1.5, marginBottom: 8 }}>已收儲值</div>
+          <div style={{ fontSize: 24, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
             ${totalPaid.toLocaleString()}
           </div>
         </div>
-        <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
-        <div style={{ flex: 1, textAlign: "center" }}>
-          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>已使用</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: T.primary, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
+        <div style={{ width: 1, background: "rgba(255,255,255,0.25)", margin: "0 4px" }} />
+        <div style={{ flex: 1, textAlign: "center", padding: "0 4px" }}>
+          <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1.5, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+            已使用
+            <span style={{ background: "rgba(255,255,255,0.25)", borderRadius: 999, padding: "1px 6px", fontSize: 10, fontWeight: 600 }}>{pct}%</span>
+          </div>
+          <div style={{ fontSize: 24, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
             ${totalUsed.toLocaleString()}
           </div>
-          <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 4 }}>{pct} %</div>
         </div>
-        <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
-        <div style={{ flex: 1, textAlign: "center" }}>
-          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>剩餘估計</div>
-          <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1,
-            color: remaining >= 0 ? T.primaryDeep : T.danger }}>
+        <div style={{ width: 1, background: "rgba(255,255,255,0.25)", margin: "0 4px" }} />
+        <div style={{ flex: 1, textAlign: "center", padding: "0 4px" }}>
+          <div style={{ fontSize: 11, opacity: 0.8, letterSpacing: 1.5, marginBottom: 8 }}>剩餘估計</div>
+          <div style={{ fontSize: 24, fontWeight: 600, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
             ${remaining.toLocaleString()}
           </div>
         </div>
