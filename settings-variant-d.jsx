@@ -801,16 +801,27 @@ function D_ClassList({ T, onEdit }) {
 }
 
 function D_PaySummary({ T }) {
+  const [range, setRange] = React.useState("累計");
+  const now = new Date();
+  const curMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const curYear = String(now.getFullYear());
+
   const allRecords = window.SAMPLE_RECORDS;
   const idx = window.Store ? window.Store.derived.buildLessonRevenueIndex() : {};
 
+  const inRange = (date) => {
+    if (range === "本月") return (date || "").slice(0,7) === curMonth;
+    if (range === "本年") return (date || "").slice(0,4) === curYear;
+    return true;
+  };
+
   const totalPaid = allRecords
-    .filter(r => r.type === "payment")
+    .filter(r => r.type === "payment" && inRange(r.date))
     .reduce((s, r) => s + (r.amount || 0), 0);
 
   let totalUsed = 0;
   allRecords.forEach(r => {
-    if (r.type !== "class" || !r.attendees) return;
+    if (r.type !== "class" || !r.attendees || !inRange(r.date)) return;
     r.attendees.forEach(a => {
       if (!a.usedPackage) return;
       totalUsed += (idx[r.id + ":" + a.studentId]?.amount || 0);
@@ -818,27 +829,48 @@ function D_PaySummary({ T }) {
   });
 
   const remaining = totalPaid - totalUsed;
-
-  const stat = (label, value, color) => (
-    <div style={{ flex: 1, textAlign: "center" }}>
-      <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>{label}</div>
-      <div style={{
-        fontSize: 18, fontWeight: 700, color,
-        fontFamily: "'Cormorant Garamond', serif", lineHeight: 1
-      }}>${value.toLocaleString()}</div>
-    </div>
-  );
+  const pct = totalPaid > 0 ? Math.round(totalUsed / totalPaid * 100) : 0;
 
   return (
     <div style={{
-      background: T.surface, borderRadius: 20, padding: "16px 18px",
-      border: `1px solid ${T.borderSoft}`, display: "flex", alignItems: "stretch"
+      background: T.surface, borderRadius: 20, padding: "14px 18px 16px",
+      border: `1px solid ${T.borderSoft}`
     }}>
-      {stat("已收儲值", totalPaid, T.accent)}
-      <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
-      {stat("已消耗", totalUsed, T.primary)}
-      <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
-      {stat("剩餘估計", remaining, remaining >= 0 ? T.primaryDeep : T.danger)}
+      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+        {["本月", "本年", "累計"].map(r => (
+          <button key={r} onClick={() => setRange(r)} style={{
+            padding: "3px 10px", borderRadius: 999, fontSize: 11, fontFamily: "inherit",
+            border: "none", cursor: "pointer",
+            background: range === r ? T.primary : T.bg,
+            color: range === r ? T.surface : T.inkSoft,
+            fontWeight: range === r ? 600 : 400,
+          }}>{r}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", alignItems: "stretch" }}>
+        <div style={{ flex: 1, textAlign: "center" }}>
+          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>已收儲值</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: T.accent, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
+            ${totalPaid.toLocaleString()}
+          </div>
+        </div>
+        <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
+        <div style={{ flex: 1, textAlign: "center" }}>
+          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>已使用</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: T.primary, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
+            ${totalUsed.toLocaleString()}
+          </div>
+          <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 4 }}>{pct} %</div>
+        </div>
+        <div style={{ width: 1, background: T.borderSoft, margin: "0 4px" }} />
+        <div style={{ flex: 1, textAlign: "center" }}>
+          <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.2, marginBottom: 6 }}>剩餘估計</div>
+          <div style={{ fontSize: 18, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif", lineHeight: 1,
+            color: remaining >= 0 ? T.primaryDeep : T.danger }}>
+            ${remaining.toLocaleString()}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
