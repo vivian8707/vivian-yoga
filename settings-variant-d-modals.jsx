@@ -1298,6 +1298,7 @@ function D_Modal_History({ embedded, onClose, student, onEditRecord }) {
   const history = window.Store && stu.id !== "_none" ? window.Store.derived.studentHistory(stu.id) : [];
   const stats = window.Store && stu.id !== "_none" ? window.Store.derived.studentStats(stu.id) : { lessons: 0, paid: 0 };
   const [editOpen, setEditOpen] = useStateMod(false);
+  const [hideAmt, setHideAmt] = useStateMod(false);
   const fmtMD = (iso) => {
     const d = new Date(iso);
     return `${d.getMonth() + 1}/${String(d.getDate()).padStart(2, "0")}`;
@@ -1314,6 +1315,18 @@ function D_Modal_History({ embedded, onClose, student, onEditRecord }) {
         background: T.bg
       }}>
         <div style={{ flex: 1, fontSize: 17, fontWeight: 600, color: T.ink, letterSpacing: 0.3 }}>學生紀錄</div>
+        <button onClick={() => setHideAmt(h => !h)} aria-label={hideAmt ? "顯示金額" : "隱藏金額"} title={hideAmt ? "顯示金額" : "隱藏金額"} style={{
+          width: 36, height: 36, borderRadius: 18, border: `1px solid ${hideAmt ? T.primary : T.border}`,
+          background: hideAmt ? T.primarySoft : T.surface,
+          color: hideAmt ? T.primaryDeep : T.inkSoft,
+          cursor: "pointer", padding: 0,
+          display: "flex", alignItems: "center", justifyContent: "center"
+        }}>
+          {hideAmt
+            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          }
+        </button>
         {stu.id !== "_none" && (
           <button onClick={() => setEditOpen(true)} aria-label="編輯" style={{
             height: 36, borderRadius: 18, border: `1px solid ${T.border}`,
@@ -1363,10 +1376,12 @@ function D_Modal_History({ embedded, onClose, student, onEditRecord }) {
           }}>
             <div><div style={{ opacity: 0.7 }}>累積上課</div>
               <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>{stats.classCount} 堂</div></div>
-            <div><div style={{ opacity: 0.7 }}>累積儲值</div>
-              <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>${stats.paid.toLocaleString()}</div></div>
-            <div><div style={{ opacity: 0.7 }}>累積金額</div>
-              <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>${stats.totalRevenue.toLocaleString()}</div></div>
+            {!hideAmt && <>
+              <div><div style={{ opacity: 0.7 }}>累積儲值</div>
+                <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>${stats.paid.toLocaleString()}</div></div>
+              <div><div style={{ opacity: 0.7 }}>累積金額</div>
+                <div style={{ fontSize: 14, fontWeight: 600, marginTop: 2 }}>${stats.totalRevenue.toLocaleString()}</div></div>
+            </>}
           </div>
         </div>
       </div>
@@ -1435,26 +1450,26 @@ function D_Modal_History({ embedded, onClose, student, onEditRecord }) {
                 <div style={{ textAlign: "right" }}>
                   {isTopUp ?
                     <>
-                      <div style={{
+                      {!hideAmt && <div style={{
                         fontSize: 16, fontWeight: 600, color: T.accent,
                         fontFamily: "'Cormorant Garamond', serif", lineHeight: 1
-                      }}>+${r.amount.toLocaleString()}</div>
-                      <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 4 }}>
+                      }}>+${r.amount.toLocaleString()}</div>}
+                      <div style={{ fontSize: 10, color: T.inkSoft, marginTop: hideAmt ? 0 : 4 }}>
                         +{r.classes} 堂
                       </div>
                     </>
                   :
                     <>
-                      <div style={{
+                      {!hideAmt && <div style={{
                         fontSize: 16, fontWeight: 600,
                         color: r.usedPackage ? T.inkSoft : T.primary,
                         fontFamily: "'Cormorant Garamond', serif", lineHeight: 1
                       }}>{r.usedPackage
                         ? `$${(r.amount || 0).toLocaleString()}`
                         : `+$${(r.amount || 0).toLocaleString()}`
-                      }</div>
+                      }</div>}
                       {r.usedPackage && (
-                        <div style={{ fontSize: 10, color: T.inkSoft, marginTop: 4 }}>
+                        <div style={{ fontSize: 10, color: T.inkSoft, marginTop: hideAmt ? 0 : 4 }}>
                           {r.count || 1} 堂
                         </div>
                       )}
