@@ -462,6 +462,7 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
   const trialPrice  = currentVenue.trialPrice  ?? 200;
 
   const allStudents = window.Store ? window.Store.getState().students : window.SAMPLE_STUDENTS;
+  const classGroups = window.Store ? (window.Store.getState().classGroups || []) : [];
   const lastClassMap = window.Store ? window.Store.derived.lastClassByStudent() : {};
   const studentsHere = allStudents.filter(s => !s.archived && s.location === loc)
     .sort((a, b) => {
@@ -610,6 +611,38 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
         <>
           <div style={{ height: 18 }} />
           <FieldLabel>選擇學生 &amp; 收費方式</FieldLabel>
+          {(() => {
+            const relevantGroups = classGroups.filter(g => (g.studentIds || []).some(id => studentsHere.find(s => s.id === id)));
+            if (!relevantGroups.length) return null;
+            return (
+              <div style={{
+                background: T.surface, borderRadius: 12,
+                border: `1px solid ${T.borderSoft}`, padding: "10px 12px", marginBottom: 10
+              }}>
+                <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.5, marginBottom: 8, fontWeight: 500 }}>班級快選</div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {relevantGroups.map(g => (
+                    <button key={g.id} onClick={() => {
+                      setStudentState(prev => {
+                        const next = { ...prev };
+                        (g.studentIds || []).forEach(id => {
+                          if (!studentsHere.find(s => s.id === id)) return;
+                          if (!next[id]) next[id] = { checked: false, count: 1, pricing: "package", customPrice: 0 };
+                          next[id] = { ...next[id], checked: true };
+                        });
+                        return next;
+                      });
+                    }} style={{
+                      padding: "5px 12px", borderRadius: 999,
+                      fontSize: 11, fontWeight: 500, cursor: "pointer",
+                      border: "none", fontFamily: "inherit",
+                      background: T.primarySoft, color: T.primaryDeep,
+                    }}>{g.name}</button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
           {studentsHere.length === 0 &&
             <div style={{ fontSize: 12, color: T.inkSoft, padding: "8px 4px" }}>
               此場地沒有學生 — 請先到「學生」頁新增。
@@ -1505,6 +1538,10 @@ function D_Modal_Settings({ embedded, onClose }) {
     (getSettings().venues || window.DEFAULT_VENUES || []).map(v => JSON.parse(JSON.stringify(v)))
   );
   const [editingVenueId, setEditingVenueId] = useStateMod(null);
+  const [classGroups, setClassGroups] = useStateMod(() =>
+    window.Store ? (window.Store.getState().classGroups || []).map(g => ({ ...g, studentIds: [...(g.studentIds || [])] })) : []
+  );
+  const [editingGroup, setEditingGroup] = useStateMod(null);
   const palette = window.VENUE_PALETTE || [
     { bg: "#e1e5dc", fg: "#5b6650" },
     { bg: "#ecdfdf", fg: "#7c5e5e" },
@@ -1534,6 +1571,90 @@ function D_Modal_Settings({ embedded, onClose }) {
     }
     onClose && onClose();
   };
+
+  // ── Class group editor sub-page ──
+  if (editingGroup !== null) {
+    const communityVenueNames = venues.filter(v => v.mode === "community").map(v => v.name);
+    const communityStudents = (window.Store ? window.Store.getState().students : window.SAMPLE_STUDENTS)
+      .filter(s => !s.archived && communityVenueNames.includes(s.location));
+    const isNew = !editingGroup.id;
+    const saveGroup = () => {
+      const g = { name: (editingGroup.name || "").trim() || "新班級", studentIds: editingGroup.studentIds };
+      if (isNew) {
+        const newId = window.Store ? window.Store.actions.addClassGroup(g) : null;
+        if (newId) setClassGroups(prev => [...prev, { id: newId, ...g }]);
+      } else {
+        window.Store && window.Store.actions.updateClassGroup(editingGroup.id, g);
+        setClassGroups(prev => prev.map(x => x.id === editingGroup.id ? { ...x, ...g } : x));
+      }
+      setEditingGroup(null);
+    };
+    const deleteGroup = () => {
+      if (!isNew) {
+        window.Store && window.Store.actions.deleteClassGroup(editingGroup.id);
+        setClassGroups(prev => prev.filter(x => x.id !== editingGroup.id));
+      }
+      setEditingGroup(null);
+    };
+    return (
+      <BottomSheet title={isNew ? "新增班級" : "編輯班級"} primaryLabel="完成" sheetHeight="90%" embedded={embedded}
+        onClose={() => setEditingGroup(null)} onSubmit={saveGroup}
+        showDelete={!isNew} onDelete={deleteGroup}
+      >
+        <FieldLabel>班級名稱</FieldLabel>
+        <input
+          value={editingGroup.name}
+          onChange={e => setEditingGroup(g => ({ ...g, name: e.target.value }))}
+          placeholder="例：週二晚"
+          style={{
+            width: "100%", boxSizing: "border-box",
+            background: T.surface, borderRadius: 10,
+            border: `1px solid ${T.border}`, padding: "11px 14px",
+            fontSize: 16, color: T.ink, fontFamily: "inherit", outline: "none"
+          }}
+        />
+        <div style={{ height: 20 }} />
+        <FieldLabel>成員</FieldLabel>
+        {communityStudents.length === 0 &&
+          <div style={{ fontSize: 12, color: T.inkSoft, padding: "8px 4px" }}>
+            尚無小班課學生，請先新增學生。
+          </div>
+        }
+        <div style={{
+          background: T.surface, borderRadius: 14,
+          border: `1px solid ${T.borderSoft}`, overflow: "hidden"
+        }}>
+          {communityStudents.map((s, i) => {
+            const checked = (editingGroup.studentIds || []).includes(s.id);
+            const toggle = () => setEditingGroup(g => ({
+              ...g,
+              studentIds: checked
+                ? (g.studentIds || []).filter(id => id !== s.id)
+                : [...(g.studentIds || []), s.id]
+            }));
+            return (
+              <div key={s.id} onClick={toggle} style={{
+                display: "flex", alignItems: "center", gap: 12,
+                padding: "12px 14px", cursor: "pointer",
+                borderBottom: i < communityStudents.length - 1 ? `1px solid ${T.borderSoft}` : "none",
+              }}>
+                <div style={{
+                  width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                  border: `1.5px solid ${checked ? T.primary : T.border}`,
+                  background: checked ? T.primary : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {checked && <svg width="11" height="8" viewBox="0 0 11 8" fill="none"><path d="M1 3.5L4 6.5L10 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                </div>
+                <span style={{ fontSize: 14, color: checked ? T.ink : T.inkSoft, fontWeight: checked ? 600 : 400 }}>{s.name}</span>
+                <span style={{ fontSize: 11, color: T.inkSoft, marginLeft: "auto" }}>{s.location}</span>
+              </div>
+            );
+          })}
+        </div>
+      </BottomSheet>
+    );
+  }
 
   // ── Venue editor sub-page ──
   if (editingVenueId) {
@@ -1792,6 +1913,34 @@ function D_Modal_Settings({ embedded, onClose }) {
           </button>
         );
       })}
+
+      <div style={{ height: 8 }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+        <FieldLabel>班級管理</FieldLabel>
+        <button onClick={() => setEditingGroup({ id: null, name: "", studentIds: [] })} style={{
+          padding: "6px 12px", borderRadius: 8, border: `1px solid ${T.border}`,
+          background: T.surface, color: T.primary, fontSize: 12, fontWeight: 600,
+          fontFamily: "inherit", cursor: "pointer"
+        }}>+ 新增</button>
+      </div>
+      {classGroups.length === 0 &&
+        <div style={{ fontSize: 12, color: T.inkSoft, padding: "4px 4px 12px" }}>
+          建立班級後，新增上課時可快速帶入該班學生。
+        </div>
+      }
+      {classGroups.map((g) => (
+        <button key={g.id} onClick={() => setEditingGroup({ ...g, studentIds: [...(g.studentIds || [])] })} style={{
+          width: "100%", display: "flex", alignItems: "center", gap: 12,
+          background: T.surface, borderRadius: 12, padding: "12px 14px",
+          border: `1px solid ${T.borderSoft}`, marginBottom: 8,
+          fontFamily: "inherit", cursor: "pointer", textAlign: "left"
+        }}>
+          <span style={{ width: 8, height: 8, borderRadius: 4, flexShrink: 0, background: T.primary }} />
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: T.ink }}>{g.name}</span>
+          <span style={{ fontSize: 11, color: T.inkSoft }}>{(g.studentIds || []).length} 位</span>
+          <span style={{ fontSize: 14, color: T.inkSoft }}>›</span>
+        </button>
+      ))}
     </BottomSheet>
   );
 }

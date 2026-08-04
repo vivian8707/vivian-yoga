@@ -41,6 +41,7 @@
       students: window.SEED_STUDENTS.slice(),
       records: window.SEED_RECORDS.slice(),
       customPlans: [],
+      classGroups: [],
       settings: { displayName: "", venues: defaultVenues(), paymentPlans: DEFAULT_COMMUNITY_PLANS.map(p => ({...p})) },
     };
   }
@@ -52,6 +53,7 @@
       const obj = JSON.parse(raw);
       if (!obj.students || !obj.records) return seed();
       if (!obj.customPlans) obj.customPlans = [];
+      if (!obj.classGroups) obj.classGroups = [];
       if (!obj.settings) obj.settings = { displayName: "", venues: defaultVenues() };
       if (!obj.settings.venues) obj.settings.venues = defaultVenues();
       if (!obj.settings.paymentPlans) obj.settings.paymentPlans = DEFAULT_COMMUNITY_PLANS.map(p => ({...p}));
@@ -341,6 +343,23 @@
     },
     deleteStudent(id) {
       state.students = state.students.filter(s => s.id !== id);
+      commit();
+    },
+    addClassGroup(g) {
+      if (!state.classGroups) state.classGroups = [];
+      const rec = Object.assign({ id: uid("cg"), studentIds: [] }, g);
+      state.classGroups.push(rec);
+      commit();
+      return rec.id;
+    },
+    updateClassGroup(id, patch) {
+      if (!state.classGroups) state.classGroups = [];
+      state.classGroups = state.classGroups.map(g => g.id === id ? Object.assign({}, g, patch) : g);
+      commit();
+    },
+    deleteClassGroup(id) {
+      if (!state.classGroups) return;
+      state.classGroups = state.classGroups.filter(g => g.id !== id);
       commit();
     },
     reset() { state = seed(); commit(); },

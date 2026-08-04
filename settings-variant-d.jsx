@@ -996,11 +996,19 @@ function StudentAvatar({ id, tone }) {
 }
 
 function D_Students({ T, onSelect }) {
+  const [groupFilter, setGroupFilter] = React.useState(null);
   if (window.SAMPLE_STUDENTS.length === 0) {
     return <D_EmptyState T={T} iconKind="person" title="還沒有學生" hint={<>點右下角 <b>+</b> 、選「新增學生」來建立名單。之後記錄上課、儲值都會以這裡為主。</>} />;
   }
+  const classGroups = window.Store ? (window.Store.getState().classGroups || []) : [];
+  const filteredStudents = groupFilter
+    ? window.SAMPLE_STUDENTS.filter(s => {
+        const g = classGroups.find(g => g.id === groupFilter);
+        return g && (g.studentIds || []).includes(s.id);
+      })
+    : window.SAMPLE_STUDENTS;
   const groups = {};
-  window.SAMPLE_STUDENTS.forEach((s) => {
+  filteredStudents.forEach((s) => {
     const k = s.location || "園頂";
     if (!groups[k]) groups[k] = [];
     groups[k].push(s);
@@ -1032,6 +1040,28 @@ function D_Students({ T, onSelect }) {
   };
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {classGroups.length > 0 && (
+        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2, scrollbarWidth: "none" }}>
+          <button onClick={() => setGroupFilter(null)} style={{
+            padding: "5px 12px", borderRadius: 999, fontSize: 11, whiteSpace: "nowrap",
+            border: "none", cursor: "pointer", fontFamily: "inherit", flexShrink: 0,
+            background: groupFilter === null ? T.primary : T.surface,
+            color: groupFilter === null ? "#fff" : T.inkSoft,
+            fontWeight: groupFilter === null ? 600 : 400,
+            boxShadow: groupFilter === null ? "none" : `inset 0 0 0 1px ${T.border}`,
+          }}>全部</button>
+          {classGroups.map(g => (
+            <button key={g.id} onClick={() => setGroupFilter(g.id === groupFilter ? null : g.id)} style={{
+              padding: "5px 12px", borderRadius: 999, fontSize: 11, whiteSpace: "nowrap",
+              border: "none", cursor: "pointer", fontFamily: "inherit", flexShrink: 0,
+              background: groupFilter === g.id ? T.primary : T.surface,
+              color: groupFilter === g.id ? "#fff" : T.inkSoft,
+              fontWeight: groupFilter === g.id ? 600 : 400,
+              boxShadow: groupFilter === g.id ? "none" : `inset 0 0 0 1px ${T.border}`,
+            }}>{g.name}</button>
+          ))}
+        </div>
+      )}
       {Object.entries(groups).map(([loc, list]) => {
         const tone = D_LOC[loc] || D_LOC["園頂"];
         return (
@@ -1066,6 +1096,13 @@ function D_Students({ T, onSelect }) {
                         background: T.borderSoft, color: T.inkSoft, fontWeight: 500, letterSpacing: 0.5,
                         flexShrink: 0
                       }}>已封存</span>}
+                      {classGroups.filter(g => (g.studentIds || []).includes(s.id)).map(g => (
+                        <span key={g.id} style={{
+                          fontSize: 9, padding: "1px 7px", borderRadius: 999,
+                          background: T.primarySoft, color: T.primaryDeep,
+                          fontWeight: 600, letterSpacing: 0.5, flexShrink: 0
+                        }}>{g.name}</span>
+                      ))}
                     </div>
                     <div style={{
                       display: "flex", alignItems: "baseline", gap: 8, minWidth: 0, marginTop: 1
