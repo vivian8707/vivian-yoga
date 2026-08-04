@@ -828,7 +828,19 @@ function D_PaySummary({ T }) {
     });
   });
 
-  const remaining = totalPaid - totalUsed;
+  // 剩餘估計永遠用累積總額，不跟著篩選範圍走
+  const totalPaidAll = allRecords
+    .filter(r => r.type === "payment")
+    .reduce((s, r) => s + (r.amount || 0), 0);
+  let totalUsedAll = 0;
+  allRecords.forEach(r => {
+    if (r.type !== "class" || !r.attendees) return;
+    r.attendees.forEach(a => {
+      if (!a.usedPackage) return;
+      totalUsedAll += (idx[r.id + ":" + a.studentId]?.amount || 0);
+    });
+  });
+  const remaining = totalPaidAll - totalUsedAll;
   const pct = totalPaid > 0 ? Math.round(totalUsed / totalPaid * 100) : 0;
 
   return (
