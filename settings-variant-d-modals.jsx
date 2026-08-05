@@ -648,7 +648,10 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
               此場地沒有學生 — 請先到「學生」頁新增。
             </div>
           }
-          {studentsHere.map((s) => {
+          {[...studentsHere].sort((a, b) => {
+            const ac = !!(studentState[a.id]?.checked), bc = !!(studentState[b.id]?.checked);
+            return ac === bc ? 0 : ac ? -1 : 1;
+          }).map((s) => {
             const st = studentState[s.id] || { checked: false, count: 1, pricing: "package", customPrice: 0 };
             return <StudentCard key={s.id} student={s} state={st} onChange={(next) => onStudentChange(s.id, next)} singlePrice={singlePrice} trialPrice={trialPrice} />;
           })}
