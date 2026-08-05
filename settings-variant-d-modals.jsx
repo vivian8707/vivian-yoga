@@ -619,7 +619,17 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
                 background: T.surface, borderRadius: 12,
                 border: `1px solid ${T.borderSoft}`, padding: "10px 12px", marginBottom: 10
               }}>
-                <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.5, marginBottom: 8, fontWeight: 500 }}>班級快選</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, color: T.inkSoft, letterSpacing: 1.5, fontWeight: 500 }}>班級快選</div>
+                  <button onClick={() => setStudentState(prev => {
+                    const next = { ...prev };
+                    studentsHere.forEach(s => { if (next[s.id]) next[s.id] = { ...next[s.id], checked: false }; });
+                    return next;
+                  })} style={{
+                    fontSize: 10, color: T.inkSoft, background: "none",
+                    border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0
+                  }}>清除</button>
+                </div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                   {relevantGroups.map(g => (
                     <button key={g.id} onClick={() => {
