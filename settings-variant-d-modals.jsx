@@ -903,14 +903,14 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
   const [pickerOpen, setPickerOpen] = useStateMod(!editRecord);
   const allVenuesCfg = window.Store ? ((window.Store.getState().settings || {}).venues || window.DEFAULT_VENUES || []) : (window.DEFAULT_VENUES || []);
   const communityVenueCfg = allVenuesCfg.find(v => v.mode === "community");
-  const communityPlansRaw = (communityVenueCfg && communityVenueCfg.communityPlans) || window.DEFAULT_COMMUNITY_PLANS || [];
+  const communityPlansRaw = (communityVenueCfg && communityVenueCfg.communityPlans && communityVenueCfg.communityPlans.length ? communityVenueCfg.communityPlans : null) || window.DEFAULT_COMMUNITY_PLANS || [];
   const builtInPlans = communityPlansRaw.map(p => ({ id: p.id, name: p.label, classes: p.classes, price: p.price }));
   const allPlans = [...builtInPlans, ...customPlans];
   // detect if editRecord plan matches a known plan
   const matchedPlan = editRecord ? allPlans.find(p => p.name === editRecord.plan && p.classes === editRecord.classes && p.price === editRecord.amount) : null;
   const initialKey = editRecord
     ? (matchedPlan ? matchedPlan.id : "__custom__")
-    : (allPlans[initialPlan] ? allPlans[initialPlan].id : builtInPlans[0].id);
+    : (allPlans[initialPlan] ? allPlans[initialPlan].id : (allPlans[0] ? allPlans[0].id : "__custom__"));
   const [planId, setPlanId] = useStateMod(initialKey);
   const [showCustom, setShowCustom] = useStateMod(customOpen || (editRecord && !matchedPlan));
   const [cClasses, setCClasses] = useStateMod(editRecord && !matchedPlan ? (editRecord.classes || customClasses) : customClasses);
@@ -927,7 +927,7 @@ function D_Modal_Payment({ initialPlan = 1, customOpen = false, customClasses = 
   const selectedPlan = allPlans.find(p => p.id === planId);
   const sel = isCustom
     ? { name: cName.trim() || "自訂方案", classes: cClasses, price: cPrice }
-    : (selectedPlan || builtInPlans[0]);
+    : (selectedPlan || builtInPlans[0] || { name: "自訂方案", classes: cClasses, price: cPrice });
   const student = students.find(s => s.id === studentId);
   const submit = () => {
     if (!student) return;
