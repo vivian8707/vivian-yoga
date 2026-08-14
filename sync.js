@@ -108,13 +108,9 @@
   function attach() {
     if (!window.Store) { setTimeout(attach, 50); return; }
 
-    // 包裝 commit:在原本 commit() 之後 schedulePush
-    // store.js 沒 export commit,所以走 subscribe 方式
-    let firstChange = true;
+    // 每次 store commit 後觸發 push（pull 觸發的 _reload 已由 __syncSilent 過濾）
     window.Store.subscribe(() => {
-      // pullNow 觸發的 reload 也會 emit,但那次不該 push
       if (window.__syncSilent) return;
-      if (firstChange) { firstChange = false; return; }
       schedulePush();
     });
 

@@ -1,5 +1,5 @@
 // Service Worker — 快取本地檔案，讓 App 在網路不穩時也能使用
-const CACHE = "vyc-v24";
+const CACHE = "vyc-v25";
 
 const LOCAL_ASSETS = [
   "./",
