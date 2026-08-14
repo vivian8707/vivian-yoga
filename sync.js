@@ -4,12 +4,15 @@
 //   2) 每次 store.commit() 之後 debounce 1.2s 上傳
 //   3) 透過 window.SyncStatus.set(...) 廣播狀態,讓 UI 顯示
 //   4) 視窗 focus 或恢復連線時自動拉一次
+//   5) 「待上傳」旗標存入 localStorage，App 重開時先 push 再 pull，防止記錄消失
 
 (function () {
   const ENDPOINT = "https://script.google.com/macros/s/AKfycby-TYIyBNFa51N4NzYGhkO5YUpRw0eVmzgRzEaDdLYO2S-px5tW3QscX36XU7K5e8dA0A/exec";
   const KEY = "vyc.v1";
+  const DIRTY_KEY = "vyc.dirty"; // 跨 App 重啟的待上傳旗標
   const DEBOUNCE_MS = 1200;
   const POLL_MS = 30000; // 每 30 秒輪詢一次
+  const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
 
   // --- Status broadcaster ---
   const statusListeners = new Set();
@@ -24,14 +27,14 @@
     get: () => status,
     subscribe(fn) { statusListeners.add(fn); fn(status); return () => statusListeners.delete(fn); },
     forcePush: () => schedulePush(0),
-    forcePull: () => pullNow(),
+    forcePull: () => pullNow(true),
   };
 
   // --- Network ---
-  async function pullNow() {
+  async function pullNow(force) {
     // 本地有待上傳的變更時，或 push 剛完成不久，不以雲端舊資料覆蓋
     if (hasPendingChanges || pushing) return;
-    if (Date.now() - lastPushTime < PUSH_GUARD_MS) return;
+    if (!force && Date.now() - lastPushTime < PUSH_GUARD_MS) return;
     setStatus("syncing", "下載最新資料…");
     try {
       const res = await fetch(ENDPOINT, { method: "GET", redirect: "follow" });
@@ -63,10 +66,12 @@
   let pushing = false;
   let hasPendingChanges = false;
   let lastPushTime = 0;
-  const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
+
   function schedulePush(delay) {
     clearTimeout(pushTimer);
     hasPendingChanges = true;
+    // 將待上傳旗標持久化，確保 App 重啟後也能偵測到
+    try { localStorage.setItem(DIRTY_KEY, "1"); } catch (e) {}
     setStatus("pending", "等待上傳…");
     pushTimer = setTimeout(pushNow, delay == null ? DEBOUNCE_MS : delay);
   }
@@ -85,6 +90,7 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         redirect: "follow",
       });
+      try { localStorage.removeItem(DIRTY_KEY); } catch (e) {}
       lastPushTime = Date.now();
       setStatus("synced", "已同步");
     } catch (err) {
@@ -112,8 +118,22 @@
       schedulePush();
     });
 
-    // 啟動時拉一次
-    pullNow();
+    // App 切到背景時立刻 push，防止 debounce 還沒到就被系統中止
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && hasPendingChanges) {
+        clearTimeout(pushTimer);
+        pushNow();
+      }
+    });
+
+    // 啟動時：若上次有未完成的 push，先推再拉
+    const wasDirty = localStorage.getItem(DIRTY_KEY);
+    if (wasDirty) {
+      hasPendingChanges = true;
+      pushNow().then(() => pullNow());
+    } else {
+      pullNow();
+    }
 
     // 視窗 focus / 連線恢復:再拉一次
     window.addEventListener("focus", () => { pullNow(); });
