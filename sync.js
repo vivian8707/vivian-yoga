@@ -29,8 +29,9 @@
 
   // --- Network ---
   async function pullNow() {
-    // 本地有待上傳的變更時，不以雲端舊資料覆蓋，避免新增記錄瞬間消失
+    // 本地有待上傳的變更時，或 push 剛完成不久，不以雲端舊資料覆蓋
     if (hasPendingChanges || pushing) return;
+    if (Date.now() - lastPushTime < PUSH_GUARD_MS) return;
     setStatus("syncing", "下載最新資料…");
     try {
       const res = await fetch(ENDPOINT, { method: "GET", redirect: "follow" });
@@ -61,6 +62,8 @@
   let pushTimer = null;
   let pushing = false;
   let hasPendingChanges = false;
+  let lastPushTime = 0;
+  const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
   function schedulePush(delay) {
     clearTimeout(pushTimer);
     hasPendingChanges = true;
@@ -82,6 +85,7 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         redirect: "follow",
       });
+      lastPushTime = Date.now();
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] push failed", err);
@@ -104,7 +108,7 @@
     window.Store.subscribe(() => {
       // pullNow 觸發的 reload 也會 emit,但那次不該 push
       if (window.__syncSilent) return;
-      if (firstChange) { firstChange = false; }
+      if (firstChange) { firstChange = false; return; }
       schedulePush();
     });
 
