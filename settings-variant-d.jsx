@@ -67,8 +67,8 @@ function MonthCard({ T, year, monthNum, income, lessons, variant = "split" }) {
   );
   const Money = ({ size = 32, color = T.ink }) => (
     <span style={{
-      fontSize: size, fontWeight: 500, letterSpacing: 0.3,
-      fontFamily: "'Noto Sans TC', sans-serif", lineHeight: 1, color
+      fontSize: size, fontWeight: 700, letterSpacing: 0.3,
+      fontFamily: "'Cormorant Garamond', 'Noto Sans TC', serif", lineHeight: 1, color
     }}>{'$'}{income.toLocaleString()}</span>
   );
 
@@ -708,7 +708,8 @@ function D_ClassList({ T, onEdit }) {
                 width: 42, textAlign: "center", flexShrink: 0,
                 borderRight: `1px solid ${T.borderSoft}`, paddingRight: 10
               }}>
-                <div style={{ fontSize: 22, fontWeight: 500, color: T.ink, lineHeight: 1 }}>{date.getDate()}</div>
+                <div style={{ fontSize: 22, fontWeight: 600, color: T.ink, lineHeight: 1,
+                  fontFamily: "'Cormorant Garamond', serif" }}>{date.getDate()}</div>
                 <div style={{ fontSize: 9, color: T.inkSoft, letterSpacing: 1, marginTop: 4 }}>
                   {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][date.getDay()]}
                 </div>
@@ -737,7 +738,8 @@ function D_ClassList({ T, onEdit }) {
                 </div>
               </div>
               <div style={{ alignSelf: "center", textAlign: "right" }}>
-                <div style={{ fontSize: 18, fontWeight: 400, color: T.accent, lineHeight: 1 }}>
+                <div style={{ fontSize: 18, fontWeight: 600, color: T.accent,
+                  fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>
                   {displayTotal(r).toLocaleString()}
                 </div>
               </div>
