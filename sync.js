@@ -12,7 +12,7 @@
   const DIRTY_KEY = "vyc.dirty"; // 跨 App 重啟的待上傳旗標
   const DEBOUNCE_MS = 1200;
   const POLL_MS = 30000; // 每 30 秒輪詢一次
-  const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
+  const PUSH_GUARD_MS = 60000; // push 完成後 60 秒內不 pull，讓 cloud 有時間處理
 
   // --- Status broadcaster ---
   const statusListeners = new Set();
@@ -37,7 +37,7 @@
     if (!force && Date.now() - lastPushTime < PUSH_GUARD_MS) return;
     setStatus("syncing", "下載最新資料…");
     try {
-      const res = await fetch(ENDPOINT, { method: "GET", redirect: "follow" });
+      const res = await fetch(ENDPOINT + "?t=" + Date.now(), { method: "GET", redirect: "follow", cache: "no-store" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
       if (!data || !data.students || !data.records) {
