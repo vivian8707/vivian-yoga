@@ -53,6 +53,17 @@
         setStatus("synced", "已同步");
         return;
       }
+      // 若雲端資料筆數少於本機，視為舊快照，改成 push 保護本機記錄
+      try {
+        const local = JSON.parse(localStorage.getItem(KEY) || "{}");
+        const localCount = (local.records || []).length;
+        const cloudCount = (data.records || []).length;
+        if (!force && cloudCount < localCount) {
+          console.warn("[sync] cloud has fewer records, pushing local data instead");
+          schedulePush(0);
+          return;
+        }
+      } catch (e) {}
       // 寫入 localStorage 並讓 store 重新載入
       localStorage.setItem(KEY, JSON.stringify(data));
       if (window.Store && window.Store._reload) window.Store._reload();
