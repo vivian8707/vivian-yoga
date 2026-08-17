@@ -9,9 +9,10 @@
 (function () {
   const ENDPOINT = "https://script.google.com/macros/s/AKfycby-TYIyBNFa51N4NzYGhkO5YUpRw0eVmzgRzEaDdLYO2S-px5tW3QscX36XU7K5e8dA0A/exec";
   const KEY = "vyc.v1";
-  const DIRTY_KEY = "vyc.dirty"; // 跨 App 重啟的待上傳旗標
+  const DIRTY_KEY = "vyc.dirty";       // 跨 App 重啟的待上傳旗標
+  const LAST_PUSH_KEY = "vyc.lastPush"; // 最後成功 push 的時間戳記（跨重啟）
   const DEBOUNCE_MS = 1200;
-  const POLL_MS = 30000; // 每 30 秒輪詢一次
+  const POLL_MS = 30000;   // 每 30 秒輪詢一次
   const PUSH_GUARD_MS = 60000; // push 完成後 60 秒內不 pull，讓 cloud 有時間處理
 
   // --- Status broadcaster ---
@@ -65,7 +66,8 @@
   let pushTimer = null;
   let pushing = false;
   let hasPendingChanges = false;
-  let lastPushTime = 0;
+  // 從 localStorage 恢復，讓 push guard 跨 App 重啟仍然有效
+  let lastPushTime = parseInt(localStorage.getItem(LAST_PUSH_KEY) || "0");
 
   function schedulePush(delay) {
     clearTimeout(pushTimer);
@@ -90,8 +92,9 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         redirect: "follow",
       });
-      try { localStorage.removeItem(DIRTY_KEY); } catch (e) {}
       lastPushTime = Date.now();
+      try { localStorage.setItem(LAST_PUSH_KEY, String(lastPushTime)); } catch (e) {}
+      try { localStorage.removeItem(DIRTY_KEY); } catch (e) {}
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] push failed", err);
