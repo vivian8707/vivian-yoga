@@ -53,20 +53,29 @@
         setStatus("synced", "已同步");
         return;
       }
-      // 若雲端資料筆數少於本機，視為舊快照，改成 push 保護本機記錄
+      // 合併：取本機與雲端的聯集（以 id 為鍵），確保本機新增記錄不被舊雲端資料覆蓋
       try {
         const local = JSON.parse(localStorage.getItem(KEY) || "{}");
-        const localCount = (local.records || []).length;
-        const cloudCount = (data.records || []).length;
-        if (!force && cloudCount < localCount) {
-          console.warn("[sync] cloud has fewer records, pushing local data instead");
-          schedulePush(0);
-          return;
+        function mergeById(localArr, cloudArr) {
+          const cloudIds = new Set((cloudArr || []).map(x => x.id));
+          return [...(cloudArr || []), ...(localArr || []).filter(x => !cloudIds.has(x.id))];
         }
-      } catch (e) {}
-      // 寫入 localStorage 並讓 store 重新載入
-      localStorage.setItem(KEY, JSON.stringify(data));
-      if (window.Store && window.Store._reload) window.Store._reload();
+        const mergedRecords  = mergeById(local.records,     data.records);
+        const mergedStudents = mergeById(local.students,     data.students);
+        const mergedPlans    = mergeById(local.customPlans,  data.customPlans  || []);
+        const mergedGroups   = mergeById(local.classGroups,  data.classGroups  || []);
+        const hadLocalOnly   = mergedRecords.length  > (data.records  || []).length ||
+                               mergedStudents.length > (data.students || []).length;
+        const merged = { ...data, records: mergedRecords, students: mergedStudents,
+                         customPlans: mergedPlans, classGroups: mergedGroups };
+        localStorage.setItem(KEY, JSON.stringify(merged));
+        if (window.Store && window.Store._reload) window.Store._reload();
+        if (!force && hadLocalOnly) schedulePush(0); // 把本機多出的資料推回雲端
+      } catch (e) {
+        // fallback: 直接用雲端資料
+        localStorage.setItem(KEY, JSON.stringify(data));
+        if (window.Store && window.Store._reload) window.Store._reload();
+      }
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] pull failed", err);
