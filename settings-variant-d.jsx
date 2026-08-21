@@ -1099,7 +1099,7 @@ function D_Students({ T, onSelect }) {
                       {classGroups.filter(g => (g.studentIds || []).includes(s.id)).map(g => (
                         <span key={g.id} style={{
                           fontSize: 10, padding: "2px 9px", borderRadius: 999,
-                          background: tone.bg, color: tone.fg,
+                          background: "#e1e5dc", color: "#5b6650",
                           fontWeight: 600, letterSpacing: 0.5, flexShrink: 0
                         }}>{g.name}</span>
                       ))}
