@@ -106,12 +106,20 @@
     try {
       const raw = localStorage.getItem(KEY) || "{}";
       // Apps Script doPost 用 text/plain 比較不會被 CORS preflight 擋
-      await fetch(ENDPOINT, {
+      const res = await fetch(ENDPOINT, {
         method: "POST",
         body: raw,
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         redirect: "follow",
       });
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (e) {}
+      // doPost 應回傳 { ok: true, savedAt: ... }；若拿到別的內容（例如被導向 doGet
+      // 回傳的資料本身），代表 POST 實際上沒有寫入，視為失敗，避免顯示假的「已同步」
+      if (!res.ok || !json || json.ok !== true) {
+        throw new Error("push 未被伺服器確認: HTTP " + res.status + " body=" + text.slice(0, 200));
+      }
       lastPushTime = Date.now();
       try { localStorage.setItem(LAST_PUSH_KEY, String(lastPushTime)); } catch (e) {}
       try { localStorage.removeItem(DIRTY_KEY); } catch (e) {}
@@ -119,7 +127,7 @@
     } catch (err) {
       console.warn("[sync] push failed", err);
       hasPendingChanges = true;
-      setStatus("offline", "上傳失敗,稍後重試");
+      setStatus("offline", "上傳失敗: " + (err && err.message ? err.message : "稍後重試"));
       // 5 秒後重試
       setTimeout(() => schedulePush(0), 5000);
     } finally {
