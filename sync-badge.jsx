@@ -16,6 +16,8 @@ function SyncBadge({ T }) {
   const p = palette[s.state] || palette.idle;
 
   const onTap = () => {
+    // 離線/失敗時先顯示詳細錯誤訊息，方便回報問題（手機無法顯示 title tooltip）
+    if (s.state === "offline" && s.message) alert(s.message);
     if (window.SyncStatus) window.SyncStatus.forcePull();
   };
 
