@@ -13,7 +13,7 @@
   const LAST_PUSH_KEY = "vyc.lastPush"; // 最後成功 push 的時間戳記（跨重啟）
   const DEBOUNCE_MS = 1200;
   const POLL_MS = 30000;   // 每 30 秒輪詢一次
-  const PUSH_GUARD_MS = 60000; // push 完成後 60 秒內不 pull，讓 cloud 有時間處理
+  const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
 
   // --- Status broadcaster ---
   const statusListeners = new Set();
