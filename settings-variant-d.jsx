@@ -1098,8 +1098,8 @@ function D_Students({ T, onSelect }) {
                       }}>已封存</span>}
                       {classGroups.filter(g => (g.studentIds || []).includes(s.id)).map(g => (
                         <span key={g.id} style={{
-                          fontSize: 9, padding: "1px 7px", borderRadius: 999,
-                          background: T.primarySoft, color: T.primaryDeep,
+                          fontSize: 10, padding: "2px 9px", borderRadius: 999,
+                          background: tone.bg, color: tone.fg,
                           fontWeight: 600, letterSpacing: 0.5, flexShrink: 0
                         }}>{g.name}</span>
                       ))}
