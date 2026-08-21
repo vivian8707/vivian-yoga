@@ -46,7 +46,7 @@ function SyncBadge({ T }) {
         background: p.dot,
         animation: (s.state === "syncing" || s.state === "pending") ? "syncPulse 1.2s ease-in-out infinite" : "none",
       }} />
-      <span>{p.label}{window.VYC_VERSION ? " ·" + window.VYC_VERSION : ""}</span>
+      <span>{p.label}</span>
       <style>{`@keyframes syncPulse { 0%,100% { opacity: 1 } 50% { opacity: 0.35 } }`}</style>
     </button>
   );
