@@ -15,6 +15,11 @@
   const POLL_MS = 30000;   // 每 30 秒輪詢一次
   const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
 
+  // --- 診斷資訊（點同步膠囊可顯示）---
+  const dbg = { ver: "33", pull: null, push: null };
+  window.__SYNC_DEBUG = dbg;
+  function now() { return new Date().toTimeString().slice(0, 8); }
+
   // --- Status broadcaster ---
   const statusListeners = new Set();
   const status = { state: "idle", message: "", lastSync: null };
@@ -34,8 +39,8 @@
   // --- Network ---
   async function pullNow(force) {
     // 本地有待上傳的變更時，或 push 剛完成不久，不以雲端舊資料覆蓋
-    if (hasPendingChanges || pushing) return;
-    if (!force && Date.now() - lastPushTime < PUSH_GUARD_MS) return;
+    if (hasPendingChanges || pushing) { dbg.pull = { at: now(), skip: "pending/pushing" }; return; }
+    if (!force && Date.now() - lastPushTime < PUSH_GUARD_MS) { dbg.pull = { at: now(), skip: "push-guard" }; return; }
     setStatus("syncing", "下載最新資料…");
     try {
       const res = await fetch(ENDPOINT + "?t=" + Date.now(), { method: "GET", redirect: "follow", cache: "no-store" });
@@ -43,6 +48,7 @@
       const data = await res.json();
       if (!data || !data.students || !data.records) {
         // 雲端是空的 — 把目前本機資料推上去當第一份
+        dbg.pull = { at: now(), cloud: "empty", willPush: true };
         setStatus("syncing", "首次同步,上傳本機資料…");
         await pushNow();
         setStatus("synced", "已同步");
@@ -50,6 +56,7 @@
       }
       // fetch 期間若產生新的本地變更，同樣不覆蓋
       if (hasPendingChanges || pushing) {
+        dbg.pull = { at: now(), skip: "changed-during-fetch" };
         setStatus("synced", "已同步");
         return;
       }
@@ -68,17 +75,20 @@
                                mergedStudents.length > (data.students || []).length;
         const merged = { ...data, records: mergedRecords, students: mergedStudents,
                          customPlans: mergedPlans, classGroups: mergedGroups };
+        dbg.pull = { at: now(), cloudRecs: (data.records || []).length, localRecs: (local.records || []).length,
+                     mergedRecs: mergedRecords.length, localOnly: mergedRecords.length - (data.records || []).length,
+                     force: !!force, willPush: !force && hadLocalOnly };
         localStorage.setItem(KEY, JSON.stringify(merged));
         if (window.Store && window.Store._reload) window.Store._reload();
-        if (!force && hadLocalOnly) schedulePush(0); // 把本機多出的資料推回雲端
+        if (!force && hadLocalOnly) { schedulePush(0); return; } // 把本機多出的資料推回雲端
       } catch (e) {
-        // fallback: 直接用雲端資料
-        localStorage.setItem(KEY, JSON.stringify(data));
-        if (window.Store && window.Store._reload) window.Store._reload();
+        // merge 失敗：保留本機資料不動（不可用雲端舊資料覆蓋本機）
+        dbg.pull = { at: now(), mergeError: String(e).slice(0, 180) };
       }
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] pull failed", err);
+      dbg.pull = { at: now(), error: String(err).slice(0, 180) };
       setStatus("offline", "離線(用本機資料)");
     }
   }
@@ -120,12 +130,14 @@
       if (!res.ok || !json || json.ok !== true) {
         throw new Error("push 未被伺服器確認: HTTP " + res.status + " body=" + text.slice(0, 200));
       }
+      dbg.push = { at: now(), ok: true, bytes: raw.length, savedAt: json.savedAt || null };
       lastPushTime = Date.now();
       try { localStorage.setItem(LAST_PUSH_KEY, String(lastPushTime)); } catch (e) {}
       try { localStorage.removeItem(DIRTY_KEY); } catch (e) {}
       setStatus("synced", "已同步");
     } catch (err) {
       console.warn("[sync] push failed", err);
+      dbg.push = { at: now(), ok: false, error: String(err && err.message || err).slice(0, 220) };
       hasPendingChanges = true;
       setStatus("offline", "上傳失敗: " + (err && err.message ? err.message : "稍後重試"));
       // 5 秒後重試
