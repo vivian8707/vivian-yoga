@@ -110,10 +110,14 @@
         return (a.kind === "pay" ? 0 : 1) - (b.kind === "pay" ? 0 : 1);
       });
       const lots = []; // { remaining, perPrice }
+      let debt = 0;    // 儲值入帳前就先扣的堂數（預借下一筆儲值）
       events.forEach((ev, evIdx) => {
         if (ev.kind === "pay") {
           const pp = ev.classes > 0 ? Math.round(ev.amount / ev.classes) : 0;
-          lots.push({ remaining: ev.classes, perPrice: pp });
+          let cls = ev.classes;
+          // 先償還之前預借的堂數，避免同一包被多算
+          if (debt > 0) { const t = Math.min(debt, cls); cls -= t; debt -= t; }
+          if (cls > 0) lots.push({ remaining: cls, perPrice: pp });
         } else {
           // 若目前無餘額，往後找最近一筆儲值的單價來估算
           let lastPrice = 360;
@@ -132,10 +136,11 @@
             need -= take;
             if (lot.remaining <= 0) lots.shift();
           }
-          // if still need (儲值不夠)，剩下用 lastPrice 估
+          // if still need (儲值不夠)，剩下用 lastPrice 估，並預借下一筆儲值的堂數
           if (need > 0) {
             gross += need * lastPrice;
             used += need;
+            debt += need;
           }
           idx[ev.recId + ":" + stuId] = { perPrice: lastPrice, amount: gross, count: ev.count };
         }
