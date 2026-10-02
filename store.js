@@ -93,10 +93,10 @@
       }
 
       if (r.type === "payment") {
-        // demo 模式下，儲值金額改用預設方案×1.2倍：5堂 $2160、10堂 $4200
+        // demo 模式下，儲值金額：5堂 $2250 ($450/堂)、10堂 $4200 ($420/堂)
         const paymentPlans = [
-          { classes: 5, amount: Math.floor(1800 * 1.2 / 10) * 10 },
-          { classes: 10, amount: Math.floor(3500 * 1.2 / 10) * 10 }
+          { classes: 5, amount: 2250 },
+          { classes: 10, amount: 4200 }
         ];
         if (r.classes && r.classes > 0) {
           const plan = paymentPlans.find(p => p.classes === r.classes);
