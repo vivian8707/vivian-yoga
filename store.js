@@ -64,36 +64,47 @@
       // 同時創建虛擬記錄
       const today = new Date();
       obj.records = [];
-      // 建立一些虛擬的上課記錄
-      for (let i = 0; i < 5; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i * 7);
-        const dateStr = date.toISOString().split('T')[0];
-        obj.records.push({
-          id: "demo_rec_class_" + i,
-          type: "class",
-          date: dateStr,
-          location: "小班",
-          attendees: [
-            { studentId: obj.students[i % obj.students.length].id, studentName: obj.students[i % obj.students.length].name, amount: 400, usedPackage: true, count: 1 }
-          ],
-          totalAmount: 400
-        });
-      }
-      // 建立一些虛擬的儲值記錄
+
+      // 先建立儲值記錄，這樣上課記錄可以引用
       for (let i = 0; i < 3; i++) {
         const date = new Date(today);
-        date.setDate(date.getDate() - i * 14);
+        date.setDate(date.getDate() - (i + 1) * 14);
         const dateStr = date.toISOString().split('T')[0];
         const plan = i % 2 === 0 ? { classes: 5, amount: 2000 } : { classes: 10, amount: 3800 };
         obj.records.push({
-          id: "demo_rec_pay_" + i,
+          id: "demo_pay_" + i,
           type: "payment",
           date: dateStr,
           studentId: obj.students[i % obj.students.length].id,
           studentName: obj.students[i % obj.students.length].name,
           classes: plan.classes,
           amount: plan.amount
+        });
+      }
+
+      // 建立上課記錄
+      for (let i = 0; i < 8; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - (i + 1));
+        const dateStr = date.toISOString().split('T')[0];
+        const student = obj.students[i % obj.students.length];
+        obj.records.push({
+          id: "demo_class_" + i,
+          type: "class",
+          date: dateStr,
+          location: "小班",
+          mode: "community",
+          headcount: 1,
+          attendees: [{
+            studentId: student.id,
+            studentName: student.name,
+            usedPackage: true,
+            count: 1,
+            amount: 400,
+            perClassPrice: 400
+          }],
+          totalAmount: 400,
+          note: DEMO_LESSONS[i % DEMO_LESSONS.length]
         });
       }
     } else {
