@@ -74,21 +74,23 @@
             }
           });
         }
-        if (!priceFactors[r.date]) priceFactors[r.date] = 0.9 + Math.random() * 0.2;
+        if (!priceFactors[r.date]) priceFactors[r.date] = 0.95 + Math.random() * 0.1;
         const factor = priceFactors[r.date];
-        if (r.totalAmount && r.totalAmount > 0) r.totalAmount = Math.max(1, Math.round(r.totalAmount * factor));
+        const offset = Math.floor(Math.random() * 20) - 10;
+        if (r.totalAmount && r.totalAmount > 0) r.totalAmount = Math.max(1, Math.round(r.totalAmount * factor) + offset);
         if (r.attendees) {
           r.attendees.forEach(a => {
-            if (a.amount && a.amount > 0) a.amount = Math.max(1, Math.round(a.amount * factor));
+            if (a.amount && a.amount > 0) a.amount = Math.max(1, Math.round(a.amount * factor) + offset);
             if (a.perClassPrice && a.perClassPrice > 0) a.perClassPrice = Math.max(1, Math.round(a.perClassPrice * factor));
           });
         }
       }
 
       if (r.type === "payment") {
-        if (!priceFactors[r.date]) priceFactors[r.date] = 0.9 + Math.random() * 0.2;
+        if (!priceFactors[r.date]) priceFactors[r.date] = 0.95 + Math.random() * 0.1;
         const factor = priceFactors[r.date];
-        if (r.amount && r.amount > 0) r.amount = Math.max(1, Math.round(r.amount * factor));
+        const offset = Math.floor(Math.random() * 20) - 10;
+        if (r.amount && r.amount > 0) r.amount = Math.max(1, Math.round(r.amount * factor) + offset);
       }
     });
 
