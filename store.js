@@ -67,37 +67,36 @@
 
       if (r.type === "class") {
         r.note = DEMO_LESSONS[Math.floor(Math.random() * DEMO_LESSONS.length)];
-        const factor = 0.95 + Math.random() * 0.1;
         if (r.attendees) {
           r.attendees.forEach(a => {
             if (a.studentId && obj.students.find(s => s.id === a.studentId)) {
               a.studentName = obj.students.find(s => s.id === a.studentId).name;
             }
-            // 修改所有可能的金額欄位
+            // 所有價格乘以 1.2 倍
             if (a.amount && a.amount > 0) {
-              a.amount = Math.floor(a.amount * factor / 10) * 10;
+              a.amount = Math.floor(a.amount * 1.2 / 10) * 10;
             }
             if (a.perClassPrice && a.perClassPrice > 0) {
-              a.perClassPrice = Math.floor(a.perClassPrice * factor / 10) * 10;
+              a.perClassPrice = Math.floor(a.perClassPrice * 1.2 / 10) * 10;
             }
             if (a.price && a.price > 0) {
-              a.price = Math.floor(a.price * factor / 10) * 10;
+              a.price = Math.floor(a.price * 1.2 / 10) * 10;
             }
             if (a.unitPrice && a.unitPrice > 0) {
-              a.unitPrice = Math.floor(a.unitPrice * factor / 10) * 10;
+              a.unitPrice = Math.floor(a.unitPrice * 1.2 / 10) * 10;
             }
           });
         }
         if (r.totalAmount && r.totalAmount > 0) {
-          r.totalAmount = Math.floor(r.totalAmount * factor / 10) * 10;
+          r.totalAmount = Math.floor(r.totalAmount * 1.2 / 10) * 10;
         }
       }
 
       if (r.type === "payment") {
-        // demo 模式下，儲值金額改用預設方案：5堂 $1800、10堂 $3500
+        // demo 模式下，儲值金額改用預設方案×1.2倍：5堂 $2160、10堂 $4200
         const paymentPlans = [
-          { classes: 5, amount: 1800 },
-          { classes: 10, amount: 3500 }
+          { classes: 5, amount: Math.floor(1800 * 1.2 / 10) * 10 },
+          { classes: 10, amount: Math.floor(3500 * 1.2 / 10) * 10 }
         ];
         if (r.classes && r.classes > 0) {
           const plan = paymentPlans.find(p => p.classes === r.classes);
