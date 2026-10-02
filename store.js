@@ -98,6 +98,14 @@
         if (r.amount && r.amount > 0) {
           r.amount = Math.floor(r.amount * factor / 10) * 10;
         }
+        // 確保儲值的單堂課價格也以 0 結尾
+        if (r.classes && r.classes > 0 && r.amount && r.amount > 0) {
+          const perPrice = Math.floor(r.amount / r.classes / 10) * 10;
+          // 如果計算出來的單價和原本的不同，調整總金額讓單價以 0 結尾
+          if (perPrice > 0 && perPrice * r.classes !== r.amount) {
+            r.amount = perPrice * r.classes;
+          }
+        }
       }
     });
 
