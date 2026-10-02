@@ -53,7 +53,7 @@
     const DEMO_STUDENTS = ["Emily", "Jessica", "Amanda", "Michelle", "Sarah", "Jennifer", "Laura", "Karen", "Lisa", "Anna"];
     const DEMO_LESSONS = ["晨間瑜伽", "能量流瑜伽", "伸展瑜伽", "舒緩瑜伽", "陰瑜伽"];
 
-    // 如果沒有學生，創建虛擬學生
+    // 如果沒有學生，創建虛擬學生和記錄
     if (!obj.students || obj.students.length === 0) {
       obj.students = DEMO_STUDENTS.map((name, i) => ({
         id: "demo_stu_" + i,
@@ -61,6 +61,41 @@
         location: "小班",
         archived: false
       }));
+      // 同時創建虛擬記錄
+      const today = new Date();
+      obj.records = [];
+      // 建立一些虛擬的上課記錄
+      for (let i = 0; i < 5; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i * 7);
+        const dateStr = date.toISOString().split('T')[0];
+        obj.records.push({
+          id: "demo_rec_class_" + i,
+          type: "class",
+          date: dateStr,
+          location: "小班",
+          attendees: [
+            { studentId: obj.students[i % obj.students.length].id, studentName: obj.students[i % obj.students.length].name, amount: 400, usedPackage: true, count: 1 }
+          ],
+          totalAmount: 400
+        });
+      }
+      // 建立一些虛擬的儲值記錄
+      for (let i = 0; i < 3; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i * 14);
+        const dateStr = date.toISOString().split('T')[0];
+        const plan = i % 2 === 0 ? { classes: 5, amount: 2000 } : { classes: 10, amount: 3800 };
+        obj.records.push({
+          id: "demo_rec_pay_" + i,
+          type: "payment",
+          date: dateStr,
+          studentId: obj.students[i % obj.students.length].id,
+          studentName: obj.students[i % obj.students.length].name,
+          classes: plan.classes,
+          amount: plan.amount
+        });
+      }
     } else {
       // 替換學生名字（不加序號）並設置所有學生到「小班」
       obj.students.forEach((s, i) => {
