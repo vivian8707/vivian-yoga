@@ -56,11 +56,15 @@
     // 替換學生名字（不加序號）並更新場地名稱
     obj.students.forEach((s, i) => {
       s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length];
-      // 更新學生的場地信息（如果有的話）
+      // 確保所有學生都有 location 欄位，指向「小班」
+      if (!s.location || s.location === "園頂" || s.location === "小班課") {
+        s.location = "小班";
+      } else if (s.location === "天空") {
+        s.location = "教室";
+      }
+      // 也更新 venue 欄位（如果存在）
       if (s.venue === "園頂" || s.venue === "小班課") s.venue = "小班";
       if (s.venue === "天空") s.venue = "教室";
-      if (s.location === "園頂" || s.location === "小班課") s.location = "小班";
-      if (s.location === "天空") s.location = "教室";
     });
 
     // 修改金額和課程名稱
