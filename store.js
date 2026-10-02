@@ -72,25 +72,27 @@
             if (a.studentId && obj.students.find(s => s.id === a.studentId)) {
               a.studentName = obj.students.find(s => s.id === a.studentId).name;
             }
+            if (a.amount && a.amount > 0) {
+              const amt = Math.round(a.amount * (0.95 + Math.random() * 0.1));
+              a.amount = Math.floor(amt / 10) * 10;
+            }
+            if (a.perClassPrice && a.perClassPrice > 0) {
+              const price = Math.round(a.perClassPrice * (0.95 + Math.random() * 0.1));
+              a.perClassPrice = Math.floor(price / 10) * 10;
+            }
           });
         }
-        if (!priceFactors[r.date]) priceFactors[r.date] = 0.95 + Math.random() * 0.1;
-        const factor = priceFactors[r.date];
-        const offset = (Math.floor(Math.random() * 11) - 5) * 10;
-        if (r.totalAmount && r.totalAmount > 0) r.totalAmount = Math.max(10, Math.round(r.totalAmount * factor / 10) * 10 + offset);
-        if (r.attendees) {
-          r.attendees.forEach(a => {
-            if (a.amount && a.amount > 0) a.amount = Math.max(10, Math.round(a.amount * factor / 10) * 10 + offset);
-            if (a.perClassPrice && a.perClassPrice > 0) a.perClassPrice = Math.max(10, Math.round(a.perClassPrice * factor / 10) * 10);
-          });
+        if (r.totalAmount && r.totalAmount > 0) {
+          const amt = Math.round(r.totalAmount * (0.95 + Math.random() * 0.1));
+          r.totalAmount = Math.floor(amt / 10) * 10;
         }
       }
 
       if (r.type === "payment") {
-        if (!priceFactors[r.date]) priceFactors[r.date] = 0.95 + Math.random() * 0.1;
-        const factor = priceFactors[r.date];
-        const offset = (Math.floor(Math.random() * 11) - 5) * 10;
-        if (r.amount && r.amount > 0) r.amount = Math.max(10, Math.round(r.amount * factor / 10) * 10 + offset);
+        if (r.amount && r.amount > 0) {
+          const amt = Math.round(r.amount * (0.95 + Math.random() * 0.1));
+          r.amount = Math.floor(amt / 10) * 10;
+        }
       }
     });
 
