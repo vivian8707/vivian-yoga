@@ -53,18 +53,12 @@
     const DEMO_STUDENTS = ["Emily", "Jessica", "Amanda", "Michelle", "Sarah", "Jennifer", "Laura", "Karen", "Lisa", "Anna"];
     const DEMO_LESSONS = ["晨間瑜伽", "能量流瑜伽", "伸展瑜伽", "舒緩瑜伽", "陰瑜伽"];
 
-    // 替換學生名字（不加序號）並更新場地名稱
+    // 替換學生名字（不加序號）並設置所有學生到「小班」
     obj.students.forEach((s, i) => {
       s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length];
-      // 確保所有學生都有 location 欄位，指向「小班」
-      if (!s.location || s.location === "園頂" || s.location === "小班課") {
-        s.location = "小班";
-      } else if (s.location === "天空") {
-        s.location = "教室";
-      }
-      // 也更新 venue 欄位（如果存在）
-      if (s.venue === "園頂" || s.venue === "小班課") s.venue = "小班";
-      if (s.venue === "天空") s.venue = "教室";
+      // demo 模式：所有學生都分配到「小班」
+      s.location = "小班";
+      s.archived = false;
     });
 
     // 修改金額和課程名稱
