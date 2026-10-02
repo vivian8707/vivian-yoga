@@ -53,13 +53,23 @@
     const DEMO_STUDENTS = ["Emily", "Jessica", "Amanda", "Michelle", "Sarah", "Jennifer", "Laura", "Karen", "Lisa", "Anna"];
     const DEMO_LESSONS = ["晨間瑜伽", "能量流瑜伽", "伸展瑜伽", "舒緩瑜伽", "陰瑜伽"];
 
-    // 替換學生名字（不加序號）並設置所有學生到「小班」
-    obj.students.forEach((s, i) => {
-      s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length];
-      // demo 模式：所有學生都分配到「小班」
-      s.location = "小班";
-      s.archived = false;
-    });
+    // 如果沒有學生，創建虛擬學生
+    if (!obj.students || obj.students.length === 0) {
+      obj.students = DEMO_STUDENTS.map((name, i) => ({
+        id: "demo_stu_" + i,
+        name: name,
+        location: "小班",
+        archived: false
+      }));
+    } else {
+      // 替換學生名字（不加序號）並設置所有學生到「小班」
+      obj.students.forEach((s, i) => {
+        s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length];
+        // demo 模式：所有學生都分配到「小班」
+        s.location = "小班";
+        s.archived = false;
+      });
+    }
 
     // 修改金額和課程名稱
     const priceFactors = {};
