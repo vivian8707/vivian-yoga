@@ -53,9 +53,9 @@
     const DEMO_STUDENTS = ["Emily", "Jessica", "Amanda", "Michelle", "Sarah", "Jennifer", "Laura", "Karen", "Lisa", "Anna"];
     const DEMO_LESSONS = ["晨間瑜伽", "能量流瑜伽", "伸展瑜伽", "舒緩瑜伽", "陰瑜伽"];
 
-    // 替換學生名字
+    // 替換學生名字（不加序號）
     obj.students.forEach((s, i) => {
-      s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length] + (i >= DEMO_STUDENTS.length ? ` ${Math.floor(i / DEMO_STUDENTS.length)}` : "");
+      s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length];
     });
 
     // 修改金額和課程名稱
@@ -74,32 +74,38 @@
             }
           });
         }
-        if (!priceFactors[r.date]) priceFactors[r.date] = 0.8 + Math.random() * 0.4;
+        if (!priceFactors[r.date]) priceFactors[r.date] = 0.9 + Math.random() * 0.2;
         const factor = priceFactors[r.date];
-        if (r.totalAmount) r.totalAmount = Math.round(r.totalAmount * factor);
+        if (r.totalAmount && r.totalAmount > 0) r.totalAmount = Math.max(1, Math.round(r.totalAmount * factor));
         if (r.attendees) {
           r.attendees.forEach(a => {
-            if (a.amount) a.amount = Math.round(a.amount * factor);
-            if (a.perClassPrice) a.perClassPrice = Math.round(a.perClassPrice * factor);
+            if (a.amount && a.amount > 0) a.amount = Math.max(1, Math.round(a.amount * factor));
+            if (a.perClassPrice && a.perClassPrice > 0) a.perClassPrice = Math.max(1, Math.round(a.perClassPrice * factor));
           });
         }
       }
 
       if (r.type === "payment") {
-        if (!priceFactors[r.date]) priceFactors[r.date] = 0.8 + Math.random() * 0.4;
+        if (!priceFactors[r.date]) priceFactors[r.date] = 0.9 + Math.random() * 0.2;
         const factor = priceFactors[r.date];
-        if (r.amount) r.amount = Math.round(r.amount * factor);
+        if (r.amount && r.amount > 0) r.amount = Math.max(1, Math.round(r.amount * factor));
       }
     });
 
-    // 把園頂改小班
+    // 改 venue 名稱：小班課→小班、天空→教室、園頂→小班
     if (obj.settings && obj.settings.venues) {
       obj.settings.venues.forEach(v => {
+        if (v.name === "小班課") v.name = "小班";
+        if (v.name === "天空") v.name = "教室";
         if (v.name === "園頂") v.name = "小班";
       });
     }
+
+    // 改 location 名稱
     obj.records.forEach(r => {
-      if (r.location === "園頂") r.location = "小班課";
+      if (r.location === "園頂") r.location = "小班";
+      if (r.location === "小班課") r.location = "小班";
+      if (r.location === "天空") r.location = "教室";
     });
 
     return obj;
