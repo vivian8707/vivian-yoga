@@ -94,16 +94,22 @@
       }
 
       if (r.type === "payment") {
-        const factor = 0.95 + Math.random() * 0.1;
-        if (r.amount && r.amount > 0) {
-          r.amount = Math.floor(r.amount * factor / 10) * 10;
-        }
-        // 確保儲值的單堂課價格也以 0 結尾
-        if (r.classes && r.classes > 0 && r.amount && r.amount > 0) {
-          const perPrice = Math.floor(r.amount / r.classes / 10) * 10;
-          // 如果計算出來的單價和原本的不同，調整總金額讓單價以 0 結尾
-          if (perPrice > 0 && perPrice * r.classes !== r.amount) {
-            r.amount = perPrice * r.classes;
+        // demo 模式下，儲值金額改用預設方案：5堂 $1800、10堂 $3500
+        const paymentPlans = [
+          { classes: 5, amount: 1800 },
+          { classes: 10, amount: 3500 }
+        ];
+        if (r.classes && r.classes > 0) {
+          const plan = paymentPlans.find(p => p.classes === r.classes);
+          if (plan) {
+            r.amount = plan.amount;
+          } else {
+            // 如果不是預設方案，用最接近的方案
+            const closest = paymentPlans.reduce((prev, curr) =>
+              Math.abs(curr.classes - r.classes) < Math.abs(prev.classes - r.classes) ? curr : prev
+            );
+            r.amount = closest.amount;
+            r.classes = closest.classes;
           }
         }
       }
