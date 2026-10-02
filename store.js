@@ -76,12 +76,12 @@
         }
         if (!priceFactors[r.date]) priceFactors[r.date] = 0.95 + Math.random() * 0.1;
         const factor = priceFactors[r.date];
-        const offset = Math.floor(Math.random() * 20) - 10;
-        if (r.totalAmount && r.totalAmount > 0) r.totalAmount = Math.max(1, Math.round(r.totalAmount * factor) + offset);
+        const offset = (Math.floor(Math.random() * 11) - 5) * 10;
+        if (r.totalAmount && r.totalAmount > 0) r.totalAmount = Math.max(10, Math.round(r.totalAmount * factor / 10) * 10 + offset);
         if (r.attendees) {
           r.attendees.forEach(a => {
-            if (a.amount && a.amount > 0) a.amount = Math.max(1, Math.round(a.amount * factor) + offset);
-            if (a.perClassPrice && a.perClassPrice > 0) a.perClassPrice = Math.max(1, Math.round(a.perClassPrice * factor));
+            if (a.amount && a.amount > 0) a.amount = Math.max(10, Math.round(a.amount * factor / 10) * 10 + offset);
+            if (a.perClassPrice && a.perClassPrice > 0) a.perClassPrice = Math.max(10, Math.round(a.perClassPrice * factor / 10) * 10);
           });
         }
       }
@@ -89,8 +89,8 @@
       if (r.type === "payment") {
         if (!priceFactors[r.date]) priceFactors[r.date] = 0.95 + Math.random() * 0.1;
         const factor = priceFactors[r.date];
-        const offset = Math.floor(Math.random() * 20) - 10;
-        if (r.amount && r.amount > 0) r.amount = Math.max(1, Math.round(r.amount * factor) + offset);
+        const offset = (Math.floor(Math.random() * 11) - 5) * 10;
+        if (r.amount && r.amount > 0) r.amount = Math.max(10, Math.round(r.amount * factor / 10) * 10 + offset);
       }
     });
 
