@@ -93,10 +93,10 @@
       }
 
       if (r.type === "payment") {
-        // demo 模式下，儲值金額：5堂 $2250 ($450/堂)、10堂 $4200 ($420/堂)
+        // demo 模式下，儲值金額：5堂 $2000 ($400/堂)、10堂 $3800 ($380/堂有折扣)
         const paymentPlans = [
-          { classes: 5, amount: 2250 },
-          { classes: 10, amount: 4200 }
+          { classes: 5, amount: 2000 },
+          { classes: 10, amount: 3800 }
         ];
         if (r.classes && r.classes > 0) {
           const plan = paymentPlans.find(p => p.classes === r.classes);
