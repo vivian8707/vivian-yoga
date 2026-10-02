@@ -184,9 +184,9 @@
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (!raw) return seed();
+      if (!raw) return applyDemoMode(seed());
       const obj = JSON.parse(raw);
-      if (!obj.students || !obj.records) return seed();
+      if (!obj.students || !obj.records) return applyDemoMode(seed());
       if (!obj.customPlans) obj.customPlans = [];
       if (!obj.classGroups) obj.classGroups = [];
       if (!obj.settings) obj.settings = { displayName: "", venues: defaultVenues() };
