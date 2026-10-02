@@ -7,6 +7,90 @@
 //   5) 「待上傳」旗標存入 localStorage，App 重開時先 push 再 pull，防止記錄消失
 
 (function () {
+  // === DEMO MODE ===
+  function initDemoMode() {
+    const url = new URL(window.location);
+    if (url.searchParams.get("demo") !== "true") return;
+
+    const KEY = "vyc.v1";
+    const DEMO_STUDENTS = [
+      "Emily", "Jessica", "Amanda", "Michelle", "Sarah",
+      "Jennifer", "Laura", "Karen", "Lisa", "Anna"
+    ];
+    const DEMO_LESSONS = ["晨間瑜伽", "能量流瑜伽", "伸展瑜伽", "舒緩瑜伽", "陰瑜伽"];
+
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data.students || data.students.length === 0) return;
+
+      // 替換學生名字，保持 ID 和班級不變
+      data.students.forEach((s, i) => {
+        s.name = DEMO_STUDENTS[i % DEMO_STUDENTS.length] + (i >= DEMO_STUDENTS.length ? ` ${Math.floor(i / DEMO_STUDENTS.length)}` : "");
+      });
+
+      // 修改紀錄的金額和人名
+      const priceFactors = {};
+      data.records.forEach(r => {
+        // 替換學生名字
+        if (r.studentId && data.students.find(s => s.id === r.studentId)) {
+          const stu = data.students.find(s => s.id === r.studentId);
+          r.studentName = stu.name;
+        }
+
+        // 替換上課記錄
+        if (r.type === "class") {
+          r.note = DEMO_LESSONS[Math.floor(Math.random() * DEMO_LESSONS.length)];
+          if (r.attendees) {
+            r.attendees.forEach(a => {
+              if (a.studentId && data.students.find(s => s.id === a.studentId)) {
+                a.studentName = data.students.find(s => s.id === a.studentId).name;
+              }
+            });
+          }
+          if (!priceFactors[r.date]) priceFactors[r.date] = 0.8 + Math.random() * 0.4;
+          const factor = priceFactors[r.date];
+          if (r.totalAmount) r.totalAmount = Math.round(r.totalAmount * factor);
+          if (r.attendees) {
+            r.attendees.forEach(a => {
+              if (a.amount) a.amount = Math.round(a.amount * factor);
+              if (a.perClassPrice) a.perClassPrice = Math.round(a.perClassPrice * factor);
+            });
+          }
+        }
+
+        // 替換儲值紀錄
+        if (r.type === "payment") {
+          if (!priceFactors[r.date]) priceFactors[r.date] = 0.8 + Math.random() * 0.4;
+          const factor = priceFactors[r.date];
+          if (r.amount) r.amount = Math.round(r.amount * factor);
+        }
+      });
+
+      // 把園頂改成小班、改 location
+      if (data.settings && data.settings.venues) {
+        data.settings.venues.forEach(v => {
+          if (v.name === "園頂") v.name = "小班";
+        });
+      }
+      data.records.forEach(r => {
+        if (r.location === "園頂") r.location = "小班課";
+      });
+
+      localStorage.setItem(KEY, JSON.stringify(data));
+      if (window.Store && window.Store._reload) {
+        setTimeout(() => window.Store._reload(), 100);
+      }
+    } catch (e) {
+      console.warn("[demo] init failed", e);
+    }
+  }
+
+  initDemoMode();
+
+  const IS_DEMO = new URL(window.location).searchParams.get("demo") === "true";
+
   const ENDPOINT = "https://script.google.com/macros/s/AKfycby-TYIyBNFa51N4NzYGhkO5YUpRw0eVmzgRzEaDdLYO2S-px5tW3QscX36XU7K5e8dA0A/exec";
   const KEY = "vyc.v1";
   const DIRTY_KEY = "vyc.dirty";       // 跨 App 重啟的待上傳旗標
@@ -16,13 +100,13 @@
   const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
 
   // --- 診斷資訊（點同步膠囊可顯示）---
-  const dbg = { ver: "33", pull: null, push: null };
+  const dbg = { ver: "33", pull: null, push: null, demo: IS_DEMO };
   window.__SYNC_DEBUG = dbg;
   function now() { return new Date().toTimeString().slice(0, 8); }
 
   // --- Status broadcaster ---
   const statusListeners = new Set();
-  const status = { state: "idle", message: "", lastSync: null };
+  const status = { state: "idle", message: IS_DEMO ? "DEMO 模式" : "", lastSync: null };
   function setStatus(state, message) {
     status.state = state;
     status.message = message || "";
@@ -32,12 +116,13 @@
   window.SyncStatus = {
     get: () => status,
     subscribe(fn) { statusListeners.add(fn); fn(status); return () => statusListeners.delete(fn); },
-    forcePush: () => schedulePush(0),
-    forcePull: () => pullNow(true),
+    forcePush: () => { if (IS_DEMO) alert("DEMO 模式不支援上傳"); else schedulePush(0); },
+    forcePull: () => { if (IS_DEMO) alert("DEMO 模式不支援同步"); else pullNow(true); },
   };
 
   // --- Network ---
   async function pullNow(force) {
+    if (IS_DEMO) { dbg.pull = { at: now(), skip: "demo-mode" }; return; }
     // 本地有待上傳的變更時，或 push 剛完成不久，不以雲端舊資料覆蓋
     if (hasPendingChanges || pushing) { dbg.pull = { at: now(), skip: "pending/pushing" }; return; }
     if (!force && Date.now() - lastPushTime < PUSH_GUARD_MS) { dbg.pull = { at: now(), skip: "push-guard" }; return; }
@@ -109,6 +194,7 @@
   }
 
   async function pushNow() {
+    if (IS_DEMO) { setStatus("idle", "DEMO 模式"); return; }
     if (pushing) { schedulePush(500); return; }
     pushing = true;
     hasPendingChanges = false;
@@ -165,13 +251,17 @@
       }
     });
 
-    // 啟動時：若上次有未完成的 push，先推再拉
-    const wasDirty = localStorage.getItem(DIRTY_KEY);
-    if (wasDirty) {
-      hasPendingChanges = true;
-      pushNow().then(() => pullNow());
+    // 啟動時：若上次有未完成的 push，先推再拉（DEMO 模式除外）
+    if (!IS_DEMO) {
+      const wasDirty = localStorage.getItem(DIRTY_KEY);
+      if (wasDirty) {
+        hasPendingChanges = true;
+        pushNow().then(() => pullNow());
+      } else {
+        pullNow();
+      }
     } else {
-      pullNow();
+      setStatus("idle", "DEMO 模式（本機數據）");
     }
 
     // 視窗 focus / 連線恢復:再拉一次
