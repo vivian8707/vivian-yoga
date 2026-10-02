@@ -67,31 +67,36 @@
 
       if (r.type === "class") {
         r.note = DEMO_LESSONS[Math.floor(Math.random() * DEMO_LESSONS.length)];
+        const factor = 0.95 + Math.random() * 0.1;
         if (r.attendees) {
           r.attendees.forEach(a => {
             if (a.studentId && obj.students.find(s => s.id === a.studentId)) {
               a.studentName = obj.students.find(s => s.id === a.studentId).name;
             }
+            // 修改所有可能的金額欄位
             if (a.amount && a.amount > 0) {
-              const amt = Math.round(a.amount * (0.95 + Math.random() * 0.1));
-              a.amount = Math.floor(amt / 10) * 10;
+              a.amount = Math.floor(a.amount * factor / 10) * 10;
             }
             if (a.perClassPrice && a.perClassPrice > 0) {
-              const price = Math.round(a.perClassPrice * (0.95 + Math.random() * 0.1));
-              a.perClassPrice = Math.floor(price / 10) * 10;
+              a.perClassPrice = Math.floor(a.perClassPrice * factor / 10) * 10;
+            }
+            if (a.price && a.price > 0) {
+              a.price = Math.floor(a.price * factor / 10) * 10;
+            }
+            if (a.unitPrice && a.unitPrice > 0) {
+              a.unitPrice = Math.floor(a.unitPrice * factor / 10) * 10;
             }
           });
         }
         if (r.totalAmount && r.totalAmount > 0) {
-          const amt = Math.round(r.totalAmount * (0.95 + Math.random() * 0.1));
-          r.totalAmount = Math.floor(amt / 10) * 10;
+          r.totalAmount = Math.floor(r.totalAmount * factor / 10) * 10;
         }
       }
 
       if (r.type === "payment") {
+        const factor = 0.95 + Math.random() * 0.1;
         if (r.amount && r.amount > 0) {
-          const amt = Math.round(r.amount * (0.95 + Math.random() * 0.1));
-          r.amount = Math.floor(amt / 10) * 10;
+          r.amount = Math.floor(r.amount * factor / 10) * 10;
         }
       }
     });
