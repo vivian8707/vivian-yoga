@@ -39,7 +39,7 @@
 4. 畫面立刻顯示 **「報名成功 ✅」**，並收到確認 Email
 5. 若名額已滿：填完資料直接「登記候補（第 N 位）」，不顯示匯款帳號，**不用先付款**；遞補到時再寄付款連結
 
-> 試用版：[`retreat-signup-prototype.html`](retreat-signup-prototype.html)
+> 試用版：[`retreat-signup-prototype.html`](retreat-signup-prototype.html)　流程圖：[`retreat-signup-diagram.html`](retreat-signup-diagram.html)
 
 ### 新生：填表 → 傳 LINE 約面試 → 通過後付款
 1. 打開報名連結、選「第一次」→ 填基本資料 **＋「想參加的原因」**（這時不用付款）

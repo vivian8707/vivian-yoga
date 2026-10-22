@@ -1,0 +1,294 @@
+<title>僻靜營報名流程圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700&display=swap">
+<style>
+/* Layout: a single reading column; three swimlane figures (student / system / teacher), each scrolls sideways on narrow phones. */
+:root {
+  --bg: #eef2ef;
+  --card: #ffffff;
+  --fg: #1f2b26;
+  --muted: #5d6b64;
+  --line: #c9d5ce;
+  --lane: #e3ebe6;
+  --accent: #2e6656;
+  --accent-ink: #ffffff;
+  --warn: #9a3d2f;
+  --warn-soft: #f6e2dd;
+  --serif: "Noto Serif TC", "Songti TC", serif;
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141b18; --card: #1c2521; --fg: #e4ece7; --muted: #9fb0a7; --line: #3a4a42; --lane: #202b26;
+  --accent: #7fc3ac; --accent-ink: #0e1a15; --warn: #f2a194; --warn-soft: #3a2420; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #141b18; --card: #1c2521; --fg: #e4ece7; --muted: #9fb0a7; --line: #3a4a42; --lane: #202b26;
+  --accent: #7fc3ac; --accent-ink: #0e1a15; --warn: #f2a194; --warn-soft: #3a2420; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.65;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 48px;
+}
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { font-size: 13px; letter-spacing: .14em; color: var(--muted); }
+h1, h2 { font-family: var(--serif); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.35; }
+h1 { font-size: 30px; }
+h2 { font-size: 21px; }
+p { margin: 0; max-width: 65ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 18px; height: 12px; border-radius: 3px; border: 1.5px solid var(--line); background: var(--card); }
+.sw.sys { background: var(--lane); }
+.sw.act { background: var(--accent); border-color: var(--accent); }
+.sw.warn { background: var(--warn-soft); border-color: var(--warn); }
+section { display: flex; flex-direction: column; gap: 10px; }
+figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.scroll { overflow-x: auto; }
+svg { display: block; width: 100%; min-width: 600px; height: auto; color: var(--muted); font-family: var(--sans); }
+figcaption { font-size: 14px; color: var(--muted); }
+svg .lane { fill: var(--card); }
+svg .lane.sys { fill: var(--lane); }
+svg .head { fill: var(--fg); font-size: 14px; font-weight: 700; }
+svg .box { fill: var(--card); stroke: var(--line); stroke-width: 1.5; }
+svg .box.sys { fill: var(--lane); stroke: var(--muted); stroke-dasharray: 4 3; }
+svg .box.act { fill: var(--accent); stroke: var(--accent); }
+svg .box.warn { fill: var(--warn-soft); stroke: var(--warn); }
+svg .t { fill: var(--fg); font-size: 13px; }
+svg .t.b { font-weight: 700; }
+svg .t.inv { fill: var(--accent-ink); font-weight: 700; }
+svg .lbl { fill: var(--muted); font-size: 12px; }
+svg .ln { fill: none; stroke: var(--muted); stroke-width: 1.6; }
+svg .ln.dash { stroke-dasharray: 5 4; }
+svg .ln.warn { stroke: var(--warn); }
+svg .lbl.warn { fill: var(--warn); font-weight: 700; }
+.note { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; }
+.note ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+a { color: var(--accent); }
+</style>
+
+<main>
+  <header>
+    <div class="eyebrow">SUCHARITA 老師・台東 YOGA HOUSE</div>
+    <h1>僻靜營報名流程圖</h1>
+    <p>正取 15 位、候補 5 位。名額的計算、遞補和通知都是系統自動處理。老師真正要動手的只有一件事：新生面試完，按「通過」或「不通過」。</p>
+    <div class="legend">
+      <span><i class="sw"></i>學生做的事</span>
+      <span><i class="sw sys"></i>系統自動</span>
+      <span><i class="sw act"></i>老師要按的按鈕</span>
+      <span><i class="sw warn"></i>名額釋出</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>一、舊生報名</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 680 370" role="img" aria-label="舊生填資料後看到匯款帳號，轉帳填後五碼就報名成功；系統寄確認信並用 LINE 通知老師，老師不用做事。">
+          <defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+          <rect class="lane" x="0" y="0" width="226" height="370"/>
+          <rect class="lane sys" x="227" y="0" width="226" height="370"/>
+          <rect class="lane" x="454" y="0" width="226" height="370"/>
+          <text class="head" x="113" y="28" text-anchor="middle">學生</text>
+          <text class="head" x="340" y="28" text-anchor="middle">系統（自動）</text>
+          <text class="head" x="567" y="28" text-anchor="middle">老師</text>
+
+          <rect class="box" x="23" y="50" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="72" text-anchor="middle">打開報名連結</text>
+          <text class="t" x="113" y="90" text-anchor="middle">選「參加過」</text>
+          <line class="ln" x1="113" y1="102" x2="113" y2="128" marker-end="url(#ma)"/>
+
+          <rect class="box" x="23" y="130" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="161" text-anchor="middle">填報名資料</text>
+          <line class="ln" x1="113" y1="182" x2="113" y2="208" marker-end="url(#ma)"/>
+          <text class="lbl" x="121" y="200">下一步：付款</text>
+
+          <rect class="box" x="23" y="210" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="232" text-anchor="middle">看到匯款帳號</text>
+          <text class="t" x="113" y="250" text-anchor="middle">轉帳、填後五碼</text>
+          <line class="ln" x1="203" y1="236" x2="248" y2="236" marker-end="url(#ma)"/>
+          <text class="lbl" x="226" y="228" text-anchor="middle">送出</text>
+
+          <rect class="box sys" x="250" y="210" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="232" text-anchor="middle">記錄為已報名</text>
+          <text class="t" x="340" y="250" text-anchor="middle">名額 −1</text>
+          <polyline class="ln" points="340,262 340,316 205,316" marker-end="url(#ma)"/>
+          <polyline class="ln" points="340,316 475,316" marker-end="url(#ma)"/>
+          <text class="lbl" x="272" y="308" text-anchor="middle">確認信</text>
+          <text class="lbl" x="408" y="308" text-anchor="middle">LINE 通知</text>
+
+          <rect class="box" x="23" y="290" width="180" height="52" rx="10"/>
+          <text class="t b" x="113" y="312" text-anchor="middle">報名成功</text>
+          <text class="t" x="113" y="330" text-anchor="middle">收到確認信</text>
+
+          <rect class="box" x="477" y="290" width="180" height="52" rx="10"/>
+          <text class="t" x="567" y="312" text-anchor="middle">收到 LINE 通知</text>
+          <text class="t" x="567" y="330" text-anchor="middle">不用做事</text>
+        </svg>
+      </div>
+      <figcaption>名額已滿時，舊生填完資料直接登記候補，頁面不顯示匯款帳號，不用先付款；遞補到時才收到付款連結（見圖三）。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>二、新生報名</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 680 450" role="img" aria-label="新生填資料和想參加的原因後，系統保留名額 7 天並通知老師；學生傳 LINE 約面試，面試後老師按通過或不通過。通過則系統寄付款連結，學生填後五碼報名成功；不通過則寄婉拒信並釋出名額。">
+          <defs><marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+          <rect class="lane" x="0" y="0" width="226" height="450"/>
+          <rect class="lane sys" x="227" y="0" width="226" height="450"/>
+          <rect class="lane" x="454" y="0" width="226" height="450"/>
+          <text class="head" x="113" y="28" text-anchor="middle">學生</text>
+          <text class="head" x="340" y="28" text-anchor="middle">系統（自動）</text>
+          <text class="head" x="567" y="28" text-anchor="middle">老師</text>
+
+          <rect class="box" x="23" y="50" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="72" text-anchor="middle">打開報名連結</text>
+          <text class="t" x="113" y="90" text-anchor="middle">選「第一次」</text>
+          <line class="ln" x1="113" y1="102" x2="113" y2="128" marker-end="url(#mb)"/>
+
+          <rect class="box" x="23" y="130" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="152" text-anchor="middle">填資料＋</text>
+          <text class="t" x="113" y="170" text-anchor="middle">想參加的原因</text>
+          <line class="ln" x1="203" y1="156" x2="248" y2="156" marker-end="url(#mb)"/>
+          <text class="lbl" x="226" y="148" text-anchor="middle">送出</text>
+
+          <rect class="box sys" x="250" y="130" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="152" text-anchor="middle">保留名額</text>
+          <text class="t" x="340" y="170" text-anchor="middle">面試期限 7 天</text>
+          <line class="ln" x1="430" y1="156" x2="475" y2="156" marker-end="url(#mb)"/>
+          <text class="lbl" x="453" y="148" text-anchor="middle">通知</text>
+
+          <rect class="box" x="477" y="130" width="180" height="52" rx="10"/>
+          <text class="t" x="567" y="152" text-anchor="middle">收到新生報名</text>
+          <text class="t" x="567" y="170" text-anchor="middle">可先看報名原因</text>
+
+          <line class="ln" x1="113" y1="182" x2="113" y2="208" marker-end="url(#mb)"/>
+          <text class="lbl" x="121" y="200">顯示老師 LINE</text>
+
+          <rect class="box" x="23" y="210" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="232" text-anchor="middle">傳 LINE 給老師</text>
+          <text class="t" x="113" y="250" text-anchor="middle">約面試時間</text>
+          <line class="ln" x1="203" y1="236" x2="475" y2="236" marker-end="url(#mb)"/>
+          <text class="lbl" x="340" y="228" text-anchor="middle">LINE 約時間</text>
+
+          <rect class="box" x="477" y="210" width="180" height="52" rx="10"/>
+          <text class="t" x="567" y="241" text-anchor="middle">面試</text>
+          <line class="ln" x1="567" y1="262" x2="567" y2="288" marker-end="url(#mb)"/>
+
+          <rect class="box act" x="477" y="290" width="180" height="52" rx="10"/>
+          <text class="t inv" x="567" y="312" text-anchor="middle">按「通過」</text>
+          <text class="t inv" x="567" y="330" text-anchor="middle">或「不通過」</text>
+
+          <line class="ln" x1="477" y1="316" x2="432" y2="316" marker-end="url(#mb)"/>
+          <text class="lbl" x="455" y="308" text-anchor="middle">通過</text>
+
+          <rect class="box sys" x="250" y="290" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="312" text-anchor="middle">寄付款連結</text>
+          <text class="t" x="340" y="330" text-anchor="middle">付款期限 3 天</text>
+          <line class="ln" x1="250" y1="316" x2="205" y2="316" marker-end="url(#mb)"/>
+          <text class="lbl" x="227" y="308" text-anchor="middle">Email</text>
+
+          <rect class="box" x="23" y="290" width="180" height="52" rx="10"/>
+          <text class="t" x="113" y="312" text-anchor="middle">轉帳（新生價）</text>
+          <text class="t" x="113" y="330" text-anchor="middle">填後五碼</text>
+          <line class="ln" x1="113" y1="342" x2="113" y2="368" marker-end="url(#mb)"/>
+
+          <rect class="box" x="23" y="370" width="180" height="52" rx="10"/>
+          <text class="t b" x="113" y="392" text-anchor="middle">報名成功</text>
+          <text class="t" x="113" y="410" text-anchor="middle">收到確認信</text>
+
+          <polyline class="ln warn" points="567,342 567,396 432,396" marker-end="url(#mb)" style="color: var(--warn)"/>
+          <text class="lbl warn" x="500" y="388" text-anchor="middle">不通過</text>
+
+          <rect class="box warn" x="250" y="370" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="392" text-anchor="middle">寄婉拒信</text>
+          <text class="t b" x="340" y="410" text-anchor="middle">釋出名額 → 圖三</text>
+        </svg>
+      </div>
+      <figcaption>老師可以在 LINE 通知裡按按鈕，也可以在「老師名單」的待面試區按，兩邊效果一樣。新生 7 天內沒完成面試，系統也會自動釋出名額。</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>三、名額釋出與自動遞補</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 720 380" role="img" aria-label="老師按不通過、新生 7 天沒面試、3 天沒付款或學生取消時，名額自動釋出並由候補第 1 位遞補：舊生收到付款連結，新生收到約面試通知，沒有候補則名額重新開放。老師在 LINE 通知和老師名單看結果。">
+          <defs><marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
+
+          <rect class="box act" x="10" y="30" width="170" height="40" rx="8"/>
+          <text class="t inv" x="95" y="55" text-anchor="middle">老師按「不通過」</text>
+          <rect class="box" x="10" y="82" width="170" height="40" rx="8"/>
+          <text class="t" x="95" y="107" text-anchor="middle">新生 7 天沒面試</text>
+          <rect class="box" x="10" y="134" width="170" height="40" rx="8"/>
+          <text class="t" x="95" y="159" text-anchor="middle">3 天沒付款</text>
+          <rect class="box" x="10" y="186" width="170" height="40" rx="8"/>
+          <text class="t" x="95" y="211" text-anchor="middle">學生點「取消報名」</text>
+
+          <polyline class="ln" points="180,50 200,50"/>
+          <polyline class="ln" points="180,102 200,102"/>
+          <polyline class="ln" points="180,154 200,154"/>
+          <polyline class="ln" points="180,206 200,206"/>
+          <line class="ln" x1="200" y1="50" x2="200" y2="206"/>
+          <line class="ln" x1="200" y1="128" x2="218" y2="128" marker-end="url(#mc)"/>
+
+          <rect class="box warn" x="220" y="100" width="120" height="56" rx="10"/>
+          <text class="t b" x="280" y="124" text-anchor="middle">名額釋出</text>
+          <text class="t" x="280" y="142" text-anchor="middle">自動</text>
+          <line class="ln" x1="340" y1="128" x2="378" y2="128" marker-end="url(#mc)"/>
+
+          <rect class="box sys" x="380" y="100" width="120" height="56" rx="10"/>
+          <text class="t b" x="440" y="124" text-anchor="middle">自動遞補</text>
+          <text class="t" x="440" y="142" text-anchor="middle">候補第 1 位</text>
+
+          <line class="ln" x1="500" y1="128" x2="520" y2="128"/>
+          <line class="ln" x1="520" y1="64" x2="520" y2="192"/>
+          <line class="ln" x1="520" y1="64" x2="538" y2="64" marker-end="url(#mc)"/>
+          <line class="ln" x1="520" y1="128" x2="538" y2="128" marker-end="url(#mc)"/>
+          <line class="ln" x1="520" y1="192" x2="538" y2="192" marker-end="url(#mc)"/>
+
+          <rect class="box sys" x="540" y="40" width="170" height="48" rx="8"/>
+          <text class="t" x="625" y="60" text-anchor="middle">舊生：寄付款連結</text>
+          <text class="lbl" x="625" y="78" text-anchor="middle">3 天內付款</text>
+          <rect class="box sys" x="540" y="104" width="170" height="48" rx="8"/>
+          <text class="t" x="625" y="124" text-anchor="middle">新生：寄約面試通知</text>
+          <text class="lbl" x="625" y="142" text-anchor="middle">7 天內面試</text>
+          <rect class="box sys" x="540" y="168" width="170" height="48" rx="8"/>
+          <text class="t" x="625" y="188" text-anchor="middle">沒有候補</text>
+          <text class="lbl" x="625" y="206" text-anchor="middle">名額重新開放報名</text>
+
+          <line class="ln dash" x1="280" y1="156" x2="230" y2="278" marker-end="url(#mc)"/>
+          <line class="ln dash" x1="440" y1="156" x2="490" y2="278" marker-end="url(#mc)"/>
+          <text class="lbl" x="246" y="222" text-anchor="end">自動通知</text>
+          <text class="lbl" x="474" y="222">自動更新</text>
+          <text class="head" x="360" y="262" text-anchor="middle">老師在哪裡看結果</text>
+
+          <rect class="box" x="110" y="280" width="240" height="72" rx="10"/>
+          <text class="t b" x="230" y="302" text-anchor="middle">老師 LINE</text>
+          <text class="t" x="230" y="322" text-anchor="middle">「○○ 名額已釋出，</text>
+          <text class="t" x="230" y="340" text-anchor="middle">已自動遞補 ○○」</text>
+
+          <rect class="box" x="370" y="280" width="240" height="72" rx="10"/>
+          <text class="t b" x="490" y="302" text-anchor="middle">老師名單</text>
+          <text class="t" x="490" y="322" text-anchor="middle">未通過的人 → 已結束</text>
+          <text class="t" x="490" y="340" text-anchor="middle">遞補的人 → 待付款／待面試</text>
+        </svg>
+      </div>
+      <figcaption>四種情況都會釋出名額，老師不用另外操作。釋出後，候補第 1 位自動補上；老師會在 LINE 收到一則通知，名單也會同步更新。開營前 5 天起不再遞補。</figcaption>
+    </figure>
+  </section>
+
+  <div class="note">
+    <h2>老師要做的事</h2>
+    <ul>
+      <li>開營前：填日期、費用、匯款帳號，把報名連結貼到 LINE 群組或 IG。</li>
+      <li>每位新生面試後：按「通過」或「不通過」。</li>
+      <li>其他時候：看 LINE 通知就好。</li>
+    </ul>
+  </div>
+</main>
