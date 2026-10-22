@@ -351,7 +351,7 @@ function nextDay() {
   });
   if (S.day === NOTICE) {
     const going = S.people.filter(p => p.status === "paid");
-    going.forEach(p => mail(p, `行前通知：${R.name}`, `${R.date}｜${R.place}\n報到時間、地址、攜帶物品、斷食前的飲食準備等（內容由老師提供）。`));
+    going.forEach(p => mail(p, `行前通知：${R.name}`, `抵達：11/21（六）下午 1:30 前抵達，2:00 準時上課\n回程：11/25（三）中午 1 點後的火車均可\n交通：台東火車站轉乘鼎東客運海線（8101、8102…8120），在「隆昌國小」下車\n地址與電話：（正式版會附上，只寄給已報名的學生）\n需帶物品：盥洗用品、瑜珈墊、頭燈、毛巾、睡袋、保暖外套、防蚊液、防曬、雨傘、泳衣……`));
     lineMsg({ title: `📮 已寄出行前通知`, body: `寄給 ${going.length} 位已報名的學生。` });
     notes.push(`已寄出行前通知給 ${going.length} 位`);
   }
