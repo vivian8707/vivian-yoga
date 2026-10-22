@@ -1,0 +1,347 @@
+<title>Sucharita 僻靜營報名</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column like a phone screen; a demo bar on top switches seat scenarios. */
+:root {
+  --bg: #eef2ef;
+  --card: #ffffff;
+  --fg: #1f2b26;
+  --muted: #5d6b64;
+  --line: #d3ddd7;
+  --accent: #2e6656;
+  --accent-ink: #ffffff;
+  --soft: #e1ebe5;
+  --warn: #9a6512;
+  --warn-soft: #f6ecd9;
+  --line-green: #06c755;
+  --error: #b3261e;
+  --demo: #dfe5f1;
+  --demo-fg: #2c3a5c;
+  --serif: "Noto Serif TC", "Songti TC", serif;
+  --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141b18; --card: #1c2521; --fg: #e4ece7; --muted: #9fb0a7; --line: #33423b;
+  --accent: #7fc3ac; --accent-ink: #0e1a15; --soft: #23332c; --warn: #e2b46a; --warn-soft: #33291a;
+  --error: #f2948c; --demo: #222b3d; --demo-fg: #c4d0ea; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #141b18; --card: #1c2521; --fg: #e4ece7; --muted: #9fb0a7; --line: #33423b;
+  --accent: #7fc3ac; --accent-ink: #0e1a15; --soft: #23332c; --warn: #e2b46a; --warn-soft: #33291a;
+  --error: #f2948c; --demo: #222b3d; --demo-fg: #c4d0ea; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 17px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 40px;
+}
+.wrap { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+.demo { background: var(--demo); color: var(--demo-fg); border-radius: 10px; padding: 10px 12px; font-size: 14px; display: flex; flex-direction: column; gap: 8px; }
+.demo b { font-weight: 700; }
+.demo .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo button { font: inherit; font-size: 14px; border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 999px; padding: 3px 12px; cursor: pointer; }
+.demo button[aria-pressed="true"] { background: var(--demo-fg); color: var(--demo); }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
+.eyebrow { font-size: 14px; letter-spacing: .12em; color: var(--muted); }
+h1, h2 { font-family: var(--serif); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.35; }
+h1 { font-size: 28px; }
+h2 { font-size: 22px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+.sample { font-size: 13px; color: var(--muted); }
+.seats { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--soft); font-weight: 500; }
+.seats.wait { background: var(--warn-soft); color: var(--warn); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; flex: none; }
+.seats .num { font-variant-numeric: tabular-nums; }
+.btn { font: inherit; font-size: 18px; font-weight: 700; width: 100%; min-height: 56px; border-radius: 14px; border: 2px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; padding: 10px 16px; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn.line { background: var(--line-green); border-color: var(--line-green); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.btn:focus-visible, input:focus-visible, textarea:focus-visible, .demo button:focus-visible, .back:focus-visible, .copy:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.choices { display: flex; flex-direction: column; gap: 12px; }
+.q { font-weight: 700; font-size: 18px; }
+form { display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+label { font-weight: 500; }
+.req { color: var(--error); margin-left: 2px; }
+.hint { font-size: 14px; color: var(--muted); }
+input, textarea { font: inherit; font-size: 17px; width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); }
+textarea { min-height: 110px; resize: vertical; }
+.err { color: var(--error); font-size: 14px; }
+input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--error); }
+.back { font: inherit; background: none; border: 0; color: var(--accent); padding: 4px 0; cursor: pointer; align-self: flex-start; font-size: 16px; }
+.steps { display: flex; gap: 6px; }
+.steps span { height: 4px; flex: 1; border-radius: 2px; background: var(--line); }
+.steps span.on { background: var(--accent); }
+.bank { border: 1.5px dashed var(--accent); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.bank .acct { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .04em; word-break: break-all; user-select: all; }
+.copy { font: inherit; font-size: 15px; align-self: flex-start; border: 1px solid var(--accent); color: var(--accent); background: transparent; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+.digits { font-size: 26px; letter-spacing: .5em; text-align: center; font-variant-numeric: tabular-nums; }
+.done-mark { width: 64px; height: 64px; border-radius: 50%; background: var(--soft); color: var(--accent); display: grid; place-items: center; font-size: 34px; font-weight: 700; }
+.done-mark.wait { background: var(--warn-soft); color: var(--warn); }
+.qr { width: 150px; height: 150px; border: 1.5px solid var(--line); border-radius: 12px; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 13px; padding: 8px; align-self: center; }
+.summary { background: var(--soft); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+.foot { font-size: 13px; color: var(--muted); text-align: center; }
+@media (prefers-reduced-motion: no-preference) { .card { animation: in .25s ease-out; } @keyframes in { from { transform: translateY(6px); } to { transform: none; } } }
+</style>
+
+<div class="wrap">
+  <div class="demo" role="region" aria-label="試用版控制">
+    <div><b>試用版</b>　資料不會送出。切換名額狀況看看不同畫面：</div>
+    <div class="opts" id="scenario">
+      <button type="button" data-s="open" aria-pressed="true">還有名額</button>
+      <button type="button" data-s="wait" aria-pressed="false">正取已滿（候補）</button>
+      <button type="button" data-s="full" aria-pressed="false">全部額滿</button>
+      <button type="button" data-s="pay" aria-pressed="false">新生付款連結</button>
+    </div>
+  </div>
+  <main id="app"></main>
+  <p class="foot">活動日期、費用、帳號皆為範例，正式版由老師填寫。</p>
+</div>
+
+<script>
+const RETREAT = {
+  name: "2026 冬季僻靜營",
+  date: "12/5（五）– 12/7（日）",
+  place: "宜蘭・山中靜修所",
+  fee: 12800,
+  bank: "國泰世華（013）",
+  acct: "1234-5678-9012",
+  holder: "Sucharita",
+  capacity: 15, waitCap: 5,
+};
+const SCEN = {
+  open: { taken: 12, waiting: 0 },
+  wait: { taken: 15, waiting: 2 },
+  full: { taken: 15, waiting: 5 },
+};
+let scenario = "open";
+let view = "home";
+let type = null;          // "old" | "new"
+let data = {};
+
+const $app = document.getElementById("app");
+const fee = n => "NT$ " + n.toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function seatState() {
+  const s = SCEN[scenario] || SCEN.open;
+  const left = RETREAT.capacity - s.taken;
+  if (left > 0) return { kind: "open", left };
+  if (s.waiting < RETREAT.waitCap) return { kind: "wait", pos: s.waiting + 1, left: RETREAT.waitCap - s.waiting };
+  return { kind: "full" };
+}
+
+function go(v) { view = v; render(); window.scrollTo(0, 0); }
+
+function steps(n, total) {
+  return `<div class="steps" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<span class="${i < n ? "on" : ""}"></span>`).join("")}</div>`;
+}
+
+function seatsBadge(st) {
+  if (st.kind === "open") return `<div class="seats"><span class="dot"></span>剩餘名額 <span class="num">${st.left} / ${RETREAT.capacity}</span></div>`;
+  if (st.kind === "wait") return `<div class="seats wait"><span class="dot"></span>正取已滿，候補還有 <span class="num">${st.left}</span> 位</div>`;
+  return `<div class="seats wait"><span class="dot"></span>本期報名已額滿</div>`;
+}
+
+function home() {
+  const st = seatState();
+  return `<section class="card">
+    <div class="eyebrow">SUCHARITA 老師</div>
+    <h1>${RETREAT.name}</h1>
+    <dl class="facts">
+      <dt>日期</dt><dd>${RETREAT.date}</dd>
+      <dt>地點</dt><dd>${RETREAT.place}</dd>
+      <dt>費用</dt><dd>${fee(RETREAT.fee)}（含食宿）</dd>
+    </dl>
+    ${seatsBadge(st)}
+    ${st.kind === "full"
+      ? `<p class="muted">謝謝你的關注，下一期開放報名時會在 LINE 群組公告。</p>`
+      : `<div class="choices">
+          <div class="q">你參加過 Sucharita 老師的課程或僻靜營嗎？</div>
+          <button class="btn" type="button" data-pick="old">參加過（舊生）</button>
+          <button class="btn ghost" type="button" data-pick="new">第一次（新生）</button>
+          ${st.kind === "wait" ? `<p class="hint">現在報名會排入候補，有名額時會用 Email 通知你，不用先付款。</p>` : ""}
+        </div>`}
+  </section>`;
+}
+
+const FIELDS_BASE = [
+  { id: "name", label: "姓名", req: true },
+  { id: "phone", label: "手機", req: true, type: "tel", ph: "0912-345-678" },
+  { id: "email", label: "Email", req: true, type: "email", hint: "報名結果會寄到這裡" },
+  { id: "lineName", label: "LINE 名稱", req: true, hint: "方便老師認出你" },
+  { id: "emergency", label: "緊急聯絡人（姓名＋電話）", req: true },
+  { id: "health", label: "身體狀況／飲食限制", area: true, hint: "沒有可寫「無」", req: true },
+];
+const FIELDS_NEW = [
+  { id: "exp", label: "瑜伽／靜坐經驗", area: true, req: true, hint: "練習多久、上過哪些課都可以寫" },
+  { id: "reason", label: "想參加的原因", area: true, req: true, hint: "老師會在面試前先看過" },
+];
+
+function fieldHtml(f) {
+  const v = esc(data[f.id] || "");
+  const ctl = f.area
+    ? `<textarea id="${f.id}" name="${f.id}">${v}</textarea>`
+    : `<input id="${f.id}" name="${f.id}" type="${f.type || "text"}" value="${v}" ${f.ph ? `placeholder="${f.ph}"` : ""} ${f.type === "tel" ? 'inputmode="tel"' : ""}>`;
+  return `<div class="field">
+    <label for="${f.id}">${f.label}${f.req ? '<span class="req">*</span>' : ""}</label>
+    ${f.hint ? `<span class="hint">${f.hint}</span>` : ""}
+    ${ctl}
+    <span class="err" id="${f.id}-err" hidden>請填寫這一欄</span>
+  </div>`;
+}
+
+function form() {
+  const st = seatState();
+  const fields = type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
+  const oldOpen = type === "old" && st.kind === "open";
+  const total = oldOpen ? 2 : 1;
+  let submitLabel = "送出報名";
+  if (oldOpen) submitLabel = "下一步：付款";
+  else if (st.kind === "wait") submitLabel = "登記候補";
+  return `<section class="card">
+    <button class="back" type="button" data-go="home">← 返回</button>
+    ${total > 1 ? steps(1, total) : ""}
+    <h2>${type === "new" ? "新生報名資料" : "舊生報名資料"}</h2>
+    ${type === "new" && st.kind === "open" ? `<p class="muted">送出後請傳 LINE 給老師約面試，面試通過再付款。</p>` : ""}
+    <form id="f" novalidate>
+      ${fields.map(fieldHtml).join("")}
+      <button class="btn" type="submit">${submitLabel}</button>
+    </form>
+  </section>`;
+}
+
+function pay(fromEmail) {
+  const who = fromEmail ? "王小美" : (data.name || "");
+  return `<section class="card">
+    ${fromEmail ? "" : `<button class="back" type="button" data-go="form">← 修改資料</button>${steps(2, 2)}`}
+    <h2>${fromEmail ? `${esc(who)}，恭喜面試通過！` : "最後一步：轉帳付款"}</h2>
+    <p>請轉帳 <b>${fee(RETREAT.fee)}</b> 到以下帳戶，完成後填寫你的匯款帳號<b>後五碼</b>，就報名完成了。</p>
+    ${fromEmail ? `<p class="hint">請在 3 天內完成，逾期名額會讓給候補的同學。</p>` : ""}
+    <div class="bank">
+      <span class="muted">${RETREAT.bank}　戶名：${RETREAT.holder}</span>
+      <span class="acct" id="acct">${RETREAT.acct}</span>
+      <button class="copy" type="button" id="copyBtn">複製帳號</button>
+    </div>
+    <form id="p" novalidate>
+      <div class="field">
+        <label for="last5">你的匯款帳號後五碼<span class="req">*</span></label>
+        <span class="hint">轉帳後在網銀或收據上可以看到</span>
+        <input id="last5" name="last5" class="digits" inputmode="numeric" maxlength="5" autocomplete="off" value="${esc(data.last5 || "")}">
+        <span class="err" id="last5-err" hidden>請輸入 5 位數字</span>
+      </div>
+      <button class="btn" type="submit">完成報名</button>
+    </form>
+  </section>`;
+}
+
+function done() {
+  const st = seatState();
+  if (view === "done-wait") {
+    return `<section class="card">
+      <div class="done-mark wait">候</div>
+      <h2>已登記候補第 ${st.pos} 位</h2>
+      <p>有名額釋出時，系統會依順序自動遞補，並寄 Email 到 <b>${esc(data.email)}</b> 通知你${type === "new" ? "約面試" : "付款"}。</p>
+      <p class="hint">現在不用付款，也不用聯絡老師。</p>
+    </section>`;
+  }
+  if (view === "done-new") {
+    return `<section class="card">
+      <div class="done-mark">✓</div>
+      <h2>已收到報名，請傳 LINE 約面試</h2>
+      <p>名額已先為你保留。請在 <b>7 天內</b>傳 LINE 給 Sucharita 老師約面試時間，傳訊時請附上你的姓名。</p>
+      <a class="btn line" href="https://line.me/" target="_blank" rel="noopener">開啟 LINE 傳訊給老師</a>
+      <div class="qr">老師的 LINE<br>QR Code<br>（正式版放這裡）</div>
+      <p class="hint">面試通過後，你會收到付款連結的 Email。超過 7 天未面試，名額會讓給候補的同學。</p>
+    </section>`;
+  }
+  return `<section class="card">
+    <div class="done-mark">✓</div>
+    <h2>報名成功！</h2>
+    <p>${esc(data.name || "王小美")}，期待在 ${RETREAT.name} 見到你。</p>
+    <div class="summary">
+      ${RETREAT.date}<br>${RETREAT.place}<br>
+      匯款後五碼：<b>${esc(data.last5)}</b>
+    </div>
+    <p class="hint">確認信已寄到 ${esc(data.email || "你的 Email")}。如需取消，請點信中的「取消報名」連結。</p>
+  </section>`;
+}
+
+function render() {
+  document.querySelectorAll("#scenario button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === scenario)));
+  if (view === "home") $app.innerHTML = home();
+  else if (view === "form") $app.innerHTML = form();
+  else if (view === "pay") $app.innerHTML = pay(false);
+  else if (view === "pay-email") $app.innerHTML = pay(true);
+  else $app.innerHTML = done();
+}
+
+function validate(formEl, ids) {
+  let ok = true, first = null;
+  ids.forEach(id => {
+    const el = formEl.querySelector("#" + id);
+    const v = el.value.trim();
+    let bad = !v;
+    if (id === "email" && v && !/^\S+@\S+\.\S+$/.test(v)) bad = true;
+    if (id === "last5" && !/^\d{5}$/.test(v)) bad = true;
+    el.setAttribute("aria-invalid", String(bad));
+    const err = formEl.querySelector("#" + id + "-err");
+    if (err) {
+      err.hidden = !bad;
+      if (id === "email" && v) err.textContent = "Email 格式不正確";
+    }
+    data[id] = v;
+    if (bad) { ok = false; if (!first) first = el; }
+  });
+  if (first) first.focus();
+  return ok;
+}
+
+document.getElementById("scenario").addEventListener("click", e => {
+  const b = e.target.closest("button[data-s]");
+  if (!b) return;
+  if (b.dataset.s === "pay") { scenario = "open"; data = { email: "xiaomei@example.com", name: "王小美" }; go("pay-email"); return; }
+  scenario = b.dataset.s; data = {}; type = null; go("home");
+});
+
+$app.addEventListener("click", e => {
+  const pick = e.target.closest("[data-pick]");
+  if (pick) { type = pick.dataset.pick; go("form"); return; }
+  const back = e.target.closest("[data-go]");
+  if (back) { go(back.dataset.go); return; }
+  if (e.target.id === "copyBtn") {
+    const btn = e.target;
+    const done = () => { btn.textContent = "已複製"; setTimeout(() => (btn.textContent = "複製帳號"), 1500); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("acct")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "已選取，請長按複製"; };
+    try { navigator.clipboard.writeText(RETREAT.acct.replace(/-/g, "")).then(done, fallback); } catch (_) { fallback(); }
+  }
+});
+
+$app.addEventListener("input", e => {
+  if (e.target.id === "last5") e.target.value = e.target.value.replace(/\D/g, "").slice(0, 5);
+});
+
+$app.addEventListener("submit", e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.id === "f") {
+    const fields = type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
+    if (!validate(f, fields.map(x => x.id))) return;
+    const st = seatState();
+    if (st.kind === "wait") go("done-wait");
+    else if (type === "new") go("done-new");
+    else go("pay");
+  } else if (f.id === "p") {
+    if (!validate(f, ["last5"])) return;
+    go("done-ok");
+  }
+});
+
+render();
+</script>
