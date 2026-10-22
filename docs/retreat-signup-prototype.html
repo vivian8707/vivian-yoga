@@ -140,7 +140,7 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--
   <div class="ctrl">
     <div class="tabs" role="tablist" id="tabs">
       <button type="button" role="tab" data-tab="student">學生<br>報名頁</button>
-      <button type="button" role="tab" data-tab="line">老師<br>LINE</button>
+      <button type="button" role="tab" data-tab="line">老師<br>Email</button>
       <button type="button" role="tab" data-tab="list">老師<br>名單</button>
       <button type="button" role="tab" data-tab="mail">學生<br>Email</button>
     </div>
@@ -149,6 +149,7 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--
       <span class="sp"></span>
       <button type="button" class="chip strong" id="nextDay">快轉 1 天 ⏩</button>
       <button type="button" class="chip" id="fillUp">填滿名額</button>
+      <button type="button" class="chip" id="jump">快轉到行前通知日</button>
       <button type="button" class="chip" id="reset">重來</button>
     </div>
   </div>
@@ -156,17 +157,18 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--
   <details class="guide" id="guide" open>
     <summary>試玩路線（模擬版，資料不會送出）</summary>
     <ol>
-      <li><b>舊生報名：</b>在「學生報名頁」選「參加過」→ 填資料（可按「自動填入範例」）→ 付款頁填任意 5 位數字 → 報名成功。再看「老師 LINE」收到的通知。</li>
-      <li><b>新生報名：</b>回首頁選「第一次」→ 送出 → 到「老師 LINE」按「面試通過」→ 到「學生 Email」點「前往付款」→ 填後五碼完成。</li>
+      <li><b>舊生報名：</b>在「學生報名頁」選「參加過」→ 填資料（可按「自動填入範例」）→ 付款頁填任意 5 位數字 → 報名成功。再看「老師 Email」收到的通知。</li>
+      <li><b>新生報名：</b>回首頁選「第一次」→ 送出 → 到「老師名單」（或「老師 Email」）按「通過」→ 到「學生 Email」點「前往付款」→ 填後五碼完成。</li>
       <li><b>候補：</b>按上方「填滿名額」，再報名一位，會變成候補。</li>
-      <li><b>自動遞補：</b>在「學生 Email」對某位已報名的人按「取消報名」，或在老師 LINE 對新生按「不通過」，看候補第 1 位自動補上。</li>
+      <li><b>自動遞補：</b>在「學生 Email」對某位已報名的人按「取消報名」，或在老師名單對新生按「不通過」，看候補第 1 位自動補上。</li>
       <li><b>逾期釋出：</b>連按「快轉 1 天」，沒面試的新生 7 天後、沒付款的人 3 天後會自動釋出名額。</li>
+      <li><b>行前通知：</b>按「快轉到行前通知日」，開營前 2 天會自動寄行前通知給所有已報名的學生。</li>
     </ol>
   </details>
 
   <div id="toast" class="toast" hidden></div>
   <main id="app"></main>
-  <p class="foot">日期、費用、帳號、學生姓名皆為範例，正式版由老師填寫。</p>
+  <p class="foot">學生姓名皆為範例。行前通知的內容由老師提供。</p>
 </div>
 
 <script>
@@ -175,13 +177,19 @@ const R = {
   date: "11/21（六）– 11/25（三）",
   place: "台東 Yoga House",
   fee: { old: 15000, new: 17500 },
-  bank: "國泰世華（013）",
-  acct: "1234-5678-9012",
-  holder: "Sucharita",
+  bankCode: "007",
+  bank: "第一銀行安南分行",
+  acct: "60868063788",
+  holder: "徐淑萍",
+  teacherEmail: "sucharita@ouryogahouse.com",
+  startDate: new Date(2026, 10, 21),
   cap: 15, waitCap: 5,
   interviewDays: 7, payDays: 3,
 };
 const START = new Date(2026, 9, 22);
+const dayIndex = d => Math.round((d - START) / 86400000);
+const CUTOFF = dayIndex(R.startDate) - 5;   // 開營前 5 天起不再遞補
+const NOTICE = dayIndex(R.startDate) - 2;   // 開營前 2 天寄行前通知
 const SEAT = ["paid", "interview", "pay"];
 const NAMES = ["周曉君", "王建國", "洪美華", "郭子瑜", "曾怡婷", "賴俊宏", "潘思妤", "邱柏翰", "徐若涵", "孫立行"];
 const FIELDS_BASE = [
@@ -280,6 +288,10 @@ function register(type, d, last5) {
 }
 
 function release(reasonText) {
+  if (S.day >= CUTOFF) {
+    lineMsg({ title: `🔄 ${reasonText}`, body: `已過遞補截止日（${dateOf(CUTOFF)}），不再遞補。\n${counts()}` });
+    return;
+  }
   const out = [];
   while (occupied() < R.cap && waiting().length) {
     const p = waiting()[0];
@@ -334,11 +346,22 @@ function nextDay() {
       p.status = "expired";
       mail(p, "報名已逾期", `因${what}，名額已讓給候補同學。`);
       release(`${p.name} ${what}，名額已釋出`);
-      notes.push(p.name);
+      notes.push(`${p.name} 逾期，名額已釋出`);
     }
   });
-  toast(`今天是 ${dateOf(S.day)}` + (notes.length ? `：${notes.join("、")} 逾期，名額已釋出` : ""));
+  if (S.day === NOTICE) {
+    const going = S.people.filter(p => p.status === "paid");
+    going.forEach(p => mail(p, `行前通知：${R.name}`, `${R.date}｜${R.place}\n報到時間、地址、攜帶物品、斷食前的飲食準備等（內容由老師提供）。`));
+    lineMsg({ title: `📮 已寄出行前通知`, body: `寄給 ${going.length} 位已報名的學生。` });
+    notes.push(`已寄出行前通知給 ${going.length} 位`);
+  }
+  toast(`今天是 ${dateOf(S.day)}` + (notes.length ? `：${notes.join("、")}` : ""));
   render();
+}
+
+function jumpToNotice() {
+  if (S.day >= NOTICE) { toast("已經過了行前通知日"); return; }
+  while (S.day < NOTICE) nextDay();
 }
 
 function fillUp() {
@@ -421,8 +444,9 @@ function sPay() {
     <p>${p && p.type === "new" ? "新生" : "舊生"}費用 <b>${fee(amount)}</b>，請轉帳到以下帳戶，完成後填寫你的匯款帳號<b>後五碼</b>，就報名完成了。</p>
     ${p ? `<p class="hint">請在 ${dateOf(p.due)} 前完成，逾期名額會讓給候補的同學。</p>` : ""}
     <div class="bank">
-      <span class="muted">${R.bank}　戶名：${R.holder}</span>
+      <span class="muted">銀行代號 ${R.bankCode}　${R.bank}</span>
       <span class="acct" id="acct">${R.acct}</span>
+      <span class="muted">戶名：${R.holder}</span>
       <button class="chip" type="button" id="copyBtn" style="align-self:flex-start">複製帳號</button>
     </div>
     <form id="p" novalidate>
@@ -486,8 +510,8 @@ function lineView() {
     return `<div class="msg"><span class="when">${dateOf(m.day)}</span><span class="title">${esc(m.title)}</span>${m.body ? `<span style="white-space:pre-line">${esc(m.body)}</span>` : ""}${btns}</div>`;
   }).reverse().join("");
   return `<section class="chat">
-    <div class="chat-head"><span class="avatar">助</span>僻靜營報名小幫手</div>
-    <p class="hint">老師只會在這裡收到通知。最新的在最上面。</p>
+    <div class="chat-head"><span class="avatar">✉</span>寄給 ${R.teacherEmail}</div>
+    <p class="hint">老師的信箱會收到這些通知信，手機 Gmail 會跳通知。看看就好，不用回信。最新的在最上面。</p>
     ${msgs || `<div class="empty">還沒有通知</div>`}
     <button class="btn ghost small" type="button" data-tabgo="list">📋 查看全部名單</button>
   </section>`;
@@ -614,6 +638,7 @@ function validate(formEl, ids) {
 document.getElementById("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) goTab(b.dataset.tab); });
 document.getElementById("nextDay").addEventListener("click", nextDay);
 document.getElementById("fillUp").addEventListener("click", fillUp);
+document.getElementById("jump").addEventListener("click", jumpToNotice);
 document.getElementById("reset").addEventListener("click", () => { reset(); tab = "student"; render(); toast("已重新開始"); });
 
 $app.addEventListener("click", e => {
