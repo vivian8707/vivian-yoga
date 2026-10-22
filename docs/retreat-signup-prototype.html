@@ -157,7 +157,7 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--
   <details class="guide" id="guide" open>
     <summary>試玩路線（模擬版，資料不會送出）</summary>
     <ol>
-      <li><b>舊生報名：</b>在「學生報名頁」選「參加過」→ 填資料（可按「自動填入範例」）→ 付款頁填任意 5 位數字 → 報名成功。再看「老師 Email」收到的通知。</li>
+      <li><b>舊生報名：</b>在「學生報名頁」選「參加過」→ 填資料（可按「自動填入範例」）→ 送出 → 到「學生 Email」看確認信的匯款資訊，點「前往付款」填任意 5 位數字。再看「老師 Email」收到的通知。</li>
       <li><b>新生報名：</b>回首頁選「第一次」→ 送出 → 到「老師名單」（或「老師 Email」）按「通過」→ 到「學生 Email」點「前往付款」→ 填後五碼完成。</li>
       <li><b>候補：</b>按上方「填滿名額」，再報名一位，會變成候補。</li>
       <li><b>自動遞補：</b>在「學生 Email」對某位已報名的人按「取消報名」，或在老師名單對新生按「不通過」，看候補第 1 位自動補上。</li>
@@ -258,10 +258,11 @@ function toInterview(p, viaPromotion) {
   mail(p, viaPromotion ? "候補遞補成功！請傳 LINE 約面試" : "已收到報名，請傳 LINE 約面試",
     `名額已為你保留。請在 ${dateOf(p.due)} 前傳 LINE 給 Sucharita 老師約面試時間。`, ["line", "cancel"]);
 }
-function toPay(p, viaPromotion) {
+const bankText = () => `銀行代號 ${R.bankCode} ${R.bank}\n帳號 ${R.acct}\n戶名 ${R.holder}`;
+function toPay(p, subject) {
   p.status = "pay"; p.due = S.day + R.payDays;
-  mail(p, viaPromotion ? "候補遞補成功！請於 3 天內付款" : "面試通過！請於 3 天內付款",
-    `請在 ${dateOf(p.due)} 前轉帳 ${fee(feeOf(p))}，並在付款頁填寫匯款帳號後五碼。`, ["pay", "cancel"]);
+  mail(p, subject,
+    `請在 ${dateOf(p.due)} 前轉帳 ${fee(feeOf(p))} 到：\n${bankText()}\n轉帳後點下方「前往付款」回填匯款帳號後五碼。逾期名額會讓給候補的同學。`, ["pay", "cancel"]);
 }
 
 function register(type, d, last5) {
@@ -277,9 +278,8 @@ function register(type, d, last5) {
     return p;
   }
   if (type === "old") {
-    p.status = "paid"; p.last5 = last5;
-    mail(p, "報名成功！", `${R.name}｜${R.date}｜${R.place}\n匯款後五碼：${last5}`, ["cancel"]);
-    lineMsg({ title: `✅ 舊生報名成功：${p.name}`, body: `後五碼 ${last5}　${counts()}`, kind: "old", pid: p.id });
+    toPay(p, `報名確認：${R.name}（請於 3 天內付款）`);
+    lineMsg({ title: `✅ 舊生報名：${p.name}`, body: `待付款（${dateOf(p.due)} 到期）　${counts()}`, kind: "old", pid: p.id });
   } else {
     toInterview(p, false);
     lineMsg({ title: `🆕 新生報名：${p.name}`, body: `原因：${p.reason}\n${counts()}`, kind: "interview", pid: p.id });
@@ -297,7 +297,7 @@ function release(reasonText) {
     const p = waiting()[0];
     if (p.type === "new") toInterview(p, true);
     else if (p.prepaid) { p.status = "paid"; mail(p, "候補遞補成功，報名完成！", "你先前已付款，不需再轉帳。", ["cancel"]); }
-    else toPay(p, true);
+    else toPay(p, "候補遞補成功！請於 3 天內付款");
     out.push(`${p.name}（${p.type === "new" ? "新生，待面試" : p.status === "paid" ? "舊生，已付款" : "舊生，待付款"}）`);
   }
   lineMsg({ title: `🔄 ${reasonText}`, body: out.length ? `已自動遞補：${out.join("、")}\n${counts()}` : `目前沒有候補，名額重新開放報名。\n${counts()}` });
@@ -308,15 +308,15 @@ function act(kind, id, extra) {
   if (!p) return;
   if (kind === "pass" && p.status === "interview") {
     if (p.prepaid) { p.status = "paid"; mail(p, "面試通過，報名完成！", "你先前已付款，不需再轉帳。", ["cancel"]); }
-    else toPay(p, false);
+    else toPay(p, "面試通過！請於 3 天內付款");
     toast(`已通過 ${p.name}，系統已寄 Email 通知`);
   } else if (kind === "reject" && p.status === "interview") {
     p.status = "rejected";
     mail(p, "關於" + R.name, "謝謝你的報名與分享，這次未能邀請你參加，期待未來有機會相遇。");
     toast(`已通知 ${p.name}，名額釋出`);
     release(`${p.name} 面試未通過，名額已釋出` + (p.prepaid ? "（此人已付款，需退款）" : ""));
-  } else if (kind === "toNew" && p.status === "paid") {
-    p.status = "interview"; p.type = "new"; p.prepaid = true; p.due = S.day + R.interviewDays;
+  } else if (kind === "toNew" && (p.status === "paid" || p.status === "pay")) {
+    p.prepaid = p.status === "paid"; p.status = "interview"; p.type = "new"; p.due = S.day + R.interviewDays;
     mail(p, "請傳 LINE 跟老師約面試", `報名需先與老師面試，請在 ${dateOf(p.due)} 前傳 LINE 給老師。`, ["line", "cancel"]);
     toast(`${p.name} 已改為新生，系統已通知他約面試`);
   } else if (kind === "pay" && p.status === "pay") {
@@ -419,10 +419,10 @@ function sForm() {
   const st = seatState();
   const fields = sv.type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
   const oldOpen = sv.type === "old" && st.kind === "open";
-  const label = st.kind === "wait" ? "登記候補" : oldOpen ? "下一步：付款" : "送出報名";
+  const label = st.kind === "wait" ? "登記候補" : "送出報名";
   return `<section class="card">
     <button class="link back" type="button" data-go="home">← 返回</button>
-    ${oldOpen ? stepsBar(1, 2) : ""}
+    ${oldOpen ? `<p class="muted">送出後會收到確認信，信中有匯款資訊，請在 3 天內轉帳並回填後五碼。</p>` : ""}
     <h2>${sv.type === "new" ? "新生報名資料" : "舊生報名資料"}</h2>
     ${sv.type === "new" && st.kind === "open" ? `<p class="muted">送出後請傳 LINE 給老師約面試，面試通過再付款。</p>` : ""}
     <button class="link fill" type="button" id="autofill">（模擬用）自動填入範例</button>
@@ -470,6 +470,13 @@ function sDone() {
       <p>有名額釋出時，系統會依順序自動遞補，並寄 Email 到 <b>${esc(p.email)}</b> 通知你${p.type === "new" ? "約面試" : p.prepaid ? "" : "付款"}。</p>
       ${p.prepaid ? `<p class="hint">你送出時名額剛好額滿，已付款會保留；若最後沒遞補到，老師會退款給你。</p>` : `<p class="hint">現在不用付款，也不用聯絡老師。</p>`}
       ${again}</section>`;
+  if (p.status === "pay") return `<section class="card">
+      <div class="mark">✓</div>
+      <h2>報名成功，請完成付款</h2>
+      <p>名額已為你保留。確認信已寄到 <b>${esc(p.email)}</b>，請在 <b>${dateOf(p.due)}</b> 前轉帳 ${fee(feeOf(p))}，再點信中的連結回填匯款帳號後五碼。</p>
+      <div class="summary" style="white-space:pre-line">${bankText()}</div>
+      <button class="btn small" type="button" data-tabgo="mail">（模擬）打開學生信箱</button>
+      ${again}</section>`;
   if (p.status === "interview") return `<section class="card">
       <div class="mark">✓</div>
       <h2>已收到報名，請傳 LINE 約面試</h2>
@@ -503,7 +510,7 @@ function lineView() {
         ? `<div class="row"><button class="btn small" type="button" data-act="pass" data-id="${p.id}">✅ 面試通過</button><button class="btn small bad" type="button" data-act="reject" data-id="${p.id}">不通過</button></div>`
         : `<div class="reply">${statusText(p)}</div>`;
     } else if (m.kind === "old" && p) {
-      btns = p.status === "paid" && p.type === "old"
+      btns = (p.status === "paid" || p.status === "pay") && p.type === "old"
         ? `<button class="link" type="button" data-act="toNew" data-id="${p.id}" style="align-self:flex-start">不認識這位？改為新生</button>`
         : p.type === "new" ? `<div class="reply">已改為新生：${statusText(p)}</div>` : "";
     }
@@ -521,7 +528,7 @@ function statusText(p) {
   return {
     paid: "已報名" + (p.last5 ? `（後五碼 ${p.last5}）` : ""),
     interview: `待面試（${dateOf(p.due)} 到期）`,
-    pay: `面試通過，待付款（${dateOf(p.due)} 到期）`,
+    pay: `待付款（${dateOf(p.due)} 到期）`,
     waiting: "候補中", rejected: "未通過", expired: "已逾期", cancelled: "已取消", closed: "額滿未報名",
   }[p.status];
 }
@@ -672,7 +679,6 @@ $app.addEventListener("submit", e => {
   if (f.id === "f") {
     const fields = sv.type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
     if (!validate(f, fields.map(x => x.id))) return;
-    if (sv.type === "old" && seatState().kind === "open") { sv.payId = null; goView("pay"); return; }
     const p = register(sv.type, { ...sv.data });
     sv.doneId = p.id; goView("done");
   } else if (f.id === "p") {

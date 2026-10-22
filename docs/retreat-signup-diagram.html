@@ -87,11 +87,11 @@ a { color: var(--accent); }
     <h2>一、舊生報名</h2>
     <figure>
       <div class="scroll">
-        <svg viewBox="0 0 680 370" role="img" aria-label="舊生填資料後看到匯款帳號，轉帳填後五碼就報名成功；系統寄確認信並用 Email 通知老師，老師不用做事。">
+        <svg viewBox="0 0 680 450" role="img" aria-label="舊生填資料送出後，系統保留名額 3 天並寄確認信，信中有匯款資訊和回填連結；學生轉帳後點連結填後五碼，系統記錄為已付款並寄確認信，老師只收到 Email 通知，不用做事。">
           <defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
-          <rect class="lane" x="0" y="0" width="226" height="370"/>
-          <rect class="lane sys" x="227" y="0" width="226" height="370"/>
-          <rect class="lane" x="454" y="0" width="226" height="370"/>
+          <rect class="lane" x="0" y="0" width="226" height="450"/>
+          <rect class="lane sys" x="227" y="0" width="226" height="450"/>
+          <rect class="lane" x="454" y="0" width="226" height="450"/>
           <text class="head" x="113" y="28" text-anchor="middle">學生</text>
           <text class="head" x="340" y="28" text-anchor="middle">系統（自動）</text>
           <text class="head" x="567" y="28" text-anchor="middle">老師</text>
@@ -102,34 +102,52 @@ a { color: var(--accent); }
           <line class="ln" x1="113" y1="102" x2="113" y2="128" marker-end="url(#ma)"/>
 
           <rect class="box" x="23" y="130" width="180" height="52" rx="10"/>
-          <text class="t" x="113" y="161" text-anchor="middle">填報名資料</text>
-          <line class="ln" x1="113" y1="182" x2="113" y2="208" marker-end="url(#ma)"/>
-          <text class="lbl" x="121" y="200">下一步：付款</text>
+          <text class="t" x="113" y="152" text-anchor="middle">填報名資料</text>
+          <text class="t" x="113" y="170" text-anchor="middle">（不用填後五碼）</text>
+          <line class="ln" x1="203" y1="156" x2="248" y2="156" marker-end="url(#ma)"/>
+          <text class="lbl" x="226" y="148" text-anchor="middle">送出</text>
+
+          <rect class="box sys" x="250" y="130" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="152" text-anchor="middle">保留名額</text>
+          <text class="t" x="340" y="170" text-anchor="middle">付款期限 3 天</text>
+          <line class="ln" x1="430" y1="156" x2="475" y2="156" marker-end="url(#ma)"/>
+          <text class="lbl" x="453" y="148" text-anchor="middle">通知</text>
+
+          <rect class="box" x="477" y="130" width="180" height="52" rx="10"/>
+          <text class="t" x="567" y="152" text-anchor="middle">收到報名通知</text>
+          <text class="t" x="567" y="170" text-anchor="middle">不用做事</text>
+
+          <line class="ln" x1="340" y1="182" x2="340" y2="208" marker-end="url(#ma)"/>
+          <rect class="box sys" x="250" y="210" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="232" text-anchor="middle">寄確認信</text>
+          <text class="t" x="340" y="250" text-anchor="middle">匯款資訊＋回填連結</text>
+          <line class="ln" x1="250" y1="236" x2="205" y2="236" marker-end="url(#ma)"/>
+          <text class="lbl" x="227" y="228" text-anchor="middle">Email</text>
 
           <rect class="box" x="23" y="210" width="180" height="52" rx="10"/>
-          <text class="t" x="113" y="232" text-anchor="middle">看到匯款帳號</text>
-          <text class="t" x="113" y="250" text-anchor="middle">轉帳、填後五碼</text>
-          <line class="ln" x1="203" y1="236" x2="248" y2="236" marker-end="url(#ma)"/>
-          <text class="lbl" x="226" y="228" text-anchor="middle">送出</text>
+          <text class="t" x="113" y="232" text-anchor="middle">轉帳後點信中連結</text>
+          <text class="t" x="113" y="250" text-anchor="middle">回填後五碼</text>
+          <polyline class="ln" points="113,262 113,316 248,316" marker-end="url(#ma)"/>
+          <text class="lbl" x="180" y="308" text-anchor="middle">送出</text>
 
-          <rect class="box sys" x="250" y="210" width="180" height="52" rx="10"/>
-          <text class="t" x="340" y="232" text-anchor="middle">記錄為已報名</text>
-          <text class="t" x="340" y="250" text-anchor="middle">名額 −1</text>
-          <polyline class="ln" points="340,262 340,316 205,316" marker-end="url(#ma)"/>
-          <polyline class="ln" points="340,316 475,316" marker-end="url(#ma)"/>
-          <text class="lbl" x="272" y="308" text-anchor="middle">確認信</text>
-          <text class="lbl" x="408" y="308" text-anchor="middle">Email 通知</text>
+          <rect class="box sys" x="250" y="290" width="180" height="52" rx="10"/>
+          <text class="t" x="340" y="312" text-anchor="middle">記錄為已付款</text>
+          <text class="t" x="340" y="330" text-anchor="middle">報名完成</text>
+          <polyline class="ln" points="340,342 340,396 205,396" marker-end="url(#ma)"/>
+          <polyline class="ln" points="340,396 475,396" marker-end="url(#ma)"/>
+          <text class="lbl" x="272" y="388" text-anchor="middle">確認信</text>
+          <text class="lbl" x="408" y="388" text-anchor="middle">Email 通知</text>
 
-          <rect class="box" x="23" y="290" width="180" height="52" rx="10"/>
-          <text class="t b" x="113" y="312" text-anchor="middle">報名成功</text>
-          <text class="t" x="113" y="330" text-anchor="middle">收到確認信</text>
+          <rect class="box" x="23" y="370" width="180" height="52" rx="10"/>
+          <text class="t b" x="113" y="392" text-anchor="middle">報名完成</text>
+          <text class="t" x="113" y="410" text-anchor="middle">收到付款確認信</text>
 
-          <rect class="box" x="477" y="290" width="180" height="52" rx="10"/>
-          <text class="t" x="567" y="312" text-anchor="middle">收到 Email 通知</text>
-          <text class="t" x="567" y="330" text-anchor="middle">不用做事</text>
+          <rect class="box" x="477" y="370" width="180" height="52" rx="10"/>
+          <text class="t" x="567" y="392" text-anchor="middle">收到付款通知</text>
+          <text class="t" x="567" y="410" text-anchor="middle">不用做事</text>
         </svg>
       </div>
-      <figcaption>名額已滿時，舊生填完資料直接登記候補，頁面不顯示匯款帳號，不用先付款；遞補到時才收到付款連結（見圖三）。</figcaption>
+      <figcaption>3 天內沒有回填後五碼，系統會在到期前一天提醒，到期自動釋出名額（見圖三）。名額已滿時，舊生填完資料直接登記候補，不用先付款；遞補到時才收到付款連結。</figcaption>
     </figure>
   </section>
 
