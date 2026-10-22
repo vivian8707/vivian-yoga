@@ -108,8 +108,8 @@ input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--
 const RETREAT = {
   name: "2026 冬季僻靜營",
   date: "12/5（五）– 12/7（日）",
-  place: "宜蘭・山中靜修所",
-  fee: 12800,
+  place: "台東 Yoga House",
+  fee: { old: 11800, new: 12800 },
   bank: "國泰世華（013）",
   acct: "1234-5678-9012",
   holder: "Sucharita",
@@ -157,7 +157,7 @@ function home() {
     <dl class="facts">
       <dt>日期</dt><dd>${RETREAT.date}</dd>
       <dt>地點</dt><dd>${RETREAT.place}</dd>
-      <dt>費用</dt><dd>${fee(RETREAT.fee)}（含食宿）</dd>
+      <dt>費用</dt><dd>舊生 ${fee(RETREAT.fee.old)}<br>新生 ${fee(RETREAT.fee.new)}<br><span class="hint">含食宿</span></dd>
     </dl>
     ${seatsBadge(st)}
     ${st.kind === "full"
@@ -222,7 +222,7 @@ function pay(fromEmail) {
   return `<section class="card">
     ${fromEmail ? "" : `<button class="back" type="button" data-go="form">← 修改資料</button>${steps(2, 2)}`}
     <h2>${fromEmail ? `${esc(who)}，恭喜面試通過！` : "最後一步：轉帳付款"}</h2>
-    <p>請轉帳 <b>${fee(RETREAT.fee)}</b> 到以下帳戶，完成後填寫你的匯款帳號<b>後五碼</b>，就報名完成了。</p>
+    <p>${fromEmail || type === "new" ? "新生" : "舊生"}費用 <b>${fee(fromEmail || type === "new" ? RETREAT.fee.new : RETREAT.fee.old)}</b>，請轉帳到以下帳戶，完成後填寫你的匯款帳號<b>後五碼</b>，就報名完成了。</p>
     ${fromEmail ? `<p class="hint">請在 3 天內完成，逾期名額會讓給候補的同學。</p>` : ""}
     <div class="bank">
       <span class="muted">${RETREAT.bank}　戶名：${RETREAT.holder}</span>
@@ -306,7 +306,7 @@ function validate(formEl, ids) {
 document.getElementById("scenario").addEventListener("click", e => {
   const b = e.target.closest("button[data-s]");
   if (!b) return;
-  if (b.dataset.s === "pay") { scenario = "open"; data = { email: "xiaomei@example.com", name: "王小美" }; go("pay-email"); return; }
+  if (b.dataset.s === "pay") { scenario = "open"; type = "new"; data = { email: "xiaomei@example.com", name: "王小美" }; go("pay-email"); return; }
   scenario = b.dataset.s; data = {}; type = null; go("home");
 });
 
