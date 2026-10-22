@@ -90,6 +90,15 @@ label { font-weight: 500; }
 input, textarea { font: inherit; font-size: 17px; width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); }
 textarea { min-height: 96px; resize: vertical; }
 .err { color: var(--error); font-size: 14px; }
+[hidden] { display: none !important; }
+.en { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
+.sec-title { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 2px; }
+.sec-title:first-child { border-top: 0; padding-top: 0; }
+fieldset.yn { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.yn legend { font-weight: 500; padding: 0; margin-bottom: 6px; }
+.yn-opts { display: flex; gap: 10px; }
+.yn-opts label { flex: 1; display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 14px; cursor: pointer; font-weight: 400; }
+.yn-opts input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
 input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--error); }
 .link { font: inherit; background: none; border: 0; color: var(--accent); padding: 2px 0; cursor: pointer; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
 .back { align-self: flex-start; text-decoration: none; font-size: 16px; }
@@ -192,22 +201,39 @@ const CUTOFF = dayIndex(R.startDate) - 5;   // 開營前 5 天起不再遞補
 const NOTICE = dayIndex(R.startDate) - 2;   // 開營前 2 天寄行前通知
 const SEAT = ["paid", "interview", "pay"];
 const NAMES = ["周曉君", "王建國", "洪美華", "郭子瑜", "曾怡婷", "賴俊宏", "潘思妤", "邱柏翰", "徐若涵", "孫立行"];
-const FIELDS_BASE = [
-  { id: "name", label: "姓名", req: true },
-  { id: "phone", label: "手機", type: "tel", ph: "0912-345-678" },
-  { id: "email", label: "Email", type: "email", hint: "報名結果會寄到這裡" },
-  { id: "lineName", label: "LINE 名稱", hint: "方便老師認出你" },
-  { id: "emergency", label: "緊急聯絡人（姓名＋電話）" },
-  { id: "health", label: "身體狀況／飲食限制", area: true, hint: "沒有可寫「無」" },
+// 依老師原本的 Yoga House Retreat 報名表（新生、舊生填同一份）
+const FORM = [
+  { sec: "個人資料", en: "Personal Information" },
+  { id: "name", label: "中文名字", en: "Chinese Name", req: true },
+  { id: "nick", label: "英文暱稱", en: "English Nickname" },
+  { id: "address", label: "地址", en: "Address", req: true },
+  { id: "phone", label: "行動電話", en: "Cell Phone", type: "tel", ph: "0912-345-678", req: true },
+  { id: "homePhone", label: "電話（住家）", en: "Home Phone", type: "tel" },
+  { id: "email", label: "Email", type: "email", hint: "報名結果和付款資訊會寄到這裡", req: true },
+  { id: "lineName", label: "LINE ID 或名稱", en: "LINE ID", hint: "方便老師認出你" },
+  { id: "birth", label: "出生年月日", en: "Date of Birth", type: "date", req: true },
+  { id: "job", label: "現職", en: "Current Occupation", req: true },
+  { sec: "緊急聯絡人", en: "Emergency Contact" },
+  { id: "ecName", label: "姓名", en: "Name", req: true },
+  { id: "ecPhone", label: "行動電話", en: "Cell Phone", type: "tel", req: true },
+  { id: "ecRel", label: "關係", en: "Relationship", req: true },
+  { sec: "關於你", en: "About You" },
+  { id: "source", label: "1. 您從哪裡獲知 Yoga House 課程的資訊？", en: "How did you first learn about Yoga House?", req: true },
+  { id: "exp", label: "2. 你學多久瑜珈？請敘述你的瑜珈練習。", en: "How long have you been practicing yoga? Describe your practice.", area: true, req: true },
+  { id: "reason", label: "3. 為什麼選擇參加這次的營隊呢？", en: "Why do you want to join this retreat?", area: true, req: true },
+  { sec: "個人就醫史", en: "Medical History", note: "請寫下您的就醫史，以便讓我們在您參與課程時，能就緊急情況做出回應。您的回答不會導致您被排除參與這次課程的機會。" },
+  { id: "psy", yn: true, label: "1. 您曾經接受過任何心理治療嗎？", en: "Are you under medical treatment for any psychological condition?", detail: "如是，請敘述 If yes, please describe" },
+  { id: "preg", yn: true, label: "2. 您目前懷孕或計畫在參與課程時懷孕嗎？", en: "Are you currently pregnant or planning to become pregnant during the course?" },
+  { id: "recov", yn: true, label: "3. 有任何您在身體或心理治療狀況的進展，我們需要知道的嗎？", en: "Are you in recovery from any physical or mental condition that we should be aware of?", detail: "如是，請敘述 If yes, please describe" },
+  { id: "medOther", label: "4. 有關您的就醫史，還有任何我們需要知道的其他事項嗎？", en: "Is there anything else we should know about your medical history?", area: true, hint: "沒有可寫「無」", req: true },
 ];
-const FIELDS_NEW = [
-  { id: "exp", label: "瑜伽／靜坐經驗", area: true, hint: "練習多久、上過哪些課都可以寫" },
-  { id: "reason", label: "想參加的原因", area: true, hint: "老師會在面試前先看過" },
-];
+const INPUTS = FORM.filter(f => f.id);
+const SAMPLE_BASE = { nick: "", address: "台北市大安區範例路 1 號", homePhone: "", birth: "1990-05-20", job: "設計師", ecRel: "母女", source: "老師的 IG", psy: "no", preg: "no", recov: "no", medOther: "無" };
 const SAMPLE = {
-  old: { name: "陳小雨", phone: "0912-345-678", email: "xiaoyu@example.com", lineName: "小雨", emergency: "陳媽媽 0922-111-222", health: "無" },
-  new: { name: "王小美", phone: "0933-456-789", email: "xiaomei@example.com", lineName: "Mei", emergency: "王先生 0955-333-444", health: "腰椎曾受傷，前彎需注意", exp: "在台北練習哈達瑜伽一年半", reason: "最近工作壓力很大，想好好安靜幾天，找回跟身體的連結。" },
+  old: { ...SAMPLE_BASE, name: "陳小雨", nick: "Rain", phone: "0912-345-678", email: "xiaoyu@example.com", lineName: "小雨", ecName: "陳媽媽", ecPhone: "0922-111-222", exp: "練習 4 年，參加過 2 次老師的僻靜營。", reason: "想再一次好好清理身體，回到安靜。" },
+  new: { ...SAMPLE_BASE, name: "王小美", nick: "Mei", phone: "0933-456-789", email: "xiaomei@example.com", lineName: "Mei", ecName: "王先生", ecPhone: "0955-333-444", ecRel: "配偶", exp: "在台北練習哈達瑜伽一年半，每週兩堂課。", reason: "最近工作壓力很大，想好好安靜幾天，找回跟身體的連結。", recov: "yes", recovDetail: "去年腰椎受傷，前彎需注意。", medOther: "對花生過敏" },
 };
+const medNotes = p => [p.psy === "yes" && `心理治療：${p.psyDetail}`, p.preg === "yes" && "懷孕或計畫懷孕", p.recov === "yes" && `復原中：${p.recovDetail}`, p.medOther && p.medOther !== "無" && p.medOther].filter(Boolean);
 
 let S;           // simulation state
 let tab = "student";
@@ -404,20 +430,65 @@ function sHome() {
   </section>`;
 }
 function fieldHtml(f) {
+  if (f.sec) return `<div class="sec-title"><h3>${f.sec}</h3>${f.en ? `<span class="en">${f.en}</span>` : ""}${f.note ? `<p class="hint">${f.note}</p>` : ""}</div>`;
+  const label = `${f.label}${f.req || f.yn ? '<span class="req">*</span>' : ""}${f.en ? `<span class="en">${f.en}</span>` : ""}`;
+  const err = `<span class="err" id="${f.id}-err" hidden>${f.yn ? "請選擇是或否" : "請填寫這一欄"}</span>`;
+  if (f.yn) {
+    const v = sv.data[f.id], dv = esc(sv.data[f.id + "Detail"] || "");
+    return `<fieldset class="field yn" id="${f.id}">
+      <legend>${label}</legend>
+      <div class="yn-opts">
+        <label><input type="radio" name="${f.id}" value="yes" ${v === "yes" ? "checked" : ""}> 是 Yes</label>
+        <label><input type="radio" name="${f.id}" value="no" ${v === "no" ? "checked" : ""}> 否 No</label>
+      </div>
+      ${f.detail ? `<div class="field" id="${f.id}-wrap" ${v === "yes" ? "" : "hidden"}><label for="${f.id}Detail" class="hint">${f.detail}</label><textarea id="${f.id}Detail" name="${f.id}Detail">${dv}</textarea><span class="err" id="${f.id}Detail-err" hidden>請簡單說明</span></div>` : ""}
+      ${err}
+    </fieldset>`;
+  }
   const v = esc(sv.data[f.id] || "");
   const ctl = f.area
     ? `<textarea id="${f.id}" name="${f.id}">${v}</textarea>`
     : `<input id="${f.id}" name="${f.id}" type="${f.type || "text"}" value="${v}" ${f.ph ? `placeholder="${f.ph}"` : ""} ${f.type === "tel" ? 'inputmode="tel"' : ""}>`;
   return `<div class="field">
-    <label for="${f.id}">${f.label}<span class="req">*</span></label>
+    <label for="${f.id}">${label}</label>
     ${f.hint ? `<span class="hint">${f.hint}</span>` : ""}
     ${ctl}
-    <span class="err" id="${f.id}-err" hidden>請填寫這一欄</span>
+    ${err}
   </div>`;
+}
+function validateForm(formEl) {
+  let first = null;
+  const mark = (id, bad, focusEl) => {
+    const err = formEl.querySelector("#" + id + "-err");
+    if (err) err.hidden = !bad;
+    if (bad && !first) first = focusEl;
+  };
+  INPUTS.forEach(f => {
+    if (f.yn) {
+      const picked = formEl.querySelector(`input[name="${f.id}"]:checked`);
+      sv.data[f.id] = picked ? picked.value : "";
+      mark(f.id, !picked, formEl.querySelector(`input[name="${f.id}"]`));
+      if (f.detail) {
+        const d = formEl.querySelector("#" + f.id + "Detail");
+        sv.data[f.id + "Detail"] = d.value.trim();
+        const bad = sv.data[f.id] === "yes" && !d.value.trim();
+        d.setAttribute("aria-invalid", String(bad)); mark(f.id + "Detail", bad, d);
+      }
+      return;
+    }
+    const el = formEl.querySelector("#" + f.id);
+    const v = el.value.trim();
+    sv.data[f.id] = v;
+    let bad = f.req && !v;
+    if (f.id === "email" && v && !/^\S+@\S+\.\S+$/.test(v)) { bad = true; formEl.querySelector("#email-err").textContent = "Email 格式不正確"; }
+    el.setAttribute("aria-invalid", String(bad)); mark(f.id, bad, el);
+  });
+  if (first) first.focus();
+  return !first;
 }
 function sForm() {
   const st = seatState();
-  const fields = sv.type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
+  const fields = FORM;
   const oldOpen = sv.type === "old" && st.kind === "open";
   const label = st.kind === "wait" ? "登記候補" : "送出報名";
   return `<section class="card">
@@ -555,6 +626,7 @@ function listView() {
       ${iv.map(p => `<div class="person">
           <div class="top"><span class="nm">${esc(p.name)}</span><span class="mini">${dateOf(p.day)} 報名・剩 ${left(p)} 天</span></div>
           ${p.reason ? `<span class="quote">「${esc(p.reason)}」</span>` : ""}
+          ${medNotes(p).length ? `<span class="mini"><span class="pill bad">就醫史</span> ${esc(medNotes(p).join("；"))}</span>` : ""}
           <div class="row"><button class="btn small" type="button" data-act="pass" data-id="${p.id}">✅ 通過</button><button class="btn small bad" type="button" data-act="reject" data-id="${p.id}">不通過</button></div>
         </div>`).join("") || `<p class="mini">沒有待面試的新生</p>`}
     </div>
@@ -566,7 +638,7 @@ function listView() {
 
     <div class="sec">
       <div class="sec-h">已報名 <span class="pill">${paid.length}</span></div>
-      ${paid.map(p => `<div class="person"><div class="top"><span class="nm">${esc(p.name)}</span>${tag(p)}<span class="mini">後五碼 ${esc(p.last5 || "—")}</span></div></div>`).join("")}
+      ${paid.map(p => `<div class="person"><div class="top"><span class="nm">${esc(p.name)}</span>${tag(p)}<span class="mini">後五碼 ${esc(p.last5 || "—")}</span></div>${medNotes(p).length ? `<span class="mini"><span class="pill bad">就醫史</span> ${esc(medNotes(p).join("；"))}</span>` : ""}</div>`).join("")}
     </div>
 
     <div class="sec">
@@ -672,13 +744,17 @@ $app.addEventListener("click", e => {
 });
 
 $app.addEventListener("input", e => { if (e.target.id === "last5") e.target.value = e.target.value.replace(/\D/g, "").slice(0, 5); });
+$app.addEventListener("change", e => {
+  if (e.target.type !== "radio") return;
+  const wrap = document.getElementById(e.target.name + "-wrap");
+  if (wrap) wrap.hidden = e.target.value !== "yes";
+});
 
 $app.addEventListener("submit", e => {
   e.preventDefault();
   const f = e.target;
   if (f.id === "f") {
-    const fields = sv.type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
-    if (!validate(f, fields.map(x => x.id))) return;
+    if (!validateForm(f)) return;
     const p = register(sv.type, { ...sv.data });
     sv.doneId = p.id; goView("done");
   } else if (f.id === "p") {
