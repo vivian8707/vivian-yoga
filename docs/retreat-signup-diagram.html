@@ -87,7 +87,7 @@ a { color: var(--accent); }
     <h2>一、舊生報名</h2>
     <figure>
       <div class="scroll">
-        <svg viewBox="0 0 680 370" role="img" aria-label="舊生填資料後看到匯款帳號，轉帳填後五碼就報名成功；系統寄確認信並用 LINE 通知老師，老師不用做事。">
+        <svg viewBox="0 0 680 370" role="img" aria-label="舊生填資料後看到匯款帳號，轉帳填後五碼就報名成功；系統寄確認信並用 Email 通知老師，老師不用做事。">
           <defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
           <rect class="lane" x="0" y="0" width="226" height="370"/>
           <rect class="lane sys" x="227" y="0" width="226" height="370"/>
@@ -118,14 +118,14 @@ a { color: var(--accent); }
           <polyline class="ln" points="340,262 340,316 205,316" marker-end="url(#ma)"/>
           <polyline class="ln" points="340,316 475,316" marker-end="url(#ma)"/>
           <text class="lbl" x="272" y="308" text-anchor="middle">確認信</text>
-          <text class="lbl" x="408" y="308" text-anchor="middle">LINE 通知</text>
+          <text class="lbl" x="408" y="308" text-anchor="middle">Email 通知</text>
 
           <rect class="box" x="23" y="290" width="180" height="52" rx="10"/>
           <text class="t b" x="113" y="312" text-anchor="middle">報名成功</text>
           <text class="t" x="113" y="330" text-anchor="middle">收到確認信</text>
 
           <rect class="box" x="477" y="290" width="180" height="52" rx="10"/>
-          <text class="t" x="567" y="312" text-anchor="middle">收到 LINE 通知</text>
+          <text class="t" x="567" y="312" text-anchor="middle">收到 Email 通知</text>
           <text class="t" x="567" y="330" text-anchor="middle">不用做事</text>
         </svg>
       </div>
@@ -210,7 +210,7 @@ a { color: var(--accent); }
           <text class="t b" x="340" y="410" text-anchor="middle">釋出名額 → 圖三</text>
         </svg>
       </div>
-      <figcaption>老師可以在 LINE 通知裡按按鈕，也可以在「老師名單」的待面試區按，兩邊效果一樣。新生 7 天內沒完成面試，系統也會自動釋出名額。</figcaption>
+      <figcaption>老師面試完，打開加在手機主畫面的「老師名單」，在待面試區按「通過」或「不通過」。新生 7 天內沒完成面試，系統也會自動釋出名額。</figcaption>
     </figure>
   </section>
 
@@ -218,7 +218,7 @@ a { color: var(--accent); }
     <h2>三、名額釋出與自動遞補</h2>
     <figure>
       <div class="scroll">
-        <svg viewBox="0 0 720 380" role="img" aria-label="老師按不通過、新生 7 天沒面試、3 天沒付款或學生取消時，名額自動釋出並由候補第 1 位遞補：舊生收到付款連結，新生收到約面試通知，沒有候補則名額重新開放。老師在 LINE 通知和老師名單看結果。">
+        <svg viewBox="0 0 720 380" role="img" aria-label="老師按不通過、新生 7 天沒面試、3 天沒付款或學生取消時，名額自動釋出並由候補第 1 位遞補：舊生收到付款連結，新生收到約面試通知，沒有候補則名額重新開放。老師在 Email 通知和老師名單看結果。">
           <defs><marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker></defs>
 
           <rect class="box act" x="10" y="30" width="170" height="40" rx="8"/>
@@ -269,7 +269,7 @@ a { color: var(--accent); }
           <text class="head" x="360" y="262" text-anchor="middle">老師在哪裡看結果</text>
 
           <rect class="box" x="110" y="280" width="240" height="72" rx="10"/>
-          <text class="t b" x="230" y="302" text-anchor="middle">老師 LINE</text>
+          <text class="t b" x="230" y="302" text-anchor="middle">老師 Email</text>
           <text class="t" x="230" y="322" text-anchor="middle">「○○ 名額已釋出，</text>
           <text class="t" x="230" y="340" text-anchor="middle">已自動遞補 ○○」</text>
 
@@ -279,7 +279,7 @@ a { color: var(--accent); }
           <text class="t" x="490" y="340" text-anchor="middle">遞補的人 → 待付款／待面試</text>
         </svg>
       </div>
-      <figcaption>四種情況都會釋出名額，老師不用另外操作。釋出後，候補第 1 位自動補上；老師會在 LINE 收到一則通知，名單也會同步更新。開營前 5 天起不再遞補。</figcaption>
+      <figcaption>四種情況都會釋出名額，老師不用另外操作。釋出後，候補第 1 位自動補上；老師會收到一封 Email 通知，名單也會同步更新。開營前 5 天起不再遞補。</figcaption>
     </figure>
   </section>
 
@@ -288,7 +288,7 @@ a { color: var(--accent); }
     <ul>
       <li>開營前：填日期、費用、匯款帳號，把報名連結貼到 LINE 群組或 IG。</li>
       <li>每位新生面試後：按「通過」或「不通過」。</li>
-      <li>其他時候：看 LINE 通知就好。</li>
+      <li>其他時候：看 Email 通知就好。開營前 2 天，系統會自動寄行前通知給所有已報名的學生。</li>
     </ul>
   </div>
 </main>
