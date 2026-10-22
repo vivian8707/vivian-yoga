@@ -2,7 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap">
 <style>
-/* Layout: one narrow column like a phone screen; a demo bar on top switches seat scenarios. */
+/* Layout: one narrow phone-width column; a sticky control bar switches between the four "screens" of the simulation. */
 :root {
   --bg: #eef2ef;
   --card: #ffffff;
@@ -14,22 +14,25 @@
   --soft: #e1ebe5;
   --warn: #9a6512;
   --warn-soft: #f6ecd9;
+  --bad: #a3392f;
+  --bad-soft: #f7e3e0;
   --line-green: #06c755;
+  --chat: #d7e3ee;
   --error: #b3261e;
-  --demo: #dfe5f1;
-  --demo-fg: #2c3a5c;
+  --bar: #1f2b26;
+  --bar-fg: #eef2ef;
   --serif: "Noto Serif TC", "Songti TC", serif;
   --sans: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #141b18; --card: #1c2521; --fg: #e4ece7; --muted: #9fb0a7; --line: #33423b;
   --accent: #7fc3ac; --accent-ink: #0e1a15; --soft: #23332c; --warn: #e2b46a; --warn-soft: #33291a;
-  --error: #f2948c; --demo: #222b3d; --demo-fg: #c4d0ea; color-scheme: dark;
+  --bad: #f2948c; --bad-soft: #3a2220; --chat: #1a2633; --error: #f2948c; --bar: #e4ece7; --bar-fg: #141b18; color-scheme: dark;
 } }
 :root[data-theme="dark"] {
   --bg: #141b18; --card: #1c2521; --fg: #e4ece7; --muted: #9fb0a7; --line: #33423b;
   --accent: #7fc3ac; --accent-ink: #0e1a15; --soft: #23332c; --warn: #e2b46a; --warn-soft: #33291a;
-  --error: #f2948c; --demo: #222b3d; --demo-fg: #c4d0ea; color-scheme: dark;
+  --bad: #f2948c; --bad-soft: #3a2220; --chat: #1a2633; --error: #f2948c; --bar: #e4ece7; --bar-fg: #141b18; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
@@ -38,74 +41,136 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 12px 40px;
 }
-.wrap { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-.demo { background: var(--demo); color: var(--demo-fg); border-radius: 10px; padding: 10px 12px; font-size: 14px; display: flex; flex-direction: column; gap: 8px; }
-.demo b { font-weight: 700; }
-.demo .opts { display: flex; flex-wrap: wrap; gap: 6px; }
-.demo button { font: inherit; font-size: 14px; border: 1px solid currentColor; background: transparent; color: inherit; border-radius: 999px; padding: 3px 12px; cursor: pointer; }
-.demo button[aria-pressed="true"] { background: var(--demo-fg); color: var(--demo); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.ctrl { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 6px; display: flex; flex-direction: column; gap: 8px; }
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px; }
+.tabs button { font: inherit; font-size: 14px; line-height: 1.3; border: 0; background: transparent; color: var(--fg); border-radius: 9px; padding: 8px 2px; cursor: pointer; position: relative; }
+.tabs button[aria-selected="true"] { background: var(--bar); color: var(--bar-fg); font-weight: 700; }
+.badge { position: absolute; top: 2px; right: 4px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--error); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; padding: 0 5px; }
+.time { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.time b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.time .sp { flex: 1; }
+.chip { font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.chip.strong { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.guide { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px; font-size: 15px; }
+.guide summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+.guide ol { margin: 0 0 10px; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.toast { background: var(--bar); color: var(--bar-fg); border-radius: 10px; padding: 10px 14px; font-size: 15px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
 .eyebrow { font-size: 14px; letter-spacing: .12em; color: var(--muted); }
-h1, h2 { font-family: var(--serif); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.35; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.35; }
 h1 { font-size: 28px; }
 h2 { font-size: 22px; }
+h3 { font-size: 18px; }
 p { margin: 0; }
 .muted { color: var(--muted); }
+.hint { font-size: 14px; color: var(--muted); }
 .facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; }
 .facts dt { color: var(--muted); }
 .facts dd { margin: 0; }
-.sample { font-size: 13px; color: var(--muted); }
 .seats { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--soft); font-weight: 500; }
 .seats.wait { background: var(--warn-soft); color: var(--warn); }
 .dot { width: 10px; height: 10px; border-radius: 50%; background: currentColor; flex: none; }
-.seats .num { font-variant-numeric: tabular-nums; }
+.num { font-variant-numeric: tabular-nums; }
 .btn { font: inherit; font-size: 18px; font-weight: 700; width: 100%; min-height: 56px; border-radius: 14px; border: 2px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; padding: 10px 16px; }
 .btn.ghost { background: transparent; color: var(--accent); }
-.btn.line { background: var(--line-green); border-color: var(--line-green); color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; }
-.btn:focus-visible, input:focus-visible, textarea:focus-visible, .demo button:focus-visible, .back:focus-visible, .copy:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.btn.line { background: var(--line-green); border-color: var(--line-green); color: #fff; }
+.btn.small { min-height: 44px; font-size: 16px; }
+.btn.bad { background: transparent; border-color: var(--bad); color: var(--bad); }
+.row { display: flex; gap: 8px; }
+.row > * { flex: 1; min-width: 0; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .choices { display: flex; flex-direction: column; gap: 12px; }
 .q { font-weight: 700; font-size: 18px; }
 form { display: flex; flex-direction: column; gap: 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 label { font-weight: 500; }
 .req { color: var(--error); margin-left: 2px; }
-.hint { font-size: 14px; color: var(--muted); }
 input, textarea { font: inherit; font-size: 17px; width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--fg); }
-textarea { min-height: 110px; resize: vertical; }
+textarea { min-height: 96px; resize: vertical; }
 .err { color: var(--error); font-size: 14px; }
 input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--error); }
-.back { font: inherit; background: none; border: 0; color: var(--accent); padding: 4px 0; cursor: pointer; align-self: flex-start; font-size: 16px; }
+.link { font: inherit; background: none; border: 0; color: var(--accent); padding: 2px 0; cursor: pointer; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
+.back { align-self: flex-start; text-decoration: none; font-size: 16px; }
+.fill { align-self: flex-start; }
 .steps { display: flex; gap: 6px; }
 .steps span { height: 4px; flex: 1; border-radius: 2px; background: var(--line); }
 .steps span.on { background: var(--accent); }
 .bank { border: 1.5px dashed var(--accent); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
-.bank .acct { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .04em; word-break: break-all; user-select: all; }
-.copy { font: inherit; font-size: 15px; align-self: flex-start; border: 1px solid var(--accent); color: var(--accent); background: transparent; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+.acct { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: .04em; word-break: break-all; user-select: all; }
 .digits { font-size: 26px; letter-spacing: .5em; text-align: center; font-variant-numeric: tabular-nums; }
-.done-mark { width: 64px; height: 64px; border-radius: 50%; background: var(--soft); color: var(--accent); display: grid; place-items: center; font-size: 34px; font-weight: 700; }
-.done-mark.wait { background: var(--warn-soft); color: var(--warn); }
-.qr { width: 150px; height: 150px; border: 1.5px solid var(--line); border-radius: 12px; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 13px; padding: 8px; align-self: center; }
+.mark { width: 64px; height: 64px; border-radius: 50%; background: var(--soft); color: var(--accent); display: grid; place-items: center; font-size: 30px; font-weight: 700; }
+.mark.wait { background: var(--warn-soft); color: var(--warn); }
+.qr { width: 140px; height: 140px; border: 1.5px solid var(--line); border-radius: 12px; display: grid; place-items: center; text-align: center; color: var(--muted); font-size: 13px; padding: 8px; align-self: center; }
 .summary { background: var(--soft); border-radius: 12px; padding: 12px 14px; font-size: 15px; }
+/* LINE chat */
+.chat { background: var(--chat); border-radius: 16px; padding: 14px 12px; display: flex; flex-direction: column; gap: 12px; }
+.chat-head { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--line-green); color: #fff; display: grid; place-items: center; font-size: 15px; flex: none; }
+.msg { background: var(--card); border-radius: 4px 16px 16px 16px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; margin-right: 24px; }
+.msg .when { font-size: 12px; color: var(--muted); }
+.msg .title { font-weight: 700; }
+.msg .reply { background: var(--soft); color: var(--accent); border-radius: 8px; padding: 6px 10px; font-size: 15px; font-weight: 500; }
+.empty { color: var(--muted); text-align: center; padding: 24px 8px; }
+/* Teacher list */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; }
+.stats div { background: var(--soft); border-radius: 10px; padding: 8px 2px; font-size: 13px; color: var(--muted); }
+.stats b { display: block; font-size: 22px; color: var(--fg); font-variant-numeric: tabular-nums; }
+.sec { display: flex; flex-direction: column; gap: 10px; }
+.sec-h { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.pill { font-size: 13px; font-weight: 500; border-radius: 999px; padding: 1px 10px; background: var(--soft); color: var(--accent); white-space: nowrap; }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.person { border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.person .top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.person .nm { font-weight: 700; }
+.quote { font-size: 15px; color: var(--muted); }
+.mini { font-size: 14px; color: var(--muted); }
+/* Email */
+.mail { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: var(--card); }
+.mail .to { font-size: 13px; color: var(--muted); }
+.mail .subj { font-weight: 700; }
+.mail .acts { display: flex; flex-wrap: wrap; gap: 8px; }
 .foot { font-size: 13px; color: var(--muted); text-align: center; }
-@media (prefers-reduced-motion: no-preference) { .card { animation: in .25s ease-out; } @keyframes in { from { transform: translateY(6px); } to { transform: none; } } }
+@media (prefers-reduced-motion: no-preference) { .card, .msg, .mail { animation: in .2s ease-out; } @keyframes in { from { transform: translateY(5px); } to { transform: none; } } }
 </style>
 
 <div class="wrap">
-  <div class="demo" role="region" aria-label="試用版控制">
-    <div><b>試用版</b>　資料不會送出。切換名額狀況看看不同畫面：</div>
-    <div class="opts" id="scenario">
-      <button type="button" data-s="open" aria-pressed="true">還有名額</button>
-      <button type="button" data-s="wait" aria-pressed="false">正取已滿（候補）</button>
-      <button type="button" data-s="full" aria-pressed="false">全部額滿</button>
-      <button type="button" data-s="pay" aria-pressed="false">新生付款連結</button>
+  <div class="ctrl">
+    <div class="tabs" role="tablist" id="tabs">
+      <button type="button" role="tab" data-tab="student">學生<br>報名頁</button>
+      <button type="button" role="tab" data-tab="line">老師<br>LINE</button>
+      <button type="button" role="tab" data-tab="list">老師<br>名單</button>
+      <button type="button" role="tab" data-tab="mail">學生<br>Email</button>
+    </div>
+    <div class="time">
+      <span>模擬日期 <b id="today"></b></span>
+      <span class="sp"></span>
+      <button type="button" class="chip strong" id="nextDay">快轉 1 天 ⏩</button>
+      <button type="button" class="chip" id="fillUp">填滿名額</button>
+      <button type="button" class="chip" id="reset">重來</button>
     </div>
   </div>
+
+  <details class="guide" id="guide" open>
+    <summary>試玩路線（模擬版，資料不會送出）</summary>
+    <ol>
+      <li><b>舊生報名：</b>在「學生報名頁」選「參加過」→ 填資料（可按「自動填入範例」）→ 付款頁填任意 5 位數字 → 報名成功。再看「老師 LINE」收到的通知。</li>
+      <li><b>新生報名：</b>回首頁選「第一次」→ 送出 → 到「老師 LINE」按「面試通過」→ 到「學生 Email」點「前往付款」→ 填後五碼完成。</li>
+      <li><b>候補：</b>按上方「填滿名額」，再報名一位，會變成候補。</li>
+      <li><b>自動遞補：</b>在「學生 Email」對某位已報名的人按「取消報名」，或在老師 LINE 對新生按「不通過」，看候補第 1 位自動補上。</li>
+      <li><b>逾期釋出：</b>連按「快轉 1 天」，沒面試的新生 7 天後、沒付款的人 3 天後會自動釋出名額。</li>
+    </ol>
+  </details>
+
+  <div id="toast" class="toast" hidden></div>
   <main id="app"></main>
-  <p class="foot">活動日期、費用、帳號皆為範例，正式版由老師填寫。</p>
+  <p class="foot">日期、費用、帳號、學生姓名皆為範例，正式版由老師填寫。</p>
 </div>
 
 <script>
-const RETREAT = {
+const R = {
   name: "2026 冬季僻靜營",
   date: "12/5（五）– 12/7（日）",
   place: "台東 Yoga House",
@@ -113,51 +178,196 @@ const RETREAT = {
   bank: "國泰世華（013）",
   acct: "1234-5678-9012",
   holder: "Sucharita",
-  capacity: 15, waitCap: 5,
+  cap: 15, waitCap: 5,
+  interviewDays: 7, payDays: 3,
 };
-const SCEN = {
-  open: { taken: 12, waiting: 0 },
-  wait: { taken: 15, waiting: 2 },
-  full: { taken: 15, waiting: 5 },
+const START = new Date(2026, 9, 22);
+const SEAT = ["paid", "interview", "pay"];
+const NAMES = ["周曉君", "王建國", "洪美華", "郭子瑜", "曾怡婷", "賴俊宏", "潘思妤", "邱柏翰", "徐若涵", "孫立行"];
+const FIELDS_BASE = [
+  { id: "name", label: "姓名", req: true },
+  { id: "phone", label: "手機", type: "tel", ph: "0912-345-678" },
+  { id: "email", label: "Email", type: "email", hint: "報名結果會寄到這裡" },
+  { id: "lineName", label: "LINE 名稱", hint: "方便老師認出你" },
+  { id: "emergency", label: "緊急聯絡人（姓名＋電話）" },
+  { id: "health", label: "身體狀況／飲食限制", area: true, hint: "沒有可寫「無」" },
+];
+const FIELDS_NEW = [
+  { id: "exp", label: "瑜伽／靜坐經驗", area: true, hint: "練習多久、上過哪些課都可以寫" },
+  { id: "reason", label: "想參加的原因", area: true, hint: "老師會在面試前先看過" },
+];
+const SAMPLE = {
+  old: { name: "陳小雨", phone: "0912-345-678", email: "xiaoyu@example.com", lineName: "小雨", emergency: "陳媽媽 0922-111-222", health: "無" },
+  new: { name: "王小美", phone: "0933-456-789", email: "xiaomei@example.com", lineName: "Mei", emergency: "王先生 0955-333-444", health: "腰椎曾受傷，前彎需注意", exp: "在台北練習哈達瑜伽一年半", reason: "最近工作壓力很大，想好好安靜幾天，找回跟身體的連結。" },
 };
-let scenario = "open";
-let view = "home";
-let type = null;          // "old" | "new"
-let data = {};
 
-const $app = document.getElementById("app");
+let S;           // simulation state
+let tab = "student";
+let sv = { view: "home", type: null, data: {}, payId: null };   // student page state
+let unread = { line: 0, mail: 0 };
+
+function reset() {
+  S = { day: 0, seq: 0, people: [], line: [], mail: [] };
+  ["陳大華", "李美玲", "張雅婷", "黃志明", "吳佩珊", "劉家豪", "蔡宜君", "楊淑芬", "許文傑", "鄭雅文", "謝宗翰"].forEach((n, i) =>
+    S.people.push({ id: ++S.seq, name: n, type: "old", status: "paid", last5: String(10000 + i * 1371).slice(-5), day: -9 + i % 5, email: "student" + i + "@example.com" }));
+  const lin = { id: ++S.seq, name: "林大明", type: "new", status: "interview", day: -2, due: -2 + R.interviewDays, email: "daming@example.com", reason: "練習兩年，想更深入靜坐，也想認識老師的教學。" };
+  S.people.push(lin);
+  S.line.push({ day: -2, title: "🆕 新生報名：林大明", body: `原因：${lin.reason}`, kind: "interview", pid: lin.id });
+  sv = { view: "home", type: null, data: {}, payId: null };
+  unread = { line: 0, mail: 0 };
+}
+
+// ---------- helpers ----------
 const fee = n => "NT$ " + n.toLocaleString("en-US");
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const dateOf = d => { const x = new Date(START); x.setDate(x.getDate() + d); return `${x.getMonth() + 1}/${x.getDate()}`; };
+const occupied = () => S.people.filter(p => SEAT.includes(p.status)).length;
+const waiting = () => S.people.filter(p => p.status === "waiting").sort((a, b) => a.wseq - b.wseq);
+const byId = id => S.people.find(p => p.id === id);
+const feeOf = p => p.type === "new" ? R.fee.new : R.fee.old;
 function seatState() {
-  const s = SCEN[scenario] || SCEN.open;
-  const left = RETREAT.capacity - s.taken;
+  const left = R.cap - occupied();
   if (left > 0) return { kind: "open", left };
-  if (s.waiting < RETREAT.waitCap) return { kind: "wait", pos: s.waiting + 1, left: RETREAT.waitCap - s.waiting };
+  const w = waiting().length;
+  if (w < R.waitCap) return { kind: "wait", pos: w + 1, left: R.waitCap - w };
   return { kind: "full" };
 }
+function counts() { return `目前 ${occupied()}/${R.cap}，候補 ${waiting().length}`; }
 
-function go(v) { view = v; render(); window.scrollTo(0, 0); }
+function lineMsg(m) { S.line.push({ day: S.day, ...m }); if (tab !== "line") unread.line++; }
+function mail(p, subject, body, acts = []) { S.mail.push({ day: S.day, to: p.name, email: p.email, subject, body, acts, pid: p.id }); if (tab !== "mail") unread.mail++; }
 
-function steps(n, total) {
-  return `<div class="steps" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<span class="${i < n ? "on" : ""}"></span>`).join("")}</div>`;
+let toastTimer;
+function toast(t) {
+  const el = document.getElementById("toast");
+  el.textContent = t; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 4000);
 }
 
+// ---------- rules ----------
+function toInterview(p, viaPromotion) {
+  p.status = "interview"; p.due = S.day + R.interviewDays;
+  mail(p, viaPromotion ? "候補遞補成功！請傳 LINE 約面試" : "已收到報名，請傳 LINE 約面試",
+    `名額已為你保留。請在 ${dateOf(p.due)} 前傳 LINE 給 Sucharita 老師約面試時間。`, ["line", "cancel"]);
+}
+function toPay(p, viaPromotion) {
+  p.status = "pay"; p.due = S.day + R.payDays;
+  mail(p, viaPromotion ? "候補遞補成功！請於 3 天內付款" : "面試通過！請於 3 天內付款",
+    `請在 ${dateOf(p.due)} 前轉帳 ${fee(feeOf(p))}，並在付款頁填寫匯款帳號後五碼。`, ["pay", "cancel"]);
+}
+
+function register(type, d, last5) {
+  const p = { id: ++S.seq, type, day: S.day, ...d };
+  S.people.push(p);
+  const st = seatState();
+  if (st.kind === "full") { p.status = "closed"; return p; }
+  if (st.kind === "wait") {
+    p.status = "waiting"; p.wseq = S.seq;
+    if (last5) { p.last5 = last5; p.prepaid = true; }
+    mail(p, `已登記候補第 ${waiting().length} 位`, "有名額時會依順序自動遞補並通知你。", ["cancel"]);
+    lineMsg({ title: `⚪ 候補登記：${p.name}（${type === "new" ? "新生" : "舊生"}）`, body: (p.prepaid ? "⚠️ 此人已付款但送出時名額剛好額滿，若最後沒遞補到需退款。\n" : "") + counts() });
+    return p;
+  }
+  if (type === "old") {
+    p.status = "paid"; p.last5 = last5;
+    mail(p, "報名成功！", `${R.name}｜${R.date}｜${R.place}\n匯款後五碼：${last5}`, ["cancel"]);
+    lineMsg({ title: `✅ 舊生報名成功：${p.name}`, body: `後五碼 ${last5}　${counts()}`, kind: "old", pid: p.id });
+  } else {
+    toInterview(p, false);
+    lineMsg({ title: `🆕 新生報名：${p.name}`, body: `原因：${p.reason}\n${counts()}`, kind: "interview", pid: p.id });
+  }
+  return p;
+}
+
+function release(reasonText) {
+  const out = [];
+  while (occupied() < R.cap && waiting().length) {
+    const p = waiting()[0];
+    if (p.type === "new") toInterview(p, true);
+    else if (p.prepaid) { p.status = "paid"; mail(p, "候補遞補成功，報名完成！", "你先前已付款，不需再轉帳。", ["cancel"]); }
+    else toPay(p, true);
+    out.push(`${p.name}（${p.type === "new" ? "新生，待面試" : p.status === "paid" ? "舊生，已付款" : "舊生，待付款"}）`);
+  }
+  lineMsg({ title: `🔄 ${reasonText}`, body: out.length ? `已自動遞補：${out.join("、")}\n${counts()}` : `目前沒有候補，名額重新開放報名。\n${counts()}` });
+}
+
+function act(kind, id, extra) {
+  const p = byId(id);
+  if (!p) return;
+  if (kind === "pass" && p.status === "interview") {
+    if (p.prepaid) { p.status = "paid"; mail(p, "面試通過，報名完成！", "你先前已付款，不需再轉帳。", ["cancel"]); }
+    else toPay(p, false);
+    toast(`已通過 ${p.name}，系統已寄 Email 通知`);
+  } else if (kind === "reject" && p.status === "interview") {
+    p.status = "rejected";
+    mail(p, "關於本期僻靜營", "謝謝你的報名與分享，這次未能邀請你參加，期待未來有機會相遇。");
+    toast(`已通知 ${p.name}，名額釋出`);
+    release(`${p.name} 面試未通過，名額已釋出` + (p.prepaid ? "（此人已付款，需退款）" : ""));
+  } else if (kind === "toNew" && p.status === "paid") {
+    p.status = "interview"; p.type = "new"; p.prepaid = true; p.due = S.day + R.interviewDays;
+    mail(p, "請傳 LINE 跟老師約面試", `報名需先與老師面試，請在 ${dateOf(p.due)} 前傳 LINE 給老師。`, ["line", "cancel"]);
+    toast(`${p.name} 已改為新生，系統已通知他約面試`);
+  } else if (kind === "pay" && p.status === "pay") {
+    p.status = "paid"; p.last5 = extra;
+    mail(p, "報名成功！", `${R.name}｜${R.date}｜${R.place}\n匯款後五碼：${extra}`, ["cancel"]);
+    lineMsg({ title: `💰 已付款：${p.name}`, body: `後五碼 ${extra}　${counts()}` });
+  } else if (kind === "cancel" && (SEAT.includes(p.status) || p.status === "waiting")) {
+    const wasSeat = SEAT.includes(p.status), paid = p.status === "paid" || p.prepaid;
+    p.status = "cancelled";
+    mail(p, "已取消報名", "你的報名已取消。" + (paid ? "老師會與你聯絡退款事宜。" : ""));
+    if (wasSeat) release(`${p.name} 取消報名，名額已釋出` + (paid ? "（已付款，需退款）" : ""));
+    else lineMsg({ title: `⚪ ${p.name} 取消候補`, body: counts() });
+    toast(`${p.name} 已取消報名`);
+  }
+  render();
+}
+
+function nextDay() {
+  S.day++;
+  const notes = [];
+  S.people.filter(p => p.status === "interview" || p.status === "pay").forEach(p => {
+    const left = p.due - S.day;
+    if (p.status === "interview" && left === 2) mail(p, "提醒：還有 2 天可以約面試", "請盡快傳 LINE 給老師約面試，逾期名額會讓給候補同學。", ["line"]);
+    if (p.status === "pay" && left === 1) mail(p, "提醒：付款明天到期", `請轉帳 ${fee(feeOf(p))} 並填寫後五碼。`, ["pay"]);
+    if (left <= 0) {
+      const what = p.status === "interview" ? "逾期未面試" : "逾期未付款";
+      p.status = "expired";
+      mail(p, "報名已逾期", `因${what}，名額已讓給候補同學。`);
+      release(`${p.name} ${what}，名額已釋出`);
+      notes.push(p.name);
+    }
+  });
+  toast(`今天是 ${dateOf(S.day)}` + (notes.length ? `：${notes.join("、")} 逾期，名額已釋出` : ""));
+  render();
+}
+
+function fillUp() {
+  let i = 0;
+  while (occupied() < R.cap) {
+    const n = NAMES.find(x => !S.people.some(p => p.name === x)) || "範例學生" + (++i);
+    S.people.push({ id: ++S.seq, name: n, type: "old", status: "paid", last5: String(20000 + S.seq * 977).slice(-5), day: S.day, email: "fill" + S.seq + "@example.com" });
+  }
+  lineMsg({ title: "（模擬）已加入幾位範例舊生", body: `名額已滿。${counts()}` });
+  toast("名額已滿，現在報名會變成候補");
+  render();
+}
+
+// ---------- student page ----------
+function stepsBar(n, total) { return `<div class="steps" aria-hidden="true">${Array.from({ length: total }, (_, i) => `<span class="${i < n ? "on" : ""}"></span>`).join("")}</div>`; }
 function seatsBadge(st) {
-  if (st.kind === "open") return `<div class="seats"><span class="dot"></span>剩餘名額 <span class="num">${st.left} / ${RETREAT.capacity}</span></div>`;
+  if (st.kind === "open") return `<div class="seats"><span class="dot"></span>剩餘名額 <span class="num">${st.left} / ${R.cap}</span></div>`;
   if (st.kind === "wait") return `<div class="seats wait"><span class="dot"></span>正取已滿，候補還有 <span class="num">${st.left}</span> 位</div>`;
   return `<div class="seats wait"><span class="dot"></span>本期報名已額滿</div>`;
 }
-
-function home() {
+function sHome() {
   const st = seatState();
   return `<section class="card">
     <div class="eyebrow">SUCHARITA 老師</div>
-    <h1>${RETREAT.name}</h1>
+    <h1>${R.name}</h1>
     <dl class="facts">
-      <dt>日期</dt><dd>${RETREAT.date}</dd>
-      <dt>地點</dt><dd>${RETREAT.place}</dd>
-      <dt>費用</dt><dd>舊生 ${fee(RETREAT.fee.old)}<br>新生 ${fee(RETREAT.fee.new)}<br><span class="hint">含食宿</span></dd>
+      <dt>日期</dt><dd>${R.date}</dd>
+      <dt>地點</dt><dd>${R.place}</dd>
+      <dt>費用</dt><dd>舊生 ${fee(R.fee.old)}<br>新生 ${fee(R.fee.new)}</dd>
     </dl>
     ${seatsBadge(st)}
     ${st.kind === "full"
@@ -170,117 +380,218 @@ function home() {
         </div>`}
   </section>`;
 }
-
-const FIELDS_BASE = [
-  { id: "name", label: "姓名", req: true },
-  { id: "phone", label: "手機", req: true, type: "tel", ph: "0912-345-678" },
-  { id: "email", label: "Email", req: true, type: "email", hint: "報名結果會寄到這裡" },
-  { id: "lineName", label: "LINE 名稱", req: true, hint: "方便老師認出你" },
-  { id: "emergency", label: "緊急聯絡人（姓名＋電話）", req: true },
-  { id: "health", label: "身體狀況／飲食限制", area: true, hint: "沒有可寫「無」", req: true },
-];
-const FIELDS_NEW = [
-  { id: "exp", label: "瑜伽／靜坐經驗", area: true, req: true, hint: "練習多久、上過哪些課都可以寫" },
-  { id: "reason", label: "想參加的原因", area: true, req: true, hint: "老師會在面試前先看過" },
-];
-
 function fieldHtml(f) {
-  const v = esc(data[f.id] || "");
+  const v = esc(sv.data[f.id] || "");
   const ctl = f.area
     ? `<textarea id="${f.id}" name="${f.id}">${v}</textarea>`
     : `<input id="${f.id}" name="${f.id}" type="${f.type || "text"}" value="${v}" ${f.ph ? `placeholder="${f.ph}"` : ""} ${f.type === "tel" ? 'inputmode="tel"' : ""}>`;
   return `<div class="field">
-    <label for="${f.id}">${f.label}${f.req ? '<span class="req">*</span>' : ""}</label>
+    <label for="${f.id}">${f.label}<span class="req">*</span></label>
     ${f.hint ? `<span class="hint">${f.hint}</span>` : ""}
     ${ctl}
     <span class="err" id="${f.id}-err" hidden>請填寫這一欄</span>
   </div>`;
 }
-
-function form() {
+function sForm() {
   const st = seatState();
-  const fields = type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
-  const oldOpen = type === "old" && st.kind === "open";
-  const total = oldOpen ? 2 : 1;
-  let submitLabel = "送出報名";
-  if (oldOpen) submitLabel = "下一步：付款";
-  else if (st.kind === "wait") submitLabel = "登記候補";
+  const fields = sv.type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
+  const oldOpen = sv.type === "old" && st.kind === "open";
+  const label = st.kind === "wait" ? "登記候補" : oldOpen ? "下一步：付款" : "送出報名";
   return `<section class="card">
-    <button class="back" type="button" data-go="home">← 返回</button>
-    ${total > 1 ? steps(1, total) : ""}
-    <h2>${type === "new" ? "新生報名資料" : "舊生報名資料"}</h2>
-    ${type === "new" && st.kind === "open" ? `<p class="muted">送出後請傳 LINE 給老師約面試，面試通過再付款。</p>` : ""}
+    <button class="link back" type="button" data-go="home">← 返回</button>
+    ${oldOpen ? stepsBar(1, 2) : ""}
+    <h2>${sv.type === "new" ? "新生報名資料" : "舊生報名資料"}</h2>
+    ${sv.type === "new" && st.kind === "open" ? `<p class="muted">送出後請傳 LINE 給老師約面試，面試通過再付款。</p>` : ""}
+    <button class="link fill" type="button" id="autofill">（模擬用）自動填入範例</button>
     <form id="f" novalidate>
       ${fields.map(fieldHtml).join("")}
-      <button class="btn" type="submit">${submitLabel}</button>
+      <button class="btn" type="submit">${label}</button>
     </form>
   </section>`;
 }
-
-function pay(fromEmail) {
-  const who = fromEmail ? "王小美" : (data.name || "");
+function sPay() {
+  const p = sv.payId ? byId(sv.payId) : null;
+  if (sv.payId && (!p || p.status !== "pay")) {
+    return `<section class="card"><h2>這個付款連結已失效</h2><p class="muted">${p && p.status === "paid" ? "你已經完成付款囉。" : "可能已逾期或已取消。"}</p><button class="btn ghost" type="button" data-go="home">回報名首頁</button></section>`;
+  }
+  const amount = p ? feeOf(p) : R.fee.old;
   return `<section class="card">
-    ${fromEmail ? "" : `<button class="back" type="button" data-go="form">← 修改資料</button>${steps(2, 2)}`}
-    <h2>${fromEmail ? `${esc(who)}，恭喜面試通過！` : "最後一步：轉帳付款"}</h2>
-    <p>${fromEmail || type === "new" ? "新生" : "舊生"}費用 <b>${fee(fromEmail || type === "new" ? RETREAT.fee.new : RETREAT.fee.old)}</b>，請轉帳到以下帳戶，完成後填寫你的匯款帳號<b>後五碼</b>，就報名完成了。</p>
-    ${fromEmail ? `<p class="hint">請在 3 天內完成，逾期名額會讓給候補的同學。</p>` : ""}
+    ${p ? "" : `<button class="link back" type="button" data-go="form">← 修改資料</button>${stepsBar(2, 2)}`}
+    <h2>${p ? `${esc(p.name)}，請完成付款` : "最後一步：轉帳付款"}</h2>
+    <p>${p && p.type === "new" ? "新生" : "舊生"}費用 <b>${fee(amount)}</b>，請轉帳到以下帳戶，完成後填寫你的匯款帳號<b>後五碼</b>，就報名完成了。</p>
+    ${p ? `<p class="hint">請在 ${dateOf(p.due)} 前完成，逾期名額會讓給候補的同學。</p>` : ""}
     <div class="bank">
-      <span class="muted">${RETREAT.bank}　戶名：${RETREAT.holder}</span>
-      <span class="acct" id="acct">${RETREAT.acct}</span>
-      <button class="copy" type="button" id="copyBtn">複製帳號</button>
+      <span class="muted">${R.bank}　戶名：${R.holder}</span>
+      <span class="acct" id="acct">${R.acct}</span>
+      <button class="chip" type="button" id="copyBtn" style="align-self:flex-start">複製帳號</button>
     </div>
     <form id="p" novalidate>
       <div class="field">
         <label for="last5">你的匯款帳號後五碼<span class="req">*</span></label>
-        <span class="hint">轉帳後在網銀或收據上可以看到</span>
-        <input id="last5" name="last5" class="digits" inputmode="numeric" maxlength="5" autocomplete="off" value="${esc(data.last5 || "")}">
+        <span class="hint">轉帳後在網銀或收據上可以看到（模擬時填任意 5 位數字）</span>
+        <input id="last5" name="last5" class="digits" inputmode="numeric" maxlength="5" autocomplete="off">
         <span class="err" id="last5-err" hidden>請輸入 5 位數字</span>
       </div>
       <button class="btn" type="submit">完成報名</button>
     </form>
   </section>`;
 }
-
-function done() {
-  const st = seatState();
-  if (view === "done-wait") {
-    return `<section class="card">
-      <div class="done-mark wait">候</div>
-      <h2>已登記候補第 ${st.pos} 位</h2>
-      <p>有名額釋出時，系統會依順序自動遞補，並寄 Email 到 <b>${esc(data.email)}</b> 通知你${type === "new" ? "約面試" : "付款"}。</p>
-      <p class="hint">現在不用付款，也不用聯絡老師。</p>
-    </section>`;
-  }
-  if (view === "done-new") {
-    return `<section class="card">
-      <div class="done-mark">✓</div>
+function sDone() {
+  const p = byId(sv.doneId);
+  const again = `<button class="btn ghost small" type="button" data-go="home">模擬下一位學生報名</button>`;
+  if (!p || p.status === "closed") return `<section class="card"><h2>本期報名已額滿</h2><p class="muted">送出時名額和候補剛好都滿了。</p>${again}</section>`;
+  if (p.status === "waiting") return `<section class="card">
+      <div class="mark wait">候</div>
+      <h2>已登記候補第 ${waiting().indexOf(p) + 1} 位</h2>
+      <p>有名額釋出時，系統會依順序自動遞補，並寄 Email 到 <b>${esc(p.email)}</b> 通知你${p.type === "new" ? "約面試" : p.prepaid ? "" : "付款"}。</p>
+      ${p.prepaid ? `<p class="hint">你送出時名額剛好額滿，已付款會保留；若最後沒遞補到，老師會退款給你。</p>` : `<p class="hint">現在不用付款，也不用聯絡老師。</p>`}
+      ${again}</section>`;
+  if (p.status === "interview") return `<section class="card">
+      <div class="mark">✓</div>
       <h2>已收到報名，請傳 LINE 約面試</h2>
-      <p>名額已先為你保留。請在 <b>7 天內</b>傳 LINE 給 Sucharita 老師約面試時間，傳訊時請附上你的姓名。</p>
-      <a class="btn line" href="https://line.me/" target="_blank" rel="noopener">開啟 LINE 傳訊給老師</a>
+      <p>名額已為你保留。請在 <b>${dateOf(p.due)}</b> 前傳 LINE 給 Sucharita 老師約面試時間，傳訊時請附上你的姓名。</p>
+      <button class="btn line" type="button" data-lineinfo>開啟 LINE 傳訊給老師</button>
       <div class="qr">老師的 LINE<br>QR Code<br>（正式版放這裡）</div>
-      <p class="hint">面試通過後，你會收到付款連結的 Email。超過 7 天未面試，名額會讓給候補的同學。</p>
-    </section>`;
-  }
+      <p class="hint">面試通過後，你會收到付款連結的 Email。</p>
+      ${again}</section>`;
   return `<section class="card">
-    <div class="done-mark">✓</div>
+    <div class="mark">✓</div>
     <h2>報名成功！</h2>
-    <p>${esc(data.name || "王小美")}，期待在 ${RETREAT.name} 見到你。</p>
-    <div class="summary">
-      ${RETREAT.date}<br>${RETREAT.place}<br>
-      匯款後五碼：<b>${esc(data.last5)}</b>
-    </div>
-    <p class="hint">確認信已寄到 ${esc(data.email || "你的 Email")}。如需取消，請點信中的「取消報名」連結。</p>
+    <p>${esc(p.name)}，期待在 ${R.place} 見到你。</p>
+    <div class="summary">${R.date}<br>${R.place}<br>匯款後五碼：<b>${esc(p.last5)}</b></div>
+    <p class="hint">確認信已寄到 ${esc(p.email)}。如需取消，請點信中的「取消報名」連結。</p>
+    ${again}</section>`;
+}
+function student() {
+  if (sv.view === "form") return sForm();
+  if (sv.view === "pay") return sPay();
+  if (sv.view === "done") return sDone();
+  return sHome();
+}
+
+// ---------- teacher LINE ----------
+function lineView() {
+  const msgs = S.line.map(m => {
+    const p = m.pid ? byId(m.pid) : null;
+    let btns = "";
+    if (m.kind === "interview" && p) {
+      btns = p.status === "interview"
+        ? `<div class="row"><button class="btn small" type="button" data-act="pass" data-id="${p.id}">✅ 面試通過</button><button class="btn small bad" type="button" data-act="reject" data-id="${p.id}">不通過</button></div>`
+        : `<div class="reply">${statusText(p)}</div>`;
+    } else if (m.kind === "old" && p) {
+      btns = p.status === "paid" && p.type === "old"
+        ? `<button class="link" type="button" data-act="toNew" data-id="${p.id}" style="align-self:flex-start">不認識這位？改為新生</button>`
+        : p.type === "new" ? `<div class="reply">已改為新生：${statusText(p)}</div>` : "";
+    }
+    return `<div class="msg"><span class="when">${dateOf(m.day)}</span><span class="title">${esc(m.title)}</span>${m.body ? `<span style="white-space:pre-line">${esc(m.body)}</span>` : ""}${btns}</div>`;
+  }).reverse().join("");
+  return `<section class="chat">
+    <div class="chat-head"><span class="avatar">助</span>僻靜營報名小幫手</div>
+    <p class="hint">老師只會在這裡收到通知。最新的在最上面。</p>
+    ${msgs || `<div class="empty">還沒有通知</div>`}
+    <button class="btn ghost small" type="button" data-tabgo="list">📋 查看全部名單</button>
   </section>`;
 }
 
-function render() {
-  document.querySelectorAll("#scenario button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === scenario)));
-  if (view === "home") $app.innerHTML = home();
-  else if (view === "form") $app.innerHTML = form();
-  else if (view === "pay") $app.innerHTML = pay(false);
-  else if (view === "pay-email") $app.innerHTML = pay(true);
-  else $app.innerHTML = done();
+function statusText(p) {
+  return {
+    paid: "已報名" + (p.last5 ? `（後五碼 ${p.last5}）` : ""),
+    interview: `待面試（${dateOf(p.due)} 到期）`,
+    pay: `面試通過，待付款（${dateOf(p.due)} 到期）`,
+    waiting: "候補中", rejected: "未通過", expired: "已逾期", cancelled: "已取消", closed: "額滿未報名",
+  }[p.status];
 }
+
+// ---------- teacher list ----------
+function listView() {
+  const g = s => S.people.filter(p => p.status === s);
+  const paid = g("paid"), iv = g("interview"), pay = g("pay"), w = waiting();
+  const ended = S.people.filter(p => ["rejected", "expired", "cancelled"].includes(p.status));
+  const tag = p => `<span class="pill${p.type === "new" ? " warn" : ""}">${p.type === "new" ? "新生" : "舊生"}</span>`;
+  const left = p => p.due - S.day;
+  return `<section class="card">
+    <h2>${R.name}</h2>
+    <div class="stats">
+      <div><b>${paid.length}</b>已報名</div>
+      <div><b>${pay.length}</b>待付款</div>
+      <div><b>${iv.length}</b>待面試</div>
+      <div><b>${w.length}</b>候補</div>
+    </div>
+    <p class="hint">名額 ${occupied()} / ${R.cap}（已報名＋待付款＋待面試）</p>
+
+    <div class="sec">
+      <div class="sec-h">待面試 <span class="pill warn">${iv.length}</span></div>
+      ${iv.map(p => `<div class="person">
+          <div class="top"><span class="nm">${esc(p.name)}</span><span class="mini">${dateOf(p.day)} 報名・剩 ${left(p)} 天</span></div>
+          ${p.reason ? `<span class="quote">「${esc(p.reason)}」</span>` : ""}
+          <div class="row"><button class="btn small" type="button" data-act="pass" data-id="${p.id}">✅ 通過</button><button class="btn small bad" type="button" data-act="reject" data-id="${p.id}">不通過</button></div>
+        </div>`).join("") || `<p class="mini">沒有待面試的新生</p>`}
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">待付款 <span class="pill">${pay.length}</span></div>
+      ${pay.map(p => `<div class="person"><div class="top"><span class="nm">${esc(p.name)}</span>${tag(p)}<span class="mini">剩 ${left(p)} 天・${fee(feeOf(p))}</span></div></div>`).join("") || `<p class="mini">無</p>`}
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">已報名 <span class="pill">${paid.length}</span></div>
+      ${paid.map(p => `<div class="person"><div class="top"><span class="nm">${esc(p.name)}</span>${tag(p)}<span class="mini">後五碼 ${esc(p.last5 || "—")}</span></div></div>`).join("")}
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">候補 <span class="pill warn">${w.length} / ${R.waitCap}</span></div>
+      ${w.map((p, i) => `<div class="person"><div class="top"><span class="nm">${i + 1}. ${esc(p.name)}</span>${tag(p)}${p.prepaid ? `<span class="pill bad">已付款</span>` : ""}</div></div>`).join("") || `<p class="mini">無</p>`}
+    </div>
+
+    ${ended.length ? `<div class="sec">
+      <div class="sec-h">已結束 <span class="pill bad">${ended.length}</span></div>
+      ${ended.map(p => `<div class="person"><div class="top"><span class="nm">${esc(p.name)}</span>${tag(p)}<span class="mini">${statusText(p)}</span></div></div>`).join("")}
+    </div>` : ""}
+  </section>`;
+}
+
+// ---------- student email ----------
+function mailView() {
+  const items = S.mail.slice().reverse().map((m, ri) => {
+    const i = S.mail.length - 1 - ri;
+    const p = byId(m.pid);
+    const acts = m.acts.map(a => {
+      if (a === "pay") return `<button class="btn small" type="button" data-mail="pay" data-id="${m.pid}">前往付款</button>`;
+      if (a === "cancel") return `<button class="chip" type="button" data-mail="cancel" data-id="${m.pid}">取消報名</button>`;
+      if (a === "line") return `<button class="btn small line" type="button" data-lineinfo>傳 LINE 給老師</button>`;
+      return "";
+    }).join("");
+    return `<div class="mail">
+      <span class="to">${dateOf(m.day)}・寄給 ${esc(m.to)}（${esc(m.email)}）・目前狀態：${p ? statusText(p) : ""}</span>
+      <span class="subj">${esc(m.subject)}</span>
+      <span style="white-space:pre-line">${esc(m.body)}</span>
+      ${acts ? `<div class="acts">${acts}</div>` : ""}
+    </div>`;
+  }).join("");
+  return `<section class="card">
+    <h2>學生收到的 Email</h2>
+    <p class="hint">模擬每位學生的信箱。點信裡的按鈕，就像學生自己點連結。</p>
+    ${items || `<div class="empty">還沒有寄出任何信。先去「學生報名頁」報名看看。</div>`}
+  </section>`;
+}
+
+// ---------- render & events ----------
+const $app = document.getElementById("app");
+function render() {
+  if (tab === "line") unread.line = 0;
+  if (tab === "mail") unread.mail = 0;
+  document.getElementById("today").textContent = dateOf(S.day);
+  document.querySelectorAll("#tabs button").forEach(b => {
+    const t = b.dataset.tab;
+    b.setAttribute("aria-selected", String(t === tab));
+    const n = unread[t] || 0;
+    b.querySelector(".badge")?.remove();
+    if (n) b.insertAdjacentHTML("beforeend", `<span class="badge">${n}</span>`);
+  });
+  $app.innerHTML = tab === "line" ? lineView() : tab === "list" ? listView() : tab === "mail" ? mailView() : student();
+}
+function goTab(t) { tab = t; render(); window.scrollTo(0, 0); }
+function goView(v) { sv.view = v; if (v === "home") { sv.type = null; sv.data = {}; sv.payId = null; } render(); window.scrollTo(0, 0); }
 
 function validate(formEl, ids) {
   let ok = true, first = null;
@@ -292,56 +603,61 @@ function validate(formEl, ids) {
     if (id === "last5" && !/^\d{5}$/.test(v)) bad = true;
     el.setAttribute("aria-invalid", String(bad));
     const err = formEl.querySelector("#" + id + "-err");
-    if (err) {
-      err.hidden = !bad;
-      if (id === "email" && v) err.textContent = "Email 格式不正確";
-    }
-    data[id] = v;
+    if (err) { err.hidden = !bad; if (id === "email" && v) err.textContent = "Email 格式不正確"; }
+    if (id !== "last5") sv.data[id] = v;
     if (bad) { ok = false; if (!first) first = el; }
   });
   if (first) first.focus();
   return ok;
 }
 
-document.getElementById("scenario").addEventListener("click", e => {
-  const b = e.target.closest("button[data-s]");
-  if (!b) return;
-  if (b.dataset.s === "pay") { scenario = "open"; type = "new"; data = { email: "xiaomei@example.com", name: "王小美" }; go("pay-email"); return; }
-  scenario = b.dataset.s; data = {}; type = null; go("home");
-});
+document.getElementById("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b) goTab(b.dataset.tab); });
+document.getElementById("nextDay").addEventListener("click", nextDay);
+document.getElementById("fillUp").addEventListener("click", fillUp);
+document.getElementById("reset").addEventListener("click", () => { reset(); tab = "student"; render(); toast("已重新開始"); });
 
 $app.addEventListener("click", e => {
-  const pick = e.target.closest("[data-pick]");
-  if (pick) { type = pick.dataset.pick; go("form"); return; }
-  const back = e.target.closest("[data-go]");
-  if (back) { go(back.dataset.go); return; }
-  if (e.target.id === "copyBtn") {
-    const btn = e.target;
-    const done = () => { btn.textContent = "已複製"; setTimeout(() => (btn.textContent = "複製帳號"), 1500); };
-    const fallback = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("acct")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = "已選取，請長按複製"; };
-    try { navigator.clipboard.writeText(RETREAT.acct.replace(/-/g, "")).then(done, fallback); } catch (_) { fallback(); }
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.pick) { sv.type = t.dataset.pick; sv.data = {}; goView("form"); return; }
+  if (t.dataset.go) { goView(t.dataset.go); return; }
+  if (t.dataset.tabgo) { goTab(t.dataset.tabgo); return; }
+  if (t.dataset.act) { act(t.dataset.act, Number(t.dataset.id)); return; }
+  if (t.hasAttribute("data-lineinfo")) { toast("（模擬）正式版會打開老師的 LINE 聊天視窗，由學生自己傳訊約面試。"); return; }
+  if (t.dataset.mail === "cancel") { act("cancel", Number(t.dataset.id)); return; }
+  if (t.dataset.mail === "pay") { sv.payId = Number(t.dataset.id); sv.view = "pay"; goTab("student"); return; }
+  if (t.id === "autofill") {
+    const base = { ...SAMPLE[sv.type] };
+    const used = S.people.filter(p => p.name.startsWith(base.name)).length;
+    if (used) { base.name += used + 1; base.email = base.email.replace("@", (used + 1) + "@"); }
+    sv.data = base; render(); return;
+  }
+  if (t.id === "copyBtn") {
+    const ok = () => { t.textContent = "已複製"; };
+    const fb = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById("acct")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "已選取，請長按複製"; };
+    try { navigator.clipboard.writeText(R.acct.replace(/-/g, "")).then(ok, fb); } catch (_) { fb(); }
   }
 });
 
-$app.addEventListener("input", e => {
-  if (e.target.id === "last5") e.target.value = e.target.value.replace(/\D/g, "").slice(0, 5);
-});
+$app.addEventListener("input", e => { if (e.target.id === "last5") e.target.value = e.target.value.replace(/\D/g, "").slice(0, 5); });
 
 $app.addEventListener("submit", e => {
   e.preventDefault();
   const f = e.target;
   if (f.id === "f") {
-    const fields = type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
+    const fields = sv.type === "new" ? FIELDS_BASE.concat(FIELDS_NEW) : FIELDS_BASE;
     if (!validate(f, fields.map(x => x.id))) return;
-    const st = seatState();
-    if (st.kind === "wait") go("done-wait");
-    else if (type === "new") go("done-new");
-    else go("pay");
+    if (sv.type === "old" && seatState().kind === "open") { sv.payId = null; goView("pay"); return; }
+    const p = register(sv.type, { ...sv.data });
+    sv.doneId = p.id; goView("done");
   } else if (f.id === "p") {
     if (!validate(f, ["last5"])) return;
-    go("done-ok");
+    const last5 = f.querySelector("#last5").value;
+    if (sv.payId) { const id = sv.payId; act("pay", id, last5); sv.doneId = id; sv.payId = null; goView("done"); }
+    else { const p = register("old", { ...sv.data }, last5); sv.doneId = p.id; goView("done"); }
   }
 });
 
+reset();
 render();
 </script>
