@@ -15,6 +15,21 @@
     [2,600],[3,800],[4,900],[5,1000],[6,1200],[7,1400],[8,1600],[9,1800],
     [10,2200],[11,2500],[12,2800],[13,3100],[14,3400],[15,3700],[16,4000]
   ];
+
+  // 教室場地的新定價：按時長分類，按人數區間計價
+  const CLASSROOM_RATES_60 = {
+    "2-5": 800,
+    "6-14": 1200,
+    "15-19": 3600,
+    "20": 4500
+  };
+  const CLASSROOM_RATES_90 = {
+    "2-5": 1200,
+    "6-11": 2200,
+    "12-19": 5500,
+    "20": 8000
+  };
+
   const DEFAULT_VENUES = [
     { id: "v1", name: "小班課", mode: "community", colorIndex: 0, singlePrice: 400, trialPrice: 200,
       communityPlans: DEFAULT_COMMUNITY_PLANS.map(p => ({...p})),
@@ -24,6 +39,7 @@
     },
     { id: "v3", name: "教室",   mode: "sky",       colorIndex: 2,
       skyRates: DEFAULT_SKY_RATES.map(r => [...r]),
+      classroomRates: { 60: CLASSROOM_RATES_60, 90: CLASSROOM_RATES_90 }
     },
     { id: "v4", name: "其他",   mode: "manual",    colorIndex: 4 },
   ];
@@ -31,6 +47,8 @@
   window.DEFAULT_HOME_PLANS     = DEFAULT_HOME_PLANS;
   window.DEFAULT_COMMUNITY_PLANS = DEFAULT_COMMUNITY_PLANS;
   window.DEFAULT_SKY_RATES      = DEFAULT_SKY_RATES;
+  window.CLASSROOM_RATES_60     = CLASSROOM_RATES_60;
+  window.CLASSROOM_RATES_90     = CLASSROOM_RATES_90;
 
   function defaultVenues() {
     return DEFAULT_VENUES.map(v => JSON.parse(JSON.stringify(v)));
