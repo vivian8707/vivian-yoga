@@ -457,6 +457,8 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
   const [classroomDuration, setClassroomDuration] = useStateMod(
     editRecord && editRecord.classroomDuration ? editRecord.classroomDuration : 60
   );
+  // 舊的天空紀錄（沒有 classroomDuration）編輯時沿用舊分潤表，不改動既有金額
+  const useDurationPricing = !(isEdit && editRecord.mode === "sky" && editRecord.location === loc && !editRecord.classroomDuration);
   const [manualAmount, setManualAmount] = useStateMod(
     editRecord && editRecord.mode === "manual" ? (editRecord.totalAmount || 0) : 2400
   );
@@ -551,35 +553,10 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       };
     }
     if (venueMode === "sky") {
-      // Check if this is the classroom (教室) venue with new duration-based pricing
-      if (loc === "教室" && currentVenue.classroomRates) {
-        const rates = classroomDuration === 90
-          ? currentVenue.classroomRates[90]
-          : currentVenue.classroomRates[60];
-        if (rates) {
-          // Find the price based on headcount range
-          let amount = 0;
-          for (const [range, price] of Object.entries(rates)) {
-            const parts = range.split("-");
-            if (parts.length === 2) {
-              const min = parseInt(parts[0], 10);
-              const max = parseInt(parts[1], 10);
-              if (headcount >= min && headcount <= max) {
-                amount = price;
-                break;
-              }
-            } else if (parts.length === 1) {
-              const exact = parseInt(parts[0], 10);
-              if (headcount === exact) {
-                amount = price;
-                break;
-              }
-            }
-          }
-          return { date, location: loc, mode: "sky", headcount, totalAmount: amount, attendees: null, note, classroomDuration };
-        }
+      if (useDurationPricing) {
+        const amount = classroomAmount(classroomRatesFor(currentVenue), classroomDuration, headcount);
+        return { date, location: loc, mode: "sky", headcount, totalAmount: amount, attendees: null, note, classroomDuration };
       }
-      // Fall back to old skyRates for backward compatibility
       const skyRates = currentVenue.skyRates || window.DEFAULT_SKY_RATES || [];
       const row = skyRates.find(r => r[0] === headcount);
       const amount = row ? row[1] : 0;
@@ -742,10 +719,10 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       }
 
       {/* ===== 教室分潤 ===== */}
-      {venueMode === "sky" && loc === "教室" && currentVenue.classroomRates &&
-        <ClassroomSection duration={classroomDuration} setDuration={setClassroomDuration} count={headcount} setCount={setHeadcount} classroomRates={currentVenue.classroomRates} />
+      {venueMode === "sky" && useDurationPricing &&
+        <ClassroomSection duration={classroomDuration} setDuration={setClassroomDuration} count={headcount} setCount={setHeadcount} classroomRates={classroomRatesFor(currentVenue)} />
       }
-      {venueMode === "sky" && loc !== "教室" && <SkySection count={headcount} setCount={setHeadcount} skyRates={skyRates} />}
+      {venueMode === "sky" && !useDurationPricing && <SkySection count={headcount} setCount={setHeadcount} skyRates={skyRates} />}
 
       {/* ===== 手動金額 ===== */}
       {venueMode === "manual" &&
@@ -839,31 +816,22 @@ function SkySection({ count, setCount, skyRates }) {
   );
 }
 
-function ClassroomSection({ duration, setDuration, count, setCount, classroomRates }) {
-  const rates = duration === 90
-    ? classroomRates[90]
-    : classroomRates[60];
+function classroomRatesFor(venue) {
+  return (venue && venue.classroomRates) || { 60: window.CLASSROOM_RATES_60 || {}, 90: window.CLASSROOM_RATES_90 || {} };
+}
 
-  let amount = 0;
-  if (rates) {
-    for (const [range, price] of Object.entries(rates)) {
-      const parts = range.split("-");
-      if (parts.length === 2) {
-        const min = parseInt(parts[0], 10);
-        const max = parseInt(parts[1], 10);
-        if (count >= min && count <= max) {
-          amount = price;
-          break;
-        }
-      } else if (parts.length === 1) {
-        const exact = parseInt(parts[0], 10);
-        if (count === exact) {
-          amount = price;
-          break;
-        }
-      }
-    }
+// rates 的 key 為 "2-5" 或 "20" 這類人數區間
+function classroomAmount(classroomRates, duration, count) {
+  const rates = classroomRates[duration === 90 ? 90 : 60] || {};
+  for (const [range, price] of Object.entries(rates)) {
+    const [min, max = min] = range.split("-").map(n => parseInt(n, 10));
+    if (count >= min && count <= max) return price;
   }
+  return 0;
+}
+
+function ClassroomSection({ duration, setDuration, count, setCount, classroomRates }) {
+  const amount = classroomAmount(classroomRates, duration, count);
 
   return (
     <>
@@ -905,7 +873,7 @@ function ClassroomSection({ duration, setDuration, count, setCount, classroomRat
         display: "flex", justifyContent: "space-between", alignItems: "baseline"
       }}>
         <div>
-          <div style={{ fontSize: 12, color: T.primaryDeep, fontWeight: 600 }}>收費金額</div>
+          <div style={{ fontSize: 12, color: T.primaryDeep, fontWeight: 600 }}>老師分潤</div>
         </div>
         <span style={{
           fontSize: 20, fontWeight: 700, color: T.primaryDeep,
