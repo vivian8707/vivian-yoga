@@ -450,9 +450,12 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
     return vPlans.find(p => p.label === ct) ? 1600 : (editRecord.totalAmount || 1600);
   });
 
-  // ===== sky / manual =====
+  // ===== sky / classroom / manual =====
   const [headcount, setHeadcount] = useStateMod(
     editRecord ? (editRecord.headcount || 8) : 8
+  );
+  const [classroomDuration, setClassroomDuration] = useStateMod(
+    editRecord && editRecord.classroomDuration ? editRecord.classroomDuration : 60
   );
   const [manualAmount, setManualAmount] = useStateMod(
     editRecord && editRecord.mode === "manual" ? (editRecord.totalAmount || 0) : 2400
@@ -548,6 +551,35 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       };
     }
     if (venueMode === "sky") {
+      // Check if this is the classroom (教室) venue with new duration-based pricing
+      if (loc === "教室" && currentVenue.classroomRates) {
+        const rates = classroomDuration === 90
+          ? currentVenue.classroomRates[90]
+          : currentVenue.classroomRates[60];
+        if (rates) {
+          // Find the price based on headcount range
+          let amount = 0;
+          for (const [range, price] of Object.entries(rates)) {
+            const parts = range.split("-");
+            if (parts.length === 2) {
+              const min = parseInt(parts[0], 10);
+              const max = parseInt(parts[1], 10);
+              if (headcount >= min && headcount <= max) {
+                amount = price;
+                break;
+              }
+            } else if (parts.length === 1) {
+              const exact = parseInt(parts[0], 10);
+              if (headcount === exact) {
+                amount = price;
+                break;
+              }
+            }
+          }
+          return { date, location: loc, mode: "sky", headcount, totalAmount: amount, attendees: null, note, classroomDuration };
+        }
+      }
+      // Fall back to old skyRates for backward compatibility
       const skyRates = currentVenue.skyRates || window.DEFAULT_SKY_RATES || [];
       const row = skyRates.find(r => r[0] === headcount);
       const amount = row ? row[1] : 0;
@@ -710,7 +742,10 @@ function D_Modal_Class({ embedded, onClose, editRecord }) {
       }
 
       {/* ===== 教室分潤 ===== */}
-      {venueMode === "sky" && <SkySection count={headcount} setCount={setHeadcount} skyRates={skyRates} />}
+      {venueMode === "sky" && loc === "教室" && currentVenue.classroomRates &&
+        <ClassroomSection duration={classroomDuration} setDuration={setClassroomDuration} count={headcount} setCount={setHeadcount} classroomRates={currentVenue.classroomRates} />
+      }
+      {venueMode === "sky" && loc !== "教室" && <SkySection count={headcount} setCount={setHeadcount} skyRates={skyRates} />}
 
       {/* ===== 手動金額 ===== */}
       {venueMode === "manual" &&
@@ -794,6 +829,83 @@ function SkySection({ count, setCount, skyRates }) {
       }}>
         <div>
           <div style={{ fontSize: 12, color: T.primaryDeep, fontWeight: 600 }}>老師分潤</div>
+        </div>
+        <span style={{
+          fontSize: 20, fontWeight: 700, color: T.primaryDeep,
+          fontFamily: "'Cormorant Garamond', serif"
+        }}>${amount.toLocaleString()}</span>
+      </div>
+    </>
+  );
+}
+
+function ClassroomSection({ duration, setDuration, count, setCount, classroomRates }) {
+  const rates = duration === 90
+    ? classroomRates[90]
+    : classroomRates[60];
+
+  let amount = 0;
+  if (rates) {
+    for (const [range, price] of Object.entries(rates)) {
+      const parts = range.split("-");
+      if (parts.length === 2) {
+        const min = parseInt(parts[0], 10);
+        const max = parseInt(parts[1], 10);
+        if (count >= min && count <= max) {
+          amount = price;
+          break;
+        }
+      } else if (parts.length === 1) {
+        const exact = parseInt(parts[0], 10);
+        if (count === exact) {
+          amount = price;
+          break;
+        }
+      }
+    }
+  }
+
+  return (
+    <>
+      <div style={{ height: 18 }} />
+      <FieldLabel>課程時長</FieldLabel>
+      <div style={{ display: "flex", gap: 8 }}>
+        {[60, 90].map(d => (
+          <button key={d} onClick={() => setDuration(d)} style={{
+            flex: 1, padding: "10px 12px", borderRadius: 8,
+            border: duration === d ? "none" : `1px solid ${T.border}`,
+            background: duration === d ? T.primarySoft : T.surface,
+            color: duration === d ? T.primaryDeep : T.ink,
+            fontSize: 14, fontWeight: duration === d ? 600 : 500,
+            fontFamily: "inherit", cursor: "pointer"
+          }}>
+            {d}分鐘
+          </button>
+        ))}
+      </div>
+
+      <div style={{ height: 16 }} />
+      <FieldLabel>到場人數</FieldLabel>
+      <div style={{
+        background: T.surface, borderRadius: 10,
+        border: `1px solid ${T.border}`, padding: "12px 16px",
+        display: "flex", alignItems: "center", justifyContent: "space-between"
+      }}>
+        <span style={{ fontSize: 13, color: T.inkSoft }}>人數</span>
+        <Stepper
+          value={count}
+          onChange={(v) => setCount(Math.max(2, Math.min(20, v)))}
+          suffix="人"
+        />
+      </div>
+
+      <div style={{ height: 12 }} />
+      <div style={{
+        background: T.primarySoft, borderRadius: 12, padding: "12px 14px",
+        display: "flex", justifyContent: "space-between", alignItems: "baseline"
+      }}>
+        <div>
+          <div style={{ fontSize: 12, color: T.primaryDeep, fontWeight: 600 }}>收費金額</div>
         </div>
         <span style={{
           fontSize: 20, fontWeight: 700, color: T.primaryDeep,
