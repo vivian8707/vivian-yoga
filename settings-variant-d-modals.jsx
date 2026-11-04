@@ -1922,8 +1922,42 @@ function D_Modal_Settings({ embedded, onClose }) {
         {/* 教室分潤: 費率表編輯 */}
         {venue.mode === "sky" &&
           <>
+            {[60, 90].map(d => {
+              const all = classroomRatesFor(venue);
+              const rows = Object.entries(all[d] || {}).sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10));
+              return (
+                <div key={d}>
+                  <div style={{ height: 16 }} />
+                  <FieldLabel>{d}分鐘課程 分潤(人數 → 金額)</FieldLabel>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {rows.map(([range, price]) => (
+                      <div key={range} style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        background: T.surface, borderRadius: 8, padding: "8px 12px",
+                        border: `1px solid ${T.border}`
+                      }}>
+                        <span style={{ fontSize: 13, color: T.inkSoft, flex: 1 }}>{range.replace("-", " – ")} 人</span>
+                        <span style={{ color: T.inkSoft, fontSize: 12 }}>$</span>
+                        <input type="text" inputMode="numeric" pattern="[0-9]*"
+                          value={price}
+                          onChange={e => {
+                            const v = parseInt(e.target.value.replace(/\D/g, "") || "0", 10);
+                            patchVenue({ classroomRates: { ...all, [d]: { ...all[d], [range]: v } } });
+                          }}
+                          style={{
+                            width: 80, minWidth: 0, background: "transparent", border: "none", outline: "none",
+                            fontSize: 14, fontWeight: 600, color: T.ink, fontFamily: "inherit", textAlign: "right"
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
             <div style={{ height: 16 }} />
-            <FieldLabel>分潤對照表(人數 → 金額)</FieldLabel>
+            <details>
+              <summary style={{ fontSize: 12, color: T.inkSoft, cursor: "pointer", marginBottom: 8 }}>舊版分潤表(只用於之前的紀錄)</summary>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
               {(venue.skyRates || window.DEFAULT_SKY_RATES || []).map(([n, price], ri) => (
                 <div key={n} style={{
@@ -1947,6 +1981,7 @@ function D_Modal_Settings({ embedded, onClose }) {
                 </div>
               ))}
             </div>
+            </details>
           </>
         }
       </BottomSheet>
