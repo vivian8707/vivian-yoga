@@ -18,7 +18,7 @@
   const PUSH_GUARD_MS = 10000; // push 完成後 10 秒內不 pull，讓 cloud 有時間處理
 
   // --- 診斷資訊（點同步膠囊可顯示）---
-  const dbg = { ver: "33", pull: null, push: null, demo: IS_DEMO };
+  const dbg = { ver: "34", pull: null, push: null, demo: IS_DEMO };
   window.__SYNC_DEBUG = dbg;
   function now() { return new Date().toTimeString().slice(0, 8); }
 
